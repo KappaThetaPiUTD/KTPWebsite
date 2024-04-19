@@ -10,27 +10,6 @@
     font-weight: 400;
     src: url(/fonts/greek.ttf);
   }
-  .underline-custom {
-    position: relative;
-    display: inline-block; /* Ensures the pseudo-element aligns correctly */
-    
-  }
   
-  .underline-custom::after {
-    content: '';
-    position: absolute;
-    width: 0;
-    height: 3px; /* Thickness of the underline */
-    bottom: -2px; /* Spacing from the text */
-    left: 0;
-    background-color: #72E2AE; /* Your specified hex color */
-    visibility: hidden;
-    transition: width 2s ease;
-  }
-  
-  .underline-custom:hover::after {
-    visibility: visible;
-    width: 100%;
-  }
-  
+
 }
