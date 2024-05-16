@@ -36,29 +36,55 @@ const activeMembers = [
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const alphaClassMembers = [
+  'Adam Moffat',
   'Aditya Sajeev',
-  'Aashna Pathi',
   'Akahaya Kummetha',
   'Arjun Prabhune',
+  'Aashna Pathi',
+  'Benjamin Wowo',
   'Ethan Lobo',
+  'Ibrahim Khan',
   'Kairavi Pandya',
+  'Kanishk Garg',
   'Lokesh Narasnai',
   'Manasa Paruchuri',
   'Rhea Aemireaddy',
+  'Renjit Joseph',
+  'Sanajana Shangle',
   'Sriram Sendhil',
-  'Viraaj Neeramanchi'
-];
+  'Shalom Michael',
+  'Viraaj Neeramanchi',
+  'Yeshas Nath',
+].sort((a, b) => a.localeCompare(b));
 
 const betaClassMembers = [
+  'Affiq Mohammed',
   'Annan Ahmed',
+  'Anwita Gudapuri',
   'Arya Thombre',
+  'Aryaman Dubey',
+  'Avani Mehrotra',
+  'Ethan Varghese',
   'Gloria Tu',
+  'Hima Nagi Reddy',
   'Humsini Revuru',
+  'Itihas Paluri',
+  'Joshua Solomon',
+  'Krisha Amaravathi',
   'Laiba Piracha',
+  'Mansi Cherukupally',
+  'Mohamed Afsar Harsath Arif',
+  'Monish Ravishankar',
+  'Nivedh Koya',
+  'Reuben John',
+  'Rushil Patel',
   'Sanjana Neelee',
-  'Sumedha Suseendrababu',
-  'Tariq Mahamid'
-];
+  'Sai Vemugunta',
+  'Shalin Shrestha',
+  'Sumi Suseendrababu',
+  'Tariq Mahamid',
+  'Wildan Susanto'
+].sort((a, b) => a.localeCompare(b));
 
 const splitIntoColumns = (arr, columns) => {
   const result = [];
@@ -87,9 +113,8 @@ const Brother = () => {
               <Image
                 src={member.src}
                 alt={`${member.name} - ${member.position}`}
-                layout="fill"
-                objectFit="cover"
-                className="transition-all duration-300 group-hover:brightness-50"
+                fill
+                className="transition-all duration-300 group-hover:brightness-50 object-cover"
               />
               <a
                 href={member.linkedin}
@@ -116,9 +141,8 @@ const Brother = () => {
               <Image
                 src={member.src}
                 alt={`${member.name}`}
-                layout="fill"
-                objectFit="cover"
-                className="transition-all duration-300 group-hover:brightness-50"
+                fill
+                className="transition-all duration-300 group-hover:brightness-50 object-cover"
               />
               <a
                 href={member.linkedin}
