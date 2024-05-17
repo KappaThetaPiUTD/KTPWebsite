@@ -9,8 +9,8 @@ const Group = () => {
                 `}
             </style>
             <div className="text-center">
-                <div className='relative w-screen h-[515px]'>
-                    <Image className='w-full h-auto opacity-50 text-gray object-cover' src={MyImage} alt="Executive Board" fill />
+                <div className='relative w-screen h-[545px]'>
+                    <Image className='w-full h-auto opacity-100 text-gray object-cover' src={MyImage} alt="Executive Board" fill unoptimized/>
                 </div>
             </div>
         </div>            
