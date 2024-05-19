@@ -6,19 +6,37 @@ const Majors = () => {
   const majors = [
     // Added 'const' keyword to declare the 'majors' array
     { name: "CS", value: 50 },
-    { name: "CGS", value: 40 },
-    { name: "ITS", value: 30 },
-    { name: "CE", value: 20 },
-    { name: "SE", value: 10 },
+    { name: "CGS", value: 100 },
+    { name: "ITS", value: 50 },
+    { name: "CE", value: 80 },
+    { name: "SE", value: 60 },
+    {name: "EE", value: 70}
   ];
 
+  const colors = ["#003f5c","#58508d", "#bc5090", "#ff6361", "#ffa600"];
+
   return (
-    <div className="text-center pl-10 pr-10">
-      <div className="text-secondary text-header1 font-bold font-georgia">
+    <div className="flex flex-col text-center pl-10 pr-10">
+      <div className="text-secondary text-header4 font-bold font-georgia">
         Majors
+        <MajorChart data={majors} colors={colors}/>
+        {/* <ul className="text-gray text-paragraph font-georgia text-center">
+          {majors.map((major, index) => (
+            <li key={index}>
+              {major.name}: {major.value}
+            </li>
+          ))}
+        </ul> */}
       </div>
       <div className="text-gray text-paragraph font-georgia text-center">
-        <MajorChart data={majors} />
+        {/* <MajorChart data={majors} colors={colors} />
+        <ul className="text-gray text-paragraph font-georgia text-center">
+          {majors.map((major, index) => (
+            <li key={index}>
+              {major.name}: {major.value}
+            </li>
+          ))}
+        </ul> */}
       </div>
     </div>
   );

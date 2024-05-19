@@ -4,6 +4,7 @@ import Quote from "../components/slogan";
 import Group from "../components/group-image";
 import Mu from "../components/mu-chapter";
 import Majors from "../components/majors";
+import Classes from "../components/class-level";
 
 const AboutUs = () =>{
     return (
@@ -46,11 +47,13 @@ const AboutUs = () =>{
                         <Portrait/>
                     </div>
                 </div>
+                {/*DO NOT ADD TO PAGE YET
                 <div>
                     <Mu/>
-                </div>
-                <div>
+                </div> */}
+                <div className="flex flex-row justify-center pt-10">
                     <Majors/>
+                    <Classes/>
                 </div>
             </div>
         </div>
