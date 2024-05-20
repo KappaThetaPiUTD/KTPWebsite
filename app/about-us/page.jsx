@@ -5,6 +5,7 @@ import Group from "../components/group-image";
 import Mu from "../components/mu-chapter";
 import Majors from "../components/majors";
 import Classes from "../components/class-level";
+import PieChartComponent from "../components/PieChartComponent";
 
 const AboutUs = () =>{
     return (
@@ -55,6 +56,9 @@ const AboutUs = () =>{
                     <Majors/>
                     <Classes/>
                 </div>
+                <div>
+    <PieChartComponent />
+  </div>
             </div>
         </div>
     );
