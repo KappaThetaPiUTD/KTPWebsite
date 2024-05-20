@@ -1,4 +1,3 @@
-// page.jsx
 import Image from "next/image";
 import React from "react";
 import { FaLinkedin } from "react-icons/fa"; // LinkedIn icon
@@ -229,21 +228,22 @@ const Brother = () => {
 
   return (
     <div className="w-screen h-full bg-[#0F0F0F] text-white">
-      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center mt-8">
+      <div className="text-secondary text-header1 font-bold font-poppins flex text-center justify-center items-center mt-8">
         Executive Board
       </div>
       <div className="flex flex-wrap justify-center mt-8">
         {executiveBoardMembers.map((member, index) => (
           <div
             key={index}
-            className="m-4 text-center relative group flex flex-col items-center"
+            className="m-4 text-center"
+            style={{ maxWidth: "calc(100% - 2rem)" }}
           >
-            <div className="relative w-40 h-40 bg-gray-400 rounded-lg overflow-hidden">
+            <div className="relative w-40 h-40 mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
                 alt={`${member.name} - ${member.position}`}
                 fill
-                className="transition-all duration-300 group-hover:brightness-50 object-cover"
+                className="object-cover"
               />
               <a
                 href={member.linkedin}
@@ -260,21 +260,22 @@ const Brother = () => {
         ))}
       </div>
 
-      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center mt-16">
+      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center items-center mt-16">
         Actives
       </div>
       <div className="flex flex-wrap justify-center mt-8">
         {activeMembers.map((member, index) => (
           <div
             key={index}
-            className="m-4 text-center relative group flex flex-col items-center"
+            className="m-4 text-center"
+            style={{ maxWidth: "calc(100% - 2rem)" }}
           >
-            <div className="relative w-40 h-40 bg-gray-400 rounded-lg overflow-hidden">
+            <div className="relative w-40 h-40 mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
                 alt={`${member.name}`}
                 fill
-                className="transition-all duration-300 group-hover:brightness-50 object-cover"
+                className="object-cover"
               />
               <a
                 href={member.linkedin}
@@ -290,7 +291,7 @@ const Brother = () => {
         ))}
       </div>
 
-      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center mt-16">
+      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center items-center mt-16">
         Alpha Class
       </div>
       <div className="flex justify-center mt-4">
@@ -305,7 +306,7 @@ const Brother = () => {
         ))}
       </div>
 
-      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center mt-16">
+      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center items-center mt-16">
         Beta Class
       </div>
       <div className="flex justify-center mt-4">
