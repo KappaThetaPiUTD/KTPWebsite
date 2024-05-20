@@ -1,8 +1,15 @@
-import React from 'react';
+import React from "react";
+
+export const metadata = {
+  title: "Kappa Theta Pi UTD - Recruitment",
+  description: "Kappa Theta Pi Descripton",
+};
 
 const RecruitmentPage = () => {
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-start pt-10"> {/* Added padding-top */}
+    <div className="min-h-screen bg-black flex flex-col items-center justify-start pt-10">
+      {" "}
+      {/* Added padding-top */}
       <div className="flex flex-col items-center space-y-4 mb-25">
         <div className="text-secondary text-header1 font-bold font-poppins">
           Recruitment

@@ -6,6 +6,11 @@ import Mu from "../../components/mu-chapter";
 import Majors from "../../components/majors";
 import Classes from "../../components/class-level";
 
+export const metadata = {
+  title: "Kappa Theta Pi UTD - About Us",
+  description: "Kappa Theta Pi Descripton",
+};
+
 const AboutUs = () => {
   return (
     <div>
