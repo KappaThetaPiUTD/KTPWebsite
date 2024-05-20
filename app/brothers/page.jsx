@@ -1,6 +1,6 @@
 import Image from "next/image";
 import React from "react";
-import { FaLinkedin } from "react-icons/fa"; // LinkedIn icon
+import { FaLinkedin } from "react-icons/fa"; 
 
 export const metadata = {
   title: "Kappa Theta Pi UTD - Brothers",
@@ -158,6 +158,11 @@ const activeMembers = [
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
     linkedin: "https://www.linkedin.com/company/ktputd",
   },
+  {
+    name: "Aditya Sajeev",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "https://www.linkedin.com/company/ktputd",
+  },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const alphaClassMembers = [
@@ -206,7 +211,7 @@ const betaClassMembers = [
   "Sanjana Neelee",
   "Sai Vemugunta",
   "Shalin Shrestha",
-  "Sumi Suseendrababu",
+  "Sumedha Suseendrababu",
   "Tariq Mahamid",
   "Wildan Susanto",
 ].sort((a, b) => a.localeCompare(b));
@@ -291,7 +296,7 @@ const Brother = () => {
         ))}
       </div>
 
-      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center items-center mt-16">
+      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Alpha Class
       </div>
       <div className="flex justify-center mt-4">
@@ -306,7 +311,7 @@ const Brother = () => {
         ))}
       </div>
 
-      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center items-center mt-16">
+      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Beta Class
       </div>
       <div className="flex justify-center mt-4">
