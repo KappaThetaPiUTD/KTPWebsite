@@ -16,13 +16,13 @@ const Gallery = () => {
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850366/Austin%20Trip/100_1549_hhphkv.jpg', alt: 'Image 12' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850366/Austin%20Trip/100_1555_zr1jtr.jpg', alt: 'Image 13' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850362/Austin%20Trip/100_1560_ayi2vm.jpg', alt: 'Image 14' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714854893/Austin%20Trip/leetcode_weekly_session_images_kqkd9s.jpg', alt: 'leetcode'},
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714854890/Austin%20Trip/leetcode_tariq_teaching_ozyzaj.jpg', alt: 'tariq teaching'},
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/first_chapter_meeting_e3yoyf.jpg', alt: 'new gen first chapter meeting'},
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/social_legdri.jpg', alt: 'social valentines day 2024'},
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/happy_ktp_hcb7r6.jpg', alt: 'happy ktp 2024'},
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/valentines_day_uno_z3tgnz.jpg', alt: 'social valentines day 2024'},
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855359/ktp_valetines_day_social_affiq_pocker_jmm8u1.jpg', alt: 'social valentines day 2024'}
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714854893/Austin%20Trip/leetcode_weekly_session_images_kqkd9s.jpg', alt: 'leetcode' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714854890/Austin%20Trip/leetcode_tariq_teaching_ozyzaj.jpg', alt: 'tariq teaching' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/first_chapter_meeting_e3yoyf.jpg', alt: 'new gen first chapter meeting' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/social_legdri.jpg', alt: 'social valentines day 2024' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/happy_ktp_hcb7r6.jpg', alt: 'happy ktp 2024' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/valentines_day_uno_z3tgnz.jpg', alt: 'social valentines day 2024' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855359/ktp_valetines_day_social_affiq_pocker_jmm8u1.jpg', alt: 'social valentines day 2024' }
   ];
 
   return (
@@ -33,7 +33,7 @@ const Gallery = () => {
       <div className="text-gray text-center font-georgia text-header4 mt-2">
         We would like to thank our photographers Tariq Mahamid and Manasa Paruchuri!
       </div>
-      <div className="grid grid-cols-3 gap-4 p-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
         {images.map((img, index) => (
           <div key={index} className="relative overflow-hidden rounded-lg">
             <div className="group relative">
@@ -42,7 +42,7 @@ const Gallery = () => {
                 alt={img.alt}
                 width={500}
                 height={300}
-                layout='responsive'
+                layout="responsive"
                 className="transition-all duration-300 rounded-lg group-hover:brightness-100"
               />
               <div className="absolute top-4 right-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
