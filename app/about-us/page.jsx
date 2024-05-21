@@ -53,11 +53,9 @@ const AboutUs = () =>{
                     <Mu/>
                 </div> */}
                 <div className="flex flex-row justify-center pt-10">
-                    <Majors/>
-                    <Classes/>
+                <PieChartComponent />
                 </div>
                 <div>
-    <PieChartComponent />
   </div>
             </div>
         </div>
