@@ -2,7 +2,7 @@ import Portrait from "../../components/image";
 import Letter from "../../components/paragraphs";
 import Quote from "../../components/slogan";
 import Group from "../../components/group-image";
-import Mu from "../../components/mu-chapter";
+import PieChartComponent from "../../components/PieChartComponent";
 import Majors from "../../components/majors";
 import Classes from "../../components/class-level";
 
@@ -56,9 +56,8 @@ const AboutUs = () => {
                 <div>
                     <Mu/>
                 </div> */}
-        <div className="flex flex-row justify-center pt-10">
-          <Majors />
-          <Classes />
+        <div className="flex flex-row justify-center pt-10 pb-24">
+          <PieChartComponent />
         </div>
       </div>
     </div>
