@@ -1,8 +1,8 @@
 "use client";
 
 import { useReducer } from "react";
-import Inputs from "../../components/Inputs";
-import SubmitButton from "../../components/SubmitButton";
+import Input from "../components-pakku/Inputs";
+import SubmitButton from "../components-pakku/SubmitButton";
 import Head from "next/head";
 
 const reducer = (state, action) => {
