@@ -65,7 +65,7 @@ const activeMembers = [
   },
   {
     name: "Sanjana Neelee",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716401954/Brother%20Page/Actives/sanjana_neelee_headshot_zf456w.jpg",
     linkedin: "https://www.linkedin.com/in/sanjananeelee",
   },
   {
@@ -145,7 +145,7 @@ const activeMembers = [
   },
   {
     name: "Arjun Prabhune",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716401982/Brother%20Page/Actives/arjun_prabhune_bai3rg.jpg",
     linkedin: "https://www.linkedin.com/company/ktputd",
   },
   {

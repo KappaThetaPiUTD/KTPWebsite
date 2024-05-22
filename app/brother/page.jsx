@@ -60,7 +60,7 @@ const activeMembers = [
   },
   {
     name: "Sanjana Neelee",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716263547/Brother%20Page/Actives/sanjana_neelee_headshot_k4w1kv.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716401954/Brother%20Page/Actives/sanjana_neelee_headshot_zf456w.jpg",
     linkedin: "https://www.linkedin.com/in/sanjananeelee",
   },
   {
@@ -75,7 +75,7 @@ const activeMembers = [
   },
   {
     name: "Sumedha Suseendrababu",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716145903/Brother%20Page/Actives/sumi_w1e38p.jpg",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716401955/Brother%20Page/Actives/sumi_s_hgs2th.jpg",
     linkedin: "https://www.linkedin.com/in/sumedhasuseendrababu",
   },
   {
@@ -105,7 +105,7 @@ const activeMembers = [
   },
   {
     name: "Arjun Prabhune",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716401982/Brother%20Page/Actives/arjun_prabhune_bai3rg.jpg",
     linkedin: "https://www.linkedin.com/company/ktputd",
   },
   {
@@ -155,7 +155,7 @@ const activeMembers = [
   },
   {
     name: "Hima Nagi Reddy",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716401983/Brother%20Page/Actives/hima_nagi_reddy_wrc5sr.jpg",
     linkedin: "https://www.linkedin.com/company/ktputd",
   },
   {

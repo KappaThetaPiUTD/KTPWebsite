@@ -9,15 +9,14 @@ const WhoWeIs = () => {
       </div>
       <div className="relative h-3/4 aspect-[1.26/1]">
         <Image
-          src="/pictures/computer.png"
+          src="/pictures/computer1.png"
           width={700}
-          height={700}
+          height={7000}
           alt="Computer Icon"
           className="bottom-0 absolute"
         />
         <div className="relative z-10 text-white px-24 pt-28 font-poppins">
-          Who we is?
-        </div>
+        Welcome to Kappa Theta Pi Mu Chapter at UT Dallas! We're all about fostering tech skills, creativity, and community. Join us for workshops, activities, and vibrant social events to grow professionally, make connections, and shape the future of tech.        </div>
       </div>
     </div>
   );

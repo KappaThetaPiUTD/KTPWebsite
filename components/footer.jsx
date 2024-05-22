@@ -31,7 +31,7 @@ const Footer = () => {
 
 const styles = {
   footer: {
-    backgroundColor: "black",
+    backgroundColor: "#0f0f0f",
     color: "darkgray",
     padding: "20px",
     display: "flex",
