@@ -16,7 +16,11 @@ const WhoWeIs = () => {
           className="bottom-0 absolute"
         />
         <div className="relative z-10 text-white px-24 pt-28 font-poppins">
-        Welcome to Kappa Theta Pi Mu Chapter at UT Dallas! We're all about fostering tech skills, creativity, and community. Join us for workshops, activities, and vibrant social events to grow professionally, make connections, and shape the future of tech.        </div>
+          Welcome to Kappa Theta Pi Mu Chapter at UT Dallas! We&apos;re all
+          about fostering tech skills, creativity, and community. Join us for
+          workshops, activities, and vibrant social events to grow
+          professionally, make connections, and shape the future of tech.{" "}
+        </div>
       </div>
     </div>
   );
