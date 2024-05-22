@@ -11,7 +11,7 @@ const WhoWeIs = () => {
         <Image
           src="/pictures/computer1.png"
           width={700}
-          height={7000}
+          height={700}
           alt="Computer Icon"
           className="bottom-0 absolute"
         />
