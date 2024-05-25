@@ -110,13 +110,13 @@ const activeMembers = [
   },
   {
     name: "Rhea Aemireddy",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716596377/Brother%20Page/Actives/Rhea_Reddy_j2pixh.jpg",
     linkedin: "https://www.linkedin.com/company/ktputd",
   },
   {
     name: "Sanjana Shangle",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
-    linkedin: "https://www.linkedin.com/company/ktputd",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716596377/Brother%20Page/Actives/Sanjana_Shangle_m4j7uq.jpg",
+    linkedin: "http://www.linkedin.com/in/sanjanashangle",
   },
   {
     name: "Aditya Sajeev",
