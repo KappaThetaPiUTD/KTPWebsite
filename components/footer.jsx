@@ -3,71 +3,34 @@ import MailIcon from "./mail-icon-footer";
 
 const Footer = () => {
   return (
-    <footer style={styles.footer}>
-      <div style={styles.leftSection}>
-        <div style={styles.icons}>
+    <footer className="flex flex-col sm:flex-row justify-between items-center bottom-0 w-full z-10 bg-[#0f0f0f] text-[#A9A9A9] p-5">
+      <div className="flex flex-col sm:flex-row items-center w-auto">
+        <div className="flex items-center">
           <MailIcon />
-          <a href="https://www.linkedin.com/company/ktputd" target="_blank">
-            <CiLinkedin
-              style={{ ...styles.icon, marginLeft: "20px", marginRight: "2px" }}
-              size={50}
-            />
-          </a>
-          <a href="https://www.instagram.com/utdktp/" target="_blank">
-            <CiInstagram
-              style={{ ...styles.icon, marginLeft: "20px", marginRight: "2px" }}
-              size={50}
-            />
-          </a>
+          <div className="flex flex-col sm:flex-row items-center ml-5">
+            <a href="https://www.linkedin.com/company/ktputd" target="_blank">
+              <CiLinkedin className="mr-[2px]" size={50} />
+            </a>
+            <a
+              href="https://www.instagram.com/utdktp/"
+              target="_blank"
+              className="sm:ml-5"
+            >
+              <CiInstagram className="mr-[2px]" size={50} />
+            </a>
+          </div>
         </div>
       </div>
-      <div style={styles.rightSection}>
-        <div style={styles.title}>Kappa Theta Pi - Mu Chapter</div>
-        <div style={styles.subtitle}>Managed by Membership Committee</div>
+      <div className="text-right mt-5 sm:mt-0">
+        <div className="text-[25px] font-extralight mb-[1px] font-poppins">
+          Kappa Theta Pi - Mu Chapter
+        </div>
+        <div className="text-[0.8rem] font-extralight mb-[1px] font-poppins">
+          Managed by Membership Committee
+        </div>
       </div>
     </footer>
   );
-};
-
-const styles = {
-  footer: {
-    backgroundColor: "#0f0f0f",
-    color: "darkgray",
-    padding: "20px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    bottom: 0,
-    width: "100%",
-    zIndex: 1000,
-  },
-  leftSection: {
-    display: "flex",
-    alignItems: "center",
-    width: "auto",
-  },
-  icons: {
-    display: "flex",
-    alignItems: "center",
-  },
-  icon: {
-    marginRight: "2px",
-  },
-  rightSection: {
-    textAlign: "right",
-  },
-  title: {
-    fontSize: "25px",
-    fontWeight: "200",
-    marginBottom: "1px",
-    fontFamily: "Poppins",
-  },
-  subtitle: {
-    fontSize: "0.8rem",
-    fontWeight: "200",
-    marginBottom: "1px",
-    fontFamily: "Poppins",
-  },
 };
 
 export default Footer;

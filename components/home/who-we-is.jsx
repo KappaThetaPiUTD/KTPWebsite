@@ -7,7 +7,7 @@ const WhoWeIs = () => {
       <div className="font-poppins font-bold text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-[#188C5D]">
         Who are we?
       </div>
-      <div className="relative h-3/4 aspect-[1.26/1]">
+      <div className="relative h-3/4 aspect-[1.4/1]">
         <Image
           src="/pictures/computer1.png"
           width={700}
@@ -15,7 +15,7 @@ const WhoWeIs = () => {
           alt="Computer Icon"
           className="bottom-0 absolute"
         />
-        <div className="relative z-10 text-white px-24 pt-28 font-poppins">
+        <div className="relative z-10 text-white px-[15%] top-1/4 font-poppins ">
           Welcome to Kappa Theta Pi Mu Chapter at UT Dallas! We&apos;re all
           about fostering tech skills, creativity, and community. Join us for
           workshops, activities, and vibrant social events to grow
