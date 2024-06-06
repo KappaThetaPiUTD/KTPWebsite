@@ -39,6 +39,15 @@ const ContactUs = () => {
     message: "",
   });
 
+  // Reducer that holds first name, last name, email, phone number, and message
+  const [state, dispatch] = useReducer(reducer, {
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    message: "",
+  });
+
   return (
     <>
       <title>Kappa Theta Pi UTD - Contact Us</title>
@@ -63,6 +72,7 @@ const ContactUs = () => {
           }
         />
       </div>
+    </>
     </>
   );
 };
