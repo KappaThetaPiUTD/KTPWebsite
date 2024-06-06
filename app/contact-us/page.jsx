@@ -3,7 +3,6 @@
 import { useReducer } from "react";
 import Inputs from "../../components/Inputs";
 import SubmitButton from "../../components/SubmitButton";
-import Head from "next/head";
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -51,7 +50,7 @@ const ContactUs = () => {
         <div className="text-secondary font-poppins text-header1 font-bold mb-[0px]">
           Contact Us
         </div>
-        <div className="text-[#FFFFFF] text-header3">
+        <div className="text-[#FFFFFF] text-header4 md:text-header2">
           Have a question or concern?
         </div>
         <Inputs inputState={state} inputDispatch={dispatch} />
