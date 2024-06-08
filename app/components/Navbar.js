@@ -25,7 +25,7 @@ const Navbar = () => {
   ];
 
   return (
-    <div className="bg-[#0F0F0F] flex justify-around items-center h-24 max-w-[950px] mx-auto px-4 text-white">
+    <div className="bg-[#100c0c] flex justify-around items-center h-24 max-w-[950px] mx-auto px-4 text-white">
       {/* Desktop Navigation - Hidden on Mobile */}
 
       <div className="flex-grow flex justify-start transition duration-500">
@@ -87,7 +87,7 @@ const Navbar = () => {
 
       {/* Mobile Navigation Menu */}
       <ul
-        className={`absolute md:hidden w-full bg-[#0F0F0F] top-24 bottom-0 ease-in-out duration-700 ${
+        className={`absolute md:hidden w-full bg-[#100c0c] top-24 bottom-0 ease-in-out duration-700 ${
           nav ? "left-0" : "left-[-100%]"
         }`}
       >
