@@ -272,8 +272,8 @@ const Brother = () => {
   const betaColumns = splitIntoColumns(betaClassMembers, 3);
 
   return (
-    <div className="w-screen h-full bg-[#0F0F0F] text-white">
-      <div className="text-secondary text-header1 font-bold font-poppins flex text-center justify-center items-center mt-8">
+    <div className="w-screen h-full bg-[#0F0F0F] pt-24 text-white">
+      <div className="text-secondary text-header1 font-bold font-poppins flex text-center justify-center items-center">
         Executive Board
       </div>
       <div className="flex flex-wrap justify-center mt-8">

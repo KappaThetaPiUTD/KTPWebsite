@@ -46,7 +46,7 @@ const ContactUs = () => {
         name="description"
         content="Have a question or concern? Hit us up."
       />
-      <div className="flex flex-col w-screen h-[1000px] bg-[#0F0F0F] items-center pt-[52px]">
+      <div className="flex flex-col w-screen h-[1000px] bg-[#0F0F0F] items-center pt-24">
         <div className="text-secondary font-poppins text-header1 font-bold mb-[0px]">
           Contact Us
         </div>

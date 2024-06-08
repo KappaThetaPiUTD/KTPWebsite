@@ -36,7 +36,7 @@ const AboutUs = () => {
                     }
                 `}
       </style>
-      <div className="fixed w-screen h-full bg-[#0F0F0F] overflow-auto">
+      <div className="fixed w-screen h-full bg-[#0F0F0F] pt-24 overflow-auto">
         <div>
           <Quote />
         </div>

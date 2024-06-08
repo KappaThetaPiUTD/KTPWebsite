@@ -7,7 +7,7 @@ export const metadata = {
 
 const RecruitmentPage = () => {
   return (
-    <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-start pt-10 px-4 md:px-8">
+    <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-start pt-24 px-4 md:px-8">
       <div className="flex flex-col items-center space-y-4 mb-10">
         <div className="text-secondary text-[32px] md:text-header1 font-bold font-poppins text-center">
           Recruitment

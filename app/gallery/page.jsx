@@ -26,7 +26,7 @@ const Gallery = () => {
   ];
 
   return (
-    <div className="w-screen h-full bg-[#0F0F0F]">
+    <div className="w-screen h-full bg-[#0F0F0F] pt-24">
       <div className="text-secondary text-header1 font-bold font-poppins flex justify-center">
         Gallery
       </div>
