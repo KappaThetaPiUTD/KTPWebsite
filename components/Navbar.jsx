@@ -25,7 +25,7 @@ const Navbar = () => {
   ];
 
   return (
-    <div className="relative bg-[#0F0F0F] w-full z-50">
+    <div className="fixed bg-[#0F0F0F] w-full z-50">
       <div className="bg-[#0F0F0F] flex justify-around items-center h-24 max-w-[950px] mx-auto px-4 text-white ">
         {/* Desktop Navigation - Hidden on Mobile */}
 
@@ -49,7 +49,7 @@ const Navbar = () => {
         </div>
 
         {/* Logo - Centered on Desktop, Left on Mobile */}
-        <div className="mx-auto absolute left-0 right-0 text-center w-[100px]">
+        <div className="mx-auto fixed left-0 right-0 text-center w-[100px]">
           <Link href={navItems[0].path}>
             <h1 className="text-5xl font-bold font-[Greek] text-[#00df9a]">
               KΘΠ
@@ -78,7 +78,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Navigation Icon */}
-        <div onClick={handleNav} className="md:hidden z-100">
+        <div onClick={handleNav} className="md:hidden z-50">
           {nav ? (
             <AiOutlineClose size={20} className="text-white" />
           ) : (
@@ -88,15 +88,12 @@ const Navbar = () => {
 
         {/* Mobile Navigation Menu */}
         <ul
-          className={`absolute md:hidden w-full  top-24 bottom-0 ease-in-out duration-700 ${
-            nav ? "left-0" : "left-[-100%]"
+          className={`absolute md:hidden h-screen w-full top-24 bottom-0 left-0 ease-in-out transition-transform transform duration-700 bg-[#0F0F0F] z-50 ${
+            nav ? "translate-x-0" : "translate-x-full"
           }`}
         >
           {navItems.map((item) => (
-            <li
-              key={item.id}
-              className="p-4 border-b border-black-600 bg-[#2b2b2b]"
-            >
+            <li key={item.id} className="p-4 text-center text-white">
               <Link href={item.path}>{item.text}</Link>
             </li>
           ))}
