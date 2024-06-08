@@ -13,6 +13,11 @@ const Navbar = () => {
     setNav(!nav);
   };
 
+  // Function to close the navbar
+  const closeNav = () => {
+    setNav(false);
+  };
+
   // Array containing navigation items
   const navItems = [
     { id: 1, text: "Home", path: "/" },
@@ -21,14 +26,12 @@ const Navbar = () => {
     { id: 4, text: "Recruitment", path: "/recruitment" },
     { id: 5, text: "Gallery", path: "/gallery" },
     { id: 6, text: "Contact", path: "/contact-us" },
-    //{ id: 5, text: "Blog", path: "/blog" },
   ];
 
   return (
     <div className="fixed bg-[#0F0F0F] w-full z-50">
       <div className="bg-[#0F0F0F] flex justify-around items-center h-24 max-w-[950px] mx-auto px-4 text-white ">
         {/* Desktop Navigation - Hidden on Mobile */}
-
         <div className="flex-grow flex justify-start transition duration-500">
           <ul className="hidden md:flex">
             {navItems.slice(1, 4).map((item) => (
@@ -94,7 +97,7 @@ const Navbar = () => {
         >
           {navItems.map((item) => (
             <li key={item.id} className="p-4 text-center text-white">
-              <Link href={item.path}>{item.text}</Link>
+              <Link href={item.path} onClick={closeNav}>{item.text}</Link>
             </li>
           ))}
         </ul>
