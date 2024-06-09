@@ -7,7 +7,7 @@ const WhoWeIs = () => {
       <div className="font-poppins font-bold text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-[#188C5D]">
         Who are we?
       </div>
-      <div className="relative h-3/4 aspect-[1.4/1]">
+      <div className="relative h-3/5 aspect-[1.4/1]">
         <Image
           src="/pictures/computer1.png"
           width={700}
