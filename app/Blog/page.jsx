@@ -13,12 +13,12 @@ const BlogPage = () => {
           Blog
         </div>
         <div className="text-white text-[24px] md:text-[45px] text-center">
-          We are looking forward to Fall 2024 Blog!
+          We are currently in the works of seeting up our Blog!
         </div>
       </div>
       <div className="flex flex-col items-center space-y-8">
         <div className="text-white text-[18px] md:text-header3 text-center">
-          Check back here closer to Blog for rush details.
+          Check back here closer to the fall 2024 rush.
         </div>
       </div>
     </div>
