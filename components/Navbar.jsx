@@ -31,7 +31,7 @@ const Navbar = () => {
 
   return (
     <div className="fixed bg-[#0F0F0F] w-full z-50">
-      <div className="bg-[#0F0F0F] flex justify-around items-center h-24 max-w-[950px] mx-auto px-4 text-white ">
+      <div className="bg-[#0F0F0F] flex justify-around items-center h-24 max-w-[825px] mx-auto px-4 text-white ">
         {/* Desktop Navigation - Hidden on Mobile */}
         <div className="flex-grow flex justify-start transition duration-500">
           <ul className="hidden md:flex">
@@ -53,7 +53,7 @@ const Navbar = () => {
         </div>
 
         {/* Logo - Centered on Desktop, Left on Mobile */}
-        <div className="mx-auto fixed left-0 right-0 text-center w-[100px]">
+        <div className="mx-auto fixed left-0 pl-7 right-0 text-center w-[100px]">
           <Link href={navItems[0].path}>
             <h1 className="text-5xl font-bold font-[Greek] text-[#00df9a]">
               KΘΠ
