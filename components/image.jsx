@@ -8,7 +8,7 @@ const Portrait = () => {
           className="border-[2px] border-gray text-gray mr-[135px]"
           src={"/pictures/ethan-lobo.png"}
           alt="Ethan Lobo KTP President"
-          width={1300}
+          width={720}
           height={428}
           layout="fixed"
         />
