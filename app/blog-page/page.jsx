@@ -2,7 +2,8 @@ import React from "react";
 
 export const metadata = {
   title: "Kappa Theta Pi UTD - Blog",
-  description: "Kappa Theta Pi Descripton",
+  description:
+    "Keep up with our blog to stay updated on our latest events and news",
 };
 
 const BlogPage = () => {
