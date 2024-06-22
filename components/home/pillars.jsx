@@ -18,11 +18,11 @@ const Pillars = () => {
           body="Our focus on continuous learning and hands-on experience empowers members to expand their technical expertise and stay at the forefront of industry advancements."
         />
         <Pillar
+          isGreen
           title="🤝 Alumni Connections"
           body="With pride, we cultivate tomorrow's tech leaders by connecting current members with accomplished alumni, offering valuable insights and mentorship for their journey ahead."
         />
         <Pillar
-          isGreen
           title="🌱 Social Growth"
           body="Through our diverse range of social events and activities, we create opportunities for members to connect, bond, and forge lasting friendships within our community and brotherhood."
         />
