@@ -3,7 +3,10 @@ import React from "react";
 
 const WhoWeIs = () => {
   return (
-    <div className="flex flex-col items-center justify-around w-screen h-[75vh] p-8 bg-[#3C3C3C]">
+    <div
+      id="who-we-are"
+      className="flex flex-col items-center justify-around w-screen h-[75vh] p-8 bg-[#3C3C3C]"
+    >
       <div className="font-poppins font-bold text-header1 text-[#188C5D]">
         Who are we?
       </div>
