@@ -14,7 +14,7 @@ const BlogPage = () => {
           Blog
         </div>
         <div className="text-white text-[24px] md:text-[45px] text-center">
-          We are currently in the works of seeting up our Blog!
+          We are currently in the works of setting up our Blog!
         </div>
       </div>
       <div className="flex flex-col items-center space-y-8">
