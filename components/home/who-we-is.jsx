@@ -4,7 +4,7 @@ import React from "react";
 const WhoWeIs = () => {
   return (
     <div className="flex flex-col items-center justify-around w-screen h-[75vh] p-8 bg-[#3C3C3C]">
-      <div className="font-poppins font-bold text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-[#188C5D]">
+      <div className="font-poppins font-bold text-header1 text-[#188C5D]">
         Who are we?
       </div>
       <div className="relative h-3/5 aspect-[1.4/1]">

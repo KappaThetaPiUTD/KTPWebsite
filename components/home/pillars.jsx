@@ -4,7 +4,7 @@ import Pillar from "./pillar";
 const Pillars = () => {
   return (
     <div className="flex flex-col gap-y-16 items-center justify-around w-screen p-8 bg-[#0f0f0f]">
-      <div className="font-poppins font-bold text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-[#188C5D]">
+      <div className="font-poppins font-bold text-header1 text-[#188C5D]">
         Our Pillars
       </div>
       <div className="flex justify-around gap-x-8 gap-y-16 flex-wrap">
