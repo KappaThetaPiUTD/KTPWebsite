@@ -16,25 +16,21 @@ const AboutUs = () => {
     <div>
       <style>
         {`
-                    
-                    ::-webkit-scrollbar {
-                        width: 4px; 
-                        height: 6px;
-                      }
-
-                    ::-webkit-scrollbar-thumb {
-                        background-color: #363636;
-                        border-radius: 3px;
-                    }
-
-                    ::-webkit-scrollbar-track {
-                        background-color: #0F0F0F;
-                    }
-
-                    ::-webkit-scrollbar-button {
-                        display: none;
-                    }
-                `}
+          ::-webkit-scrollbar {
+            width: 4px; 
+            height: 6px;
+          }
+          ::-webkit-scrollbar-thumb {
+            background-color: #363636;
+            border-radius: 3px;
+          }
+          ::-webkit-scrollbar-track {
+            background-color: #0F0F0F;
+          }
+          ::-webkit-scrollbar-button {
+            display: none;
+          }
+        `}
       </style>
       <div className="fixed w-screen h-full bg-[#0F0F0F] pt-24 overflow-auto">
         <div>
@@ -43,20 +39,16 @@ const AboutUs = () => {
         <div>
           <Group />
         </div>
-        <div className="pl-10 pr-10 pb-10">
-          <div className="flex flex-row justify-center text-primary text-header1 font-bold font-georgia pl-10 pr-10 pt-10">
+        <div className="pl-5 pr-5 pb-10 sm:pl-10 sm:pr-10">
+          <div className="flex justify-center text-primary text-header1 font-bold font-georgia pt-10">
             Letter From The President
           </div>
-          <div className="flex flex-row pl-10 pr-10">
+          <div className="flex flex-col sm:flex-row pl-5 pr-5 sm:pl-10 sm:pr-10">
             <Letter />
             <Portrait />
           </div>
         </div>
-        {/*DO NOT ADD TO PAGE YET
-                <div>
-                    <Mu/>
-                </div> */}
-        <div className="flex flex-row justify-center pt-10 pb-24">
+        <div className="flex flex-col sm:flex-row justify-center pt-10 pb-24">
           <PieChartComponent />
         </div>
       </div>

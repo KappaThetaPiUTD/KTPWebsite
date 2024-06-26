@@ -87,7 +87,7 @@ const options = {
 };
 
 const PieChartComponent = () => (
-  <div className="bg-[#0f0f0f] p-8 text-white">
+  <div className="bg-[#0f0f0f] p-8 text-white w-full">
     <h2 className="text-secondary text-header2 font-bold font-poppins text-center mb-8">
       KTP Wrapped
     </h2>
@@ -97,8 +97,8 @@ const PieChartComponent = () => (
           Academic Year
         </h3>
         <div
-          className="flex justify-center items-center md:max-w-xs mx-auto"
-          style={{ width: "100%", maxWidth: "480px" }}
+          className="flex justify-center items-center w-full"
+          style={{ maxWidth: "480px" }}
         >
           <Pie
             data={dataAcademicYear}
@@ -113,8 +113,8 @@ const PieChartComponent = () => (
           Major
         </h3>
         <div
-          className="flex justify-center items-center md:max-w-xs mx-auto"
-          style={{ width: "100%", maxWidth: "480px" }}
+          className="flex justify-center items-center w-full"
+          style={{ maxWidth: "480px" }}
         >
           <Pie
             data={dataMajors}
