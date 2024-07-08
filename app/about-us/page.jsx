@@ -14,27 +14,6 @@ export const metadata = {
 const AboutUs = () => {
   return (
     <div className="relative min-h-screen bg-[#0F0F0F]">
-      <style>
-        {`
-          ::-webkit-scrollbar {
-              width: 4px; 
-              height: 6px;
-            }
-
-          ::-webkit-scrollbar-thumb {
-              background-color: #363636;
-              border-radius: 3px;
-          }
-
-          ::-webkit-scrollbar-track {
-              background-color: #0F0F0F;
-          }
-
-          ::-webkit-scrollbar-button {
-              display: none;
-          }
-        `}
-      </style>
       <div className="w-full pt-24 overflow-auto">
         <div>
           <Quote />

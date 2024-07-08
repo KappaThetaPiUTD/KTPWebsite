@@ -17,6 +17,27 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <style>
+        {`
+          ::-webkit-scrollbar {
+              width: 4px; 
+              height: 6px;
+            }
+
+          ::-webkit-scrollbar-thumb {
+              background-color: #363636;
+              border-radius: 3px;
+          }
+
+          ::-webkit-scrollbar-track {
+              background-color: #0F0F0F;
+          }
+
+          ::-webkit-scrollbar-button {
+              display: none;
+          }
+        `}
+      </style>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <body className={inter.className} style={{ overflowX: "hidden" }}>
         <Navbar />
