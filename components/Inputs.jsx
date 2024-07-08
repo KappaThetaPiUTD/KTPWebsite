@@ -7,7 +7,7 @@ const Input = ({ inputState, inputDispatch }) => {
 
   return (
     <div className="font-poppins">
-      <div className="flex flex-col md:flex-row md:items-start text-[16px] md:text-[20px] font-semibold mt-[32px] md:mt-[32px] w-[75vw]">
+      <div className="flex flex-col md:flex-row md:items-start text-[16px] md:text-[20px] text-black font-semibold mt-[32px] md:mt-[32px] w-[75vw]">
         <div className="flex flex-col w-full md:w-1/2">
           <p className="text-[#FFFFFF] ml-[2px]">First Name</p>
           <input
@@ -27,7 +27,7 @@ const Input = ({ inputState, inputDispatch }) => {
           />
         </div>
       </div>
-      <div className="flex flex-col mt-[32px]">
+      <div className="flex flex-col mt-[32px] text-black">
         <p className="text-[#FFFFFF] text-[16px] md:text-[20px] font-semibold ml-[2px]">
           Email
         </p>
@@ -38,7 +38,7 @@ const Input = ({ inputState, inputDispatch }) => {
           onChange={handleChange("email")}
         />
       </div>
-      <div className="flex flex-col mt-[32px]">
+      <div className="flex flex-col mt-[32px] text-black">
         <p className="text-[#FFFFFF] text-[16px] md:text-[20px] font-semibold ml-[2px]">
           Phone Number
         </p>
@@ -49,7 +49,7 @@ const Input = ({ inputState, inputDispatch }) => {
           onChange={handleChange("phoneNumber")}
         />
       </div>
-      <div className="flex flex-col mt-[32px]">
+      <div className="flex flex-col mt-[32px] text-black">
         <p className="text-[#FFFFFF] text-[16px] md:text-[20px] font-semibold ml-[2px]">
           Message
         </p>
