@@ -43,7 +43,7 @@ const AboutUs = () => {
           <Group />
         </div>
         <div className="pl-10 pr-10 pb-10">
-          <div className="flex flex-row justify-center text-primary text-4xl lg:text-header1 font-bold font-georgia pl-10 pr-10 pt-10 mb-4">
+          <div className="flex flex-row justify-center text-primary text-4xl lg:text-header1 font-bold font-georgia pl-10 pr-10 pt-10 mb-8">
             Letter From The President
           </div>
           <div className="flex-row pl-10 pr-10 hidden lg:flex">
