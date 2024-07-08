@@ -14,7 +14,7 @@ export const metadata = {
 const AboutUs = () => {
   return (
     <div className="relative min-h-screen bg-[#0F0F0F]">
-      <div className="w-full pt-24 overflow-auto">
+      <div className="w-full pt-16 overflow-auto">
         <div>
           <Quote />
         </div>
