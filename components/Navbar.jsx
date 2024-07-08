@@ -30,9 +30,8 @@ const Navbar = () => {
   ];
 
   return (
-    <div className="fixed bg-[#0F0F0F] w-full z-50">
+    <div className="fixed bg-[#0F0F0F] w-full z-50 h-24">
       <div className="bg-[#0F0F0F] flex justify-between items-center h-24 max-w-[1200px] mx-auto px-4 text-white">
-
         {/* Desktop Navigation - Hidden on Mobile */}
         <div className="hidden md:flex space-x-6">
           {navItems.slice(1, 4).map((item) => (
@@ -54,7 +53,7 @@ const Navbar = () => {
         {/* Logo - Centered */}
         <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
           <Link href={navItems[0].path}>
-            <h1 className="text-5xl font-bold font-[Greek] text-[#00df9a]">
+            <h1 className="text-5xl font-bold font-[Greek] text-primary">
               KΘΠ
             </h1>
           </Link>
@@ -87,7 +86,6 @@ const Navbar = () => {
           )}
         </div>
 
-
         {/* Mobile Navigation Menu */}
         <ul
           className={`absolute md:hidden h-screen w-full top-24 bottom-0 right-0 ease-in-out transition-transform transform duration-700 bg-[#0F0F0F] z-50 ${
@@ -96,7 +94,9 @@ const Navbar = () => {
         >
           {navItems.map((item) => (
             <li key={item.id} className="p-4 text-center text-white">
-              <Link href={item.path} onClick={closeNav}>{item.text}</Link>
+              <Link href={item.path} onClick={closeNav}>
+                {item.text}
+              </Link>
             </li>
           ))}
         </ul>

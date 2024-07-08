@@ -11,7 +11,7 @@ const Input = ({ inputState, inputDispatch }) => {
         <div className="flex flex-col w-full md:w-1/2">
           <p className="text-[#FFFFFF] ml-[2px]">First Name</p>
           <input
-            className="w-full h-[45px] md:h-[60px] rounded-[8px] placeholder-[#0F0F0F] placeholder-opacity-50 pl-[10px] text-[14px] md:text-[18px] mt-[8px] md:mt-[16px]"
+            className="w-full h-[45px] md:h-[60px] rounded-[8px] placeholder-[#0F0F0F] placeholder-opacity-50 pl-[10px] text-[14px] md:text-[18px] mt-[8px] md:mt-[16px] font-normal"
             placeholder="First Name"
             value={inputState.firstName}
             onChange={handleChange("firstName")}
@@ -20,7 +20,7 @@ const Input = ({ inputState, inputDispatch }) => {
         <div className="flex flex-col w-full md:w-1/2 md:ml-[20px]">
           <p className="text-[#FFFFFF] ml-[2px] mt-[16px] md:mt-0">Last Name</p>
           <input
-            className="w-full h-[45px] md:h-[60px] rounded-[8px] placeholder-[#0F0F0F] placeholder-opacity-50 pl-[10px] text-[14px] md:text-[18px] mt-[8px] md:mt-[16px]"
+            className="w-full h-[45px] md:h-[60px] rounded-[8px] placeholder-[#0F0F0F] placeholder-opacity-50 pl-[10px] text-[14px] md:text-[18px] mt-[8px] md:mt-[16px] font-normal"
             placeholder="Last Name"
             value={inputState.lastName}
             onChange={handleChange("lastName")}

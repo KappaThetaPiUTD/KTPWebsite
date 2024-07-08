@@ -88,7 +88,7 @@ const options = {
 
 const PieChartComponent = () => (
   <div className="bg-[#0f0f0f] p-8 text-white w-full">
-    <h2 className="text-secondary text-header2 font-bold font-poppins text-center mb-8">
+    <h2 className="text-primary text-4xl lg:text-header1 font-bold font-poppins text-center mb-8">
       KTP Wrapped
     </h2>
     <div className="flex flex-col md:flex-row justify-center md:gap-8">

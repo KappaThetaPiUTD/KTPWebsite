@@ -6,8 +6,9 @@ const WhoWeIs = () => {
     <div
       id="who-we-are"
       className="flex flex-col items-center justify-around w-screen h-[75vh] p-8 bg-[#3C3C3C]"
+      style={{ scrollMarginTop: "6rem" }}
     >
-      <div className="font-poppins font-bold text-header1 text-[#188C5D] text-center">
+      <div className="font-poppins font-bold text-header1 text-primary text-center">
         Who are we?
       </div>
       <div className="relative w-full max-w-4xl h-[50vh] md:h-[60vh] lg:h-[70vh]">

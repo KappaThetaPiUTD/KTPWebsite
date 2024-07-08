@@ -36,13 +36,6 @@ const SubmitButton = ({ inputState, clearForm }) => {
   const sendEmail = async () => {
     if (isSending) return;
 
-    console.log("Input:", {
-      full_name: `${firstName} ${lastName}`,
-      email,
-      phone_number: normalizePhoneNumber(phoneNumber),
-      message,
-    });
-
     if (!validate()) return;
 
     setIsSending(true);
