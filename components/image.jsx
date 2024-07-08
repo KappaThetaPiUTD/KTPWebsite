@@ -5,7 +5,7 @@ const Portrait = () => {
     <div className="mt-5 sm:mt-0 sm:ml-5">
       <div className="text-center">
         <Image
-          className="border-[2px] border-gray text-gray mr-0 sm:mr-[135px]"
+          className="border-[2px] text-gray mr-0 sm:mr-[135px] aspect-square object-scale-down"
           src={"/pictures/ethan-lobo.png"}
           alt="Ethan Lobo KTP President"
           width={720}

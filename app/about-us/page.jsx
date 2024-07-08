@@ -43,12 +43,16 @@ const AboutUs = () => {
           <Group />
         </div>
         <div className="pl-10 pr-10 pb-10">
-          <div className="flex flex-row justify-center text-primary text-header1 font-bold font-georgia pl-10 pr-10 pt-10">
+          <div className="flex flex-row justify-center text-primary text-4xl lg:text-header1 font-bold font-georgia pl-10 pr-10 pt-10 mb-4">
             Letter From The President
           </div>
-          <div className="flex flex-row pl-10 pr-10">
+          <div className="flex-row pl-10 pr-10 hidden lg:flex">
             <Letter />
             <Portrait />
+          </div>
+          <div className="flex flex-col pl-10 pr-10 lg:hidden space-y-12">
+            <Portrait />
+            <Letter />
           </div>
         </div>
         {/*DO NOT ADD TO PAGE YET
