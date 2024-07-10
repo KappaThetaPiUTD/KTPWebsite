@@ -203,6 +203,46 @@ const activeMembers = [
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
     linkedin: "https://www.linkedin.com/company/ktputd",
   },
+  {
+    name: "Aashna Pathi",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "https://www.linkedin.com/company/ktputd",
+  },
+  {
+    name: "Manasa Paruchuri",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "https://www.linkedin.com/company/ktputd",
+  },
+  {
+    name: "Gloria Tu",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "https://www.linkedin.com/company/ktputd",
+  },
+  {
+    name: "Annan Ahmed",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "https://www.linkedin.com/company/ktputd",
+  },
+  {
+    name: "Ethan Varghese",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "https://www.linkedin.com/company/ktputd",
+  },
+  {
+    name: "Shalom Michael",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "https://www.linkedin.com/company/ktputd",
+  },
+  {
+    name: "Joshua Solomon",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "https://www.linkedin.com/company/ktputd",
+  },  
+  {
+    name: "Reuben John",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "https://www.linkedin.com/company/ktputd",
+  },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const alphaClassMembers = [

@@ -6,6 +6,7 @@ const Gallery = () => {
   const images = [
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850376/Austin%20Trip/100_1531_yphg3y.jpg', alt: 'Image 1' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850373/Austin%20Trip/100_1532_kyjzgm.jpg', alt: 'Image 2' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1720637478/Austin%20Trip/IMG_1585_tariq_exec_image.jpg', alt: 'Image 3' },
    // { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850372/Austin%20Trip/100_1536_zdnmmh.jpg', alt: 'Image 5' },
    // { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850372/Austin%20Trip/100_1537_ji9dto.jpg', alt: 'Image 4' },
    // { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850371/Austin%20Trip/100_1541_taziyw.jpg', alt: 'Image 6' },
