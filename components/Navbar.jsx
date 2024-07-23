@@ -26,7 +26,7 @@ const Navbar = () => {
     { id: 4, text: "Recruitment", path: "/recruitment" },
     { id: 5, text: "Blog", path: "/blog" },
     { id: 6, text: "Gallery", path: "/gallery" },
-    { id: 7, text: "Contact", path: "/contact-us" },
+    { id: 7, text: "Contact Us", path: "/contact-us" },
   ];
 
   return (
