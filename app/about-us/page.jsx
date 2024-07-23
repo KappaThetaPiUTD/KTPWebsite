@@ -5,6 +5,7 @@ import Group from "../../components/group-image";
 import PieChartComponent from "../../components/PieChartComponent";
 import Majors from "../../components/majors";
 import Classes from "../../components/class-level";
+import CompanyCollage from "../../components/CompanyCollage";
 
 export const metadata = {
   title: "Kappa Theta Pi UTD - About Us",
@@ -40,6 +41,9 @@ const AboutUs = () => {
                 </div> */}
         <div className="flex flex-row justify-center pt-10 pb-24">
           <PieChartComponent />
+        </div>
+        <div>
+          <CompanyCollage/>
         </div>
       </div>
     </div>
