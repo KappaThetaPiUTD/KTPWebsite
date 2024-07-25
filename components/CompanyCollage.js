@@ -32,7 +32,7 @@ const CompanyCollage = () => {
 
   return (
     <div className="w-screen h-full flex flex-col justify-center items-center p-6 bg-gray-100">
-      <h2 className="text-header1 font-bold font-poppins text-primary text-center mb-6">Alumni</h2>
+      <h2 className="text-header1 font-bold font-poppins text-primary text-center mb-6">Our Companies</h2>
       <div className="relative w-full overflow-hidden bg-gray-100">
         <div className="scroll-container">
           {Array.from({ length: rows }).map((_, rowIndex) => (
@@ -83,10 +83,10 @@ const CompanyCollage = () => {
           }
         }
         .scroll:nth-child(2) {
-          animation-delay: 6.67s;
+          animation-delay: 1s;
         }
         .scroll:nth-child(3) {
-          animation-delay: 13.33s; 
+          animation-delay: 2s; 
         }
       `}</style>
     </div>
