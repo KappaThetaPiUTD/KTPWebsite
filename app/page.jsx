@@ -1,6 +1,8 @@
 import Hero from "../components/home/hero";
 import WhoWeIs from "../components/home/who-we-is";
 import Pillars from "../components/home/pillars";
+import CompanyCollage from "../components/CompanyCollage";
+
 
 export const metadata = {
   title: "Kappa Theta Pi UTD - Home",
@@ -13,6 +15,7 @@ export default function Home() {
       <Hero />
       <WhoWeIs />
       <Pillars />
+      <CompanyCollage/>
     </div>
   );
 }
