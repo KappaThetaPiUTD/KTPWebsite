@@ -53,7 +53,7 @@ const Navbar = () => {
         {/* Logo - Centered */}
         <div className="absolute left-1/2 transform -translate-x-1/2 text-center">
           <Link href={navItems[0].path}>
-            <h1 className="text-5xl font-bold font-[Greek] text-primary">
+            <h1 className="text-5xl font-bold font-[Greek] text-primary text-[#9B1E2E]">
               KΘΠ
             </h1>
           </Link>
