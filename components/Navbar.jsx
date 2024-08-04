@@ -43,7 +43,7 @@ const Navbar = () => {
             >
               <Link href={item.path}>{item.text}</Link>
               <div
-                className={`absolute bottom-0 left-0 right-0 h-0.5 bg-[#00df9a] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center`}
+                className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center`}
                 style={{ width: isHovered === item.id ? "100%" : "0" }}
               />
             </li>
@@ -70,7 +70,7 @@ const Navbar = () => {
             >
               <Link href={item.path}>{item.text}</Link>
               <div
-                className={`absolute bottom-0 left-0 right-0 h-0.5 bg-[#00df9a] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center`}
+                className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center`}
                 style={{ width: isHovered === item.id ? "100%" : "0" }}
               />
             </li>

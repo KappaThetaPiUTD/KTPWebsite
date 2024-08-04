@@ -313,7 +313,7 @@ const Brother = () => {
 
   return (
     <div className="w-screen h-full bg-[#0F0F0F] pt-24 text-white">
-      <div className="text-secondary text-header1 font-bold font-poppins flex text-center justify-center items-center">
+      <div className="text-primary text-header1 font-bold font-poppins flex text-center justify-center items-center">
         Executive Board
       </div>
       <div className="flex flex-wrap justify-center mt-8">
@@ -345,7 +345,7 @@ const Brother = () => {
         ))}
       </div>
 
-      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center items-center mt-16">
+      <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-16">
         Actives
       </div>
       <div className="flex flex-wrap justify-center mt-8">
@@ -376,7 +376,7 @@ const Brother = () => {
         ))}
       </div>
 
-      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
+      <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Alpha Class
       </div>
       <div className="flex justify-center mt-4">
@@ -391,7 +391,7 @@ const Brother = () => {
         ))}
       </div>
 
-      <div className="text-secondary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
+      <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Beta Class
       </div>
       <div className="flex justify-center mt-4">
