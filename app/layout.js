@@ -19,6 +19,12 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <style>
         {`
+          @media print {
+            #simplify-jobs-container {
+              display: none;
+            }
+          }
+          " Client: "
           ::-webkit-scrollbar {
               width: 4px; 
               height: 6px;
