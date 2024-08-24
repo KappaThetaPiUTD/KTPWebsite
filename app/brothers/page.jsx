@@ -248,7 +248,7 @@ const activeMembers = [
 const alphaClassMembers = [
   "Adam Moffat",
   "Aditya Sajeev",
-  "Akahaya Kummetha",
+  "Akshaya Kummetha",
   "Arjun Prabhune",
   "Aashna Pathi",
   "Benjamin Wowo",
@@ -256,14 +256,14 @@ const alphaClassMembers = [
   "Ibrahim Khan",
   "Kairavi Pandya",
   "Kanishk Garg",
-  "Lokesh Narasnai",
+  "Lokesh Narasani",
   "Manasa Paruchuri",
   "Rhea Aemireaddy",
   "Renjit Joseph",
-  "Sanajana Shangle",
+  "Sanjana Shangle",
   "Sriram Sendhil",
   "Shalom Michael",
-  "Viraaj Neeramanchi",
+  "Viraaj Veeramachaneni",
   "Yeshas Nath",
 ].sort((a, b) => a.localeCompare(b));
 

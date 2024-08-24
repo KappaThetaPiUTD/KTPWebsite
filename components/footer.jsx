@@ -24,7 +24,7 @@ const Footer = () => {
           Kappa Theta Pi - Mu Chapter
         </div>
         <div className="text-[0.8rem] font-extralight mb-1 font-georgia">
-          Managed by Membership Committee
+          Managed by Technology Committee
         </div>
       </div>
     </footer>
