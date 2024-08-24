@@ -1,15 +1,113 @@
-import React from "react";
-import Script from 'next/script'
+"use client";
+
+import React, { useState } from "react";
+import Image from "next/image";
+import Script from "next/script";
 import FormPage from "./form";
 
-export const metadata = {
-  title: "Kappa Theta Pi UTD - Recruitment",
-  description: "Kappa Theta Pi Descripton",
-};
+const events = [
+  {
+    date: "9/3",
+    event: "Info Session",
+    location: "GR.428",
+    time: "7PM",
+    rsvpLink: "", // Replace with actual RSVP link when available
+  },
+  {
+    date: "9/4",
+    event: "Info Session",
+    location: "ECSW 1.365",
+    time: "7PM",
+    rsvpLink: "", // Replace with actual RSVP link when available
+  },
+  {
+    date: "9/5",
+    event: "Meet the Bros",
+    location: "NS Skylounge",
+    time: "7PM",
+    rsvpLink: "", // Replace with actual RSVP link when available
+  },
+  {
+    date: "9/9",
+    event: "Game Night",
+    location: "TBA",
+    time: "7PM",
+    rsvpLink: "", // Replace with actual RSVP link when available
+  },
+  {
+    date: "9/10",
+    event: "KTP Speed Dating",
+    location: "TBA",
+    time: "7PM",
+    rsvpLink: "", // Replace with actual RSVP link when available
+  },
+  {
+    date: "9/11",
+    event: "Professional Event (Invite Only)",
+    location: "TBA",
+    time: "7PM",
+    rsvpLink: "", // Replace with actual RSVP link when available
+  },
+];
 
 const RecruitmentPage = () => {
+  const handleRSVPClick = (link) => {
+    if (!link) {
+      alert(
+        "Link to be added soon. We will update our Instagram when the links are available."
+      );
+    } else {
+      window.open(link, "_blank");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-start pt-24 px-4 md:px-8">
+    <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-start pt-24 px-4 md:px-8 text-white">
+      <div className="text-[#9B1E2E] text-[36px] md:text-header1 font-bold font-poppins text-center mb-4">
+        Recruitment
+      </div>
+
+      <div className="text-[#5d6b79] text-[28px] md:text-header2 font-bold font-poppins text-center mb-8">
+        Fall 2024 Rush
+      </div>
+
+      {/* Logo */}
+      <div className="mb-10">
+        <Image
+          src="/pictures/fall 2024 rush logo.jpg"
+          alt="Fall 2024 Rush Logo"
+          width={200}
+          height={200}
+          className="object-contain"
+        />
+      </div>
+
+      <div className="flex flex-col items-center w-full mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {events.map((event, index) => (
+            <div
+              key={index}
+              className="bg-[#1a1a1a] p-6 rounded-md shadow-lg flex flex-col items-center"
+            >
+              <div className="text-2xl font-bold mb-2">{event.date}</div>
+              <div className="text-xl mb-2">{event.event}</div>
+              <div className="text-lg mb-2">{event.location}</div>
+              <div className="text-lg mb-2">{event.time}</div>
+              <button
+                onClick={() => handleRSVPClick(event.rsvpLink)}
+                className="mt-4 px-4 py-2 bg-[#5d6b79] text-white rounded hover:bg-secondary transition"
+              >
+                RSVP
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="text-[#5d6b79] text-[28px] md:text-header2 font-bold font-poppins text-center mb-4">
+        Interest Form
+      </div>
+
       <FormPage />
     </div>
   );
