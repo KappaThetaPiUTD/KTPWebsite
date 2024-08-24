@@ -18,9 +18,6 @@ const BlogPage = () => {
         </div>
       </div>
       <div className="flex flex-col items-center space-y-8">
-        <div className="text-white text-[18px] md:text-header3 text-center">
-          Check back here closer to the Fall 2024 rush.
-        </div>
       </div>
     </div>
   );

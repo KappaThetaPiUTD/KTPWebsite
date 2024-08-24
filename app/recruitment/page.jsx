@@ -67,7 +67,7 @@ const RecruitmentPage = () => {
         Recruitment
       </div>
 
-      <div className="text-[#5d6b79] text-[22px] sm:text-[28px] md:text-header2 font-bold font-poppins text-center mb-8">
+      <div className="text-white text-[22px] sm:text-[28px] md:text-header2 font-bold font-poppins text-center mb-8">
         Fall 2024 Rush
       </div>
 
@@ -108,7 +108,7 @@ const RecruitmentPage = () => {
       </div>
 
       {/* Interest Form Section */}
-      <div className="text-[#5d6b79] text-[24px] sm:text-[28px] md:text-header2 font-bold font-poppins text-center mb-4">
+      <div className="text-white text-[24px] sm:text-[28px] md:text-header2 font-bold font-poppins text-center mb-4">
         Interest Form
       </div>
 
