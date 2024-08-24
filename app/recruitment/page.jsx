@@ -62,11 +62,12 @@ const RecruitmentPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-start pt-24 px-4 md:px-8 text-white">
-      <div className="text-[#9B1E2E] text-[36px] md:text-header1 font-bold font-poppins text-center mb-4">
+      {/* Page Titles */}
+      <div className="text-[#9B1E2E] text-[28px] sm:text-[36px] md:text-header1 font-bold font-poppins text-center mb-4">
         Recruitment
       </div>
 
-      <div className="text-[#5d6b79] text-[28px] md:text-header2 font-bold font-poppins text-center mb-8">
+      <div className="text-[#5d6b79] text-[22px] sm:text-[28px] md:text-header2 font-bold font-poppins text-center mb-8">
         Fall 2024 Rush
       </div>
 
@@ -75,23 +76,26 @@ const RecruitmentPage = () => {
         <Image
           src="/pictures/fall 2024 rush logo.jpg"
           alt="Fall 2024 Rush Logo"
-          width={200}
-          height={200}
-          className="object-contain"
+          width={150}
+          height={150}
+          className="object-contain sm:w-[200px] sm:h-[200px]"
         />
       </div>
 
+      {/* Events Grid */}
       <div className="flex flex-col items-center w-full mb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
           {events.map((event, index) => (
             <div
               key={index}
-              className="bg-[#1a1a1a] p-6 rounded-md shadow-lg flex flex-col items-center"
+              className="bg-[#1a1a1a] p-6 rounded-md shadow-lg flex flex-col items-center text-center"
             >
-              <div className="text-2xl font-bold mb-2">{event.date}</div>
-              <div className="text-xl mb-2">{event.event}</div>
-              <div className="text-lg mb-2">{event.location}</div>
-              <div className="text-lg mb-2">{event.time}</div>
+              <div className="text-xl sm:text-2xl font-bold mb-2">
+                {event.date}
+              </div>
+              <div className="text-lg sm:text-xl mb-2">{event.event}</div>
+              <div className="text-md sm:text-lg mb-2">{event.location}</div>
+              <div className="text-md sm:text-lg mb-2">{event.time}</div>
               <button
                 onClick={() => handleRSVPClick(event.rsvpLink)}
                 className="mt-4 px-4 py-2 bg-[#5d6b79] text-white rounded hover:bg-secondary transition"
@@ -103,7 +107,8 @@ const RecruitmentPage = () => {
         </div>
       </div>
 
-      <div className="text-[#5d6b79] text-[28px] md:text-header2 font-bold font-poppins text-center mb-4">
+      {/* Interest Form Section */}
+      <div className="text-[#5d6b79] text-[24px] sm:text-[28px] md:text-header2 font-bold font-poppins text-center mb-4">
         Interest Form
       </div>
 
