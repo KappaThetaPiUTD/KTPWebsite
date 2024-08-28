@@ -1,6 +1,12 @@
 import Image from 'next/image';
 import React from 'react';
 
+export const metadata = {
+  title: "Kappa Theta Pi UTD - Gallery",
+  description:
+    "A page with pictures of our times together",
+};
+
 const Gallery = () => {
   // Array of images with their public IDs from Cloudinary
   const images = [
