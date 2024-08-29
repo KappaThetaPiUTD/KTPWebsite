@@ -11,6 +11,9 @@ module.exports = {
         primary: "#9B1E2E",
         secondary: "#9B1E2E",
         gray: "#9B9B9B",
+        bg: "#fffff", //white
+        text: "#000000", //black
+
       },
       fontFamily: {
         poppins: ["Poppins"],

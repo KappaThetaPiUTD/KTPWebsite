@@ -10,35 +10,35 @@ const events = [
     event: "Info Session",
     location: "GR.428",
     time: "7PM",
-    rsvpLink: "", // Replace with actual RSVP link when available
+    rsvpLink: "https://tally.so/r/wooqbO", // Replace with actual RSVP link when available
   },
   {
     date: "9/4",
     event: "Info Session",
     location: "ECSW 1.365",
     time: "7PM",
-    rsvpLink: "", // Replace with actual RSVP link when available
+    rsvpLink: "https://tally.so/r/mD5jqN", // Replace with actual RSVP link when available
   },
   {
     date: "9/5",
     event: "Meet the Bros",
     location: "NS Skylounge",
     time: "7PM",
-    rsvpLink: "", // Replace with actual RSVP link when available
+    rsvpLink: "https://tally.so/r/wooq9O", // Replace with actual RSVP link when available
   },
   {
     date: "9/9",
     event: "Game Night",
     location: "TBA",
     time: "7PM",
-    rsvpLink: "", // Replace with actual RSVP link when available
+    rsvpLink: "https://tally.so/r/3x2AVv", // Replace with actual RSVP link when available
   },
   {
     date: "9/10",
     event: "KTP Speed Dating",
     location: "TBA",
     time: "7PM",
-    rsvpLink: "", // Replace with actual RSVP link when available
+    rsvpLink: "https://tally.so/r/wQdboX", // Replace with actual RSVP link when available
   },
   {
     date: "9/11",
@@ -53,7 +53,7 @@ const RecruitmentPage = () => {
   const handleRSVPClick = (link) => {
     if (!link) {
       alert(
-        "Link to be added soon. We will update our Instagram when the links are available."
+        "You will be reached out personally for the Profressional Event if you are invited. Be sure to check your email or instgram closer to the date."
       );
     } else {
       window.open(link, "_blank");
