@@ -5,7 +5,7 @@ import React from 'react';
 
 const CompanyCollage = () => {
   const companyLogos = [
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1721741774/Brother%20Page/Companies/a0efc1c5-0849-416b-b066-f0c8a13bfc50.png', alt: 'PWC' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724968751/Brother%20Page/Companies/ec67d703-5819-437f-bce9-83e6c57c2f64.png', alt: 'PWC' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1721866520/Brother%20Page/Companies/36df9108-2cc6-4485-a25a-069aba492aad.png', alt: 'Fannie Mae' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1721740563/Brother%20Page/Companies/60481dda-7ef5-4542-81e8-3871074f8052.png', alt: 'Verizon' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1721868503/Brother%20Page/Companies/0272b14d-e99c-4896-9603-b4325910b605.png', alt: 'JP Morgan Chase' },
