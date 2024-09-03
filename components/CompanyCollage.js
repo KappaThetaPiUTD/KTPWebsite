@@ -16,6 +16,7 @@ const CompanyCollage = () => {
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969639/Brother%20Page/Companies/cb3f5bb7-2c25-4497-857d-9ca51569325f.png', alt: 'Walmart' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969806/Brother%20Page/Companies/73e21920-9d1d-445c-88ab-a5ab8908adcf.png', alt: 'UT Southwestern Medical Center' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969899/Brother%20Page/Companies/eff0e2f8-0844-44b6-9081-1c93c42fdd6a.png', alt: 'Bank of America' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724970250/Brother%20Page/Companies/90aeb29a-edf1-4efd-9fb6-377089d9e298.png', alt: 'IBM' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969945/Brother%20Page/Companies/ebf5e8b5-3532-4867-9b14-b60a0b74c3f0.png', alt: 'Tenet Health' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969981/Brother%20Page/Companies/a4d079af-4dd2-4863-ae4d-c9059d4c87c5.png', alt: 'GM Financial' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724970038/Brother%20Page/Companies/0e26ec5c-869d-4e4e-bd91-81bfd7dd164e.png', alt: 'EDP Renewables' },
@@ -23,8 +24,10 @@ const CompanyCollage = () => {
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724970141/Brother%20Page/Companies/ea20ad08-9b3e-4fff-8aec-6a840509837a.png', alt: 'Realtor.com' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724970341/Brother%20Page/Companies/8a5118eb-9d6a-4080-9a3d-c2d67316def4.png', alt: 'Country Financial' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724970218/Brother%20Page/Companies/31fec9f2-f883-4780-97a3-8a18d203fe88.png', alt: 'PNC Bank' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724970250/Brother%20Page/Companies/90aeb29a-edf1-4efd-9fb6-377089d9e298.png', alt: 'IBM' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724970281/Brother%20Page/Companies/0e5a44e6-4799-4780-b860-5e8f4ed3ba1e.png', alt: 'Tech Mahindra' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1725403202/Brother%20Page/Companies/2449d2a8-e771-4c1a-a78c-08729a4d2575.png', alt: '7-11' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1725403247/Brother%20Page/Companies/e486c0c3-8914-406e-888e-3dccf6fa81e8.png', alt: 'OGandE' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1725403289/Brother%20Page/Companies/a9de1dc5-9e31-478d-a6a7-dc319a533de3.png', alt: 'Webacy' },
   ];
 
   const rows = 3;

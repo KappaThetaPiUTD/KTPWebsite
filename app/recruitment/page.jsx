@@ -22,28 +22,28 @@ const events = [
   {
     date: "9/5",
     event: "Meet the Bros",
-    location: "NS Skylounge",
+    location: "Science Courtyard",
     time: "7PM",
     rsvpLink: "https://tally.so/r/wooq9O", // Replace with actual RSVP link when available
   },
   {
     date: "9/9",
     event: "Game Night",
-    location: "TBA",
+    location: "NS Skylounge",
     time: "7PM",
     rsvpLink: "https://tally.so/r/3x2AVv", // Replace with actual RSVP link when available
   },
   {
     date: "9/10",
     event: "KTP Speed Dating",
-    location: "TBA",
+    location: "GR 3.420",
     time: "7PM",
     rsvpLink: "https://tally.so/r/wQdboX", // Replace with actual RSVP link when available
   },
   {
     date: "9/11",
     event: "Professional Event (Invite Only)",
-    location: "TBA",
+    location: "Location will be sent with invite",
     time: "7PM",
     rsvpLink: "", // Replace with actual RSVP link when available
   },
