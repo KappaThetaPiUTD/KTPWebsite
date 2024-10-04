@@ -12,6 +12,7 @@ const CompanyCollage = () => {
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969392/Brother%20Page/Companies/a355942a-71c5-4484-95d3-b55696403e63.png', alt: 'Amazon' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969467/Brother%20Page/Companies/eb6797b1-82a7-4517-b06d-e9abd9a28dfc.png', alt: 'Optiver' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969509/Brother%20Page/Companies/87ee6052-eb34-4bdd-9595-7e120a66de96.png', alt: 'Anduril' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1728059612/Brother%20Page/Companies/s-l1200_hdhgi0.png', alt: 'Mavs' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969565/Brother%20Page/Companies/843487c4-c03d-4150-b073-4a03c2a27db4.png', alt: 'Keurig Dr Pepper' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969639/Brother%20Page/Companies/cb3f5bb7-2c25-4497-857d-9ca51569325f.png', alt: 'Walmart' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1724969806/Brother%20Page/Companies/73e21920-9d1d-445c-88ab-a5ab8908adcf.png', alt: 'UT Southwestern Medical Center' },
@@ -28,6 +29,12 @@ const CompanyCollage = () => {
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1725403202/Brother%20Page/Companies/2449d2a8-e771-4c1a-a78c-08729a4d2575.png', alt: '7-11' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1725403247/Brother%20Page/Companies/e486c0c3-8914-406e-888e-3dccf6fa81e8.png', alt: 'OGandE' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1725403289/Brother%20Page/Companies/a9de1dc5-9e31-478d-a6a7-dc319a533de3.png', alt: 'Webacy' },
+    //{ src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1728060859/Brother%20Page/Companies/occ-logo-color-rgb_uu8x2t.webp', alt: 'the occ' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1728060859/Brother%20Page/Companies/nsf-white_rqjtb4.png', alt: 'nsf' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1728060858/Brother%20Page/Companies/logo.46ab9870_jxl9nd.png', alt: 'Wise assistant' },
+    //{ src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1728060860/Brother%20Page/Companies/CSU.TO_BIG-a8c98406_bkwnxt.png', alt: 'constilation software' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1728060857/Brother%20Page/Companies/Outlier_AI-AI_xe8ohg.png', alt: 'outlier ai' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1728060857/Brother%20Page/Companies/DXC_Technology_logo_2021-768x419_cf8wvr.png', alt: 'constilation software' },
   ];
 
   const rows = 3;
