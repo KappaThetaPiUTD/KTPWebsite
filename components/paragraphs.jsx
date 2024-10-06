@@ -50,8 +50,8 @@ const Letter = () => {
         website, you will find information about rush and our brotherhood.
         Enjoy, and please do not hesitate to reach out to our E-Board on the
         contact page if you have any questions! You can contact us at{" "}
-        <a className="underline" href="mailto:utdkappathetapi@gmail.com">
-          utdkappathetapi@gmail.com
+        <a className="underline" href="mailto:kappathetapiutd@gmail.com">
+          kappathetapiutd@gmail.com
         </a>{" "}
         for any concerns or questions!
       </p>
