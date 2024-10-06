@@ -2,7 +2,7 @@ import Hero from "../components/home/hero";
 import WhoWeIs from "../components/home/who-we-is";
 import Pillars from "../components/home/pillars";
 import CompanyCollage from "../components/CompanyCollage";
-import '../styles/globals.css'
+import '/Users/kairavipandya/Documents/Coding Projects/KTPWebsite/app/globals.css'
 
 
 export const metadata = {
