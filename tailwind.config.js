@@ -8,15 +8,15 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#9B1E2E",
+        primary: "#00542C",
         secondary: "#9B1E2E",
         gray: "#9B9B9B",
-        bg: "#fffff", //white
+        backg: "#fffff", //white
         text: "#000000", //black
 
       },
       fontFamily: {
-        poppins: ["Poppins"],
+        poppins: ["Public Sans"],
         georgia: ["Georgia"],
         greek: ["Greek"],
       },
