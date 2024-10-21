@@ -1,14 +1,17 @@
 import React from "react";
 
-const Pillar = ({ isGreen, title, body }) => {
+const Pillar = ({ number, title, body }) => {
   return (
-    <div
-      className={`flex flex-col justify-center items-center p-8 gap-y-4 w-[80%] xl:w-1/4 aspect-w-1 aspect-h-1 rounded-xl font-poppins transition-transform transform hover:scale-105 hover:shadow-lg ${
-        isGreen ? "bg-primary text-white" : "bg-black text-whitek"
-      }`}
-    >
-      <div className="font-medium text-header4 text-center">{title}</div>
-      <div className="font-normal text-paragraph text-center">{body}</div>
+    <div className="flex flex-row items-center gap-x-8 bg-white shadow-lg p-4 rounded-lg">
+      <div className="text-5xl font-bold text-gray">
+        {number}
+      </div>
+      <div>
+        <h3 className="text-xl font-semibold">{title}</h3>
+        <p className="text-gray">
+          {body}
+        </p>
+      </div>
     </div>
   );
 };
