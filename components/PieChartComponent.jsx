@@ -77,9 +77,9 @@ const options = {
       position: "bottom",
       labels: {
         font: {
-          family: "Georgia",
+          family: "Public Sans",
         },
-        color: "#FFFFFF",
+        color: "#000000",
       },
     },
   },
@@ -87,13 +87,13 @@ const options = {
 };
 
 const PieChartComponent = () => (
-  <div className="bg-[#0f0f0f] p-8 text-white w-full">
-    <h2 className="text-primary text-4xl lg:text-header1 font-bold font-poppins text-center mb-8">
+  <div className="bg-white p-8 text-black w-full">
+    <h2 className="text-black text-4xl lg:text-header1 font-bold font-poppins text-center mb-8 tracking--2">
       KTP Wrapped
     </h2>
     <div className="flex flex-col md:flex-row justify-center md:gap-8">
       <div className="text-center mb-8 md:mb-0">
-        <h3 className="text-white text-header4 font-bold font-georgia mb-4">
+        <h3 className="text-white text-header4 font-bold font-poppins mb-4">
           Academic Year
         </h3>
         <div
@@ -109,7 +109,7 @@ const PieChartComponent = () => (
         </div>
       </div>
       <div className="text-center">
-        <h3 className="text-white text-header4 font-bold font-georgia mb-4">
+        <h3 className="text-white text-header4 font-bold font-poppins mb-4">
           Major
         </h3>
         <div

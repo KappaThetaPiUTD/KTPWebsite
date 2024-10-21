@@ -32,8 +32,8 @@ const Navbar = () => {
         {/* Logo on the left */}
         <div className="text-center">
           <Link href={navItems[0].path}>
-            <h1 className="text-5xl font-bold font-[Greek] text-primary text-[#9B1E2E] cursor-pointer">
-              KΘΠ
+            <h1 className="text-5xl text-primary text-[#9B1E2E] cursor-pointer">
+              𝚱𝚯𝚷
             </h1>
           </Link>
         </div>
