@@ -33,11 +33,11 @@ const Gallery = () => {
   ];
 
   return (
-    <div className="w-screen h-full bg-[#0F0F0F] pt-24">
+    <div className="w-screen h-full bg-white pt-24">
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center">
         Gallery
       </div>
-      <div className="text-gray text-center font-georgia text-header4 mt-2">
+      <div className="text-accent text-center font-georgia text-header4 mt-2">
         We would like to thank our photographers Tariq Mahamid and Manasa Paruchuri!
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4">
