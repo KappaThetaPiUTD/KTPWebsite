@@ -1,6 +1,6 @@
 const Letter = () => {
   return (
-    <div className="text-white text-paragraph font-georgia text-left pr-0 sm:pr-5">
+    <div className="text-white text-paragraph font-poppins text-left pr-0 sm:pr-5">
       <p>
         Welcome to the Mu Chapter of Kappa Theta Pi, The University of Texas at
         Dallas&apos;s premier professional technology fraternity. On behalf of

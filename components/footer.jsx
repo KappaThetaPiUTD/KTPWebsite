@@ -3,7 +3,15 @@ import MailIcon from "./mail-icon-footer";
 
 const Footer = () => {
   return (
-    <footer className="flex flex-col sm:flex-row justify-between items-center bottom-0 w-full z-10 bg-[#0f0f0f] text-[#ffffff] p-5 font-poppins">
+    <footer className="flex flex-col sm:flex-row justify-between items-center bottom-0 w-full z-10 bg-primary text-[#ffffff] p-5 font-poppins">
+    <div className="text-center sm:text-right mt-5 sm:mt-0">
+      <div className="font-regular font-poppins">
+            The University of Texas at Dallas
+          </div>
+        <div className="text-[20px] sm:text-[25px] font-bold mb-1 font-poppins">
+          Kappa Theta Pi - Mu Chapter
+        </div>
+      </div>
       <div className="flex flex-col sm:flex-row items-center w-full sm:w-auto">
         <div className="flex items-center">
           <div className="flex flex-col sm:flex-row items-center ml-0 sm:ml-5 mt-5 sm:mt-0">
@@ -19,14 +27,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-      <div className="text-center sm:text-right mt-5 sm:mt-0">
-        <div className="text-[20px] sm:text-[25px] font-extralight mb-1 font-georgia">
-          Kappa Theta Pi - Mu Chapter
-        </div>
-        <div className="text-[0.8rem] font-extralight mb-1 font-georgia">
-          Managed by Technology Committee
-        </div>
-      </div>
+      
     </footer>
   );
 };

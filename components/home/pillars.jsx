@@ -1,36 +1,36 @@
 import React from "react";
-import Pillar from "./pillar";
 
-const Pillars = () => {
+// Define a single Pillar component
+const Pillar = ({ number, title, description }) => {
   return (
-    <div className="flex flex-col gap-y-16 items-center justify-around w-screen p-8 bg-[#0f0f0f]">
-      <div className="font-poppins font-bold text-header1 text-primary">
-        Our Pillars
+    <div className="flex flex-row items-start justify-start p-6 bg-white border-2 border-primary border-opacity-25 shadow-md my-4 rounded-lg w-full">
+      <div className="text-3xl font-bold text-black mr-9">{number}</div>
+      <div className="flex flex-col">
+        <div className="text-xl font-semibold text-black mb-1">{title}</div>
+        <p className="text-black">{description}</p>
       </div>
-      <div className="flex justify-around gap-x-8 gap-y-16 flex-wrap">
-        <Pillar
-          isGreen
-          title="🎓 Academic Support"
-          body="We offer a supportive network of peers and mentors, providing invaluable guidance and assistance to help members excel academically in their tech-related studies."
-        />
-        <Pillar
-          title="💻 Tech. Advancement"
-          body="Our focus on continuous learning and hands-on experience empowers members to expand their technical expertise and stay at the forefront of industry advancements."
-        />
-        <Pillar
-          isGreen
-          title="🤝 Alumni Connections"
-          body="With pride, we cultivate tomorrow's tech leaders by connecting current members with accomplished alumni, offering valuable insights and mentorship for their journey ahead."
-        />
-        <Pillar
-          title="🌱 Social Growth"
-          body="Through our diverse range of social events and activities, we create opportunities for members to connect, bond, and forge lasting friendships within our community and brotherhood."
-        />
-        <Pillar
-          isGreen
-          title="📈 Prof. Development"
-          body="We're committed to nurturing the future leaders of tech through tailored programs and mentorship, ensuring our members are equipped for success."
-        />
+    </div>
+  );
+};
+
+
+// Main Pillars component containing all individual Pillar components
+const Pillars = () => {
+  const pillarsData = [
+    { number: '1', title: "Academic Support", description: "We provide a network of support for our members, offering access to tutoring, study groups, and educational workshops to ensure academic success." },
+    { number: '2', title: "Tech Advancement", description: "Our commitment to technology extends to hands-on workshops, coding bootcamps, and tech talks to keep our members ahead in the fast-evolving tech landscape." },
+    { number: '3', title: "Alumni Connections", description: "We bridge the gap between current members and alumni through networking events, mentorship opportunities, and career guidance to foster long-term professional relationships." },
+    { number: '4', title: "Social Growth", description: "Social events, retreats, and community service projects are integral to our mission, helping members build lifelong friendships and soft skills." },
+    { number: '5', title: "Professional Development", description: "From resume workshops to interview prep sessions, our professional development programs are designed to prepare members for the workforce." }
+  ];
+
+  return (
+    <div className="flex flex-col items-center justify-center p-8 bg-gray-50">
+      <h2 className="text-header2 font-bold text-black mb-6">Our Core Values</h2>
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4 w-full max-w-4xl">
+        {pillarsData.map((pillar, index) => (
+          <Pillar key={index} number={pillar.number} title={pillar.title} description={pillar.description} />
+        ))}
       </div>
     </div>
   );

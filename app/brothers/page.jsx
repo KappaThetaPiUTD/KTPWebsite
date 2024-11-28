@@ -235,7 +235,7 @@ const Brother = () => {
   const betaColumns = splitIntoColumns(betaClassMembers, 3);
 
   return (
-    <div className="w-screen h-full bg-[#0F0F0F] pt-24 text-white">
+    <div className="w-screen h-full bg-white pt-24 text-black">
       <div className="text-primary text-header1 font-bold font-poppins flex text-center justify-center items-center">
         Executive Board
       </div>
@@ -259,7 +259,7 @@ const Brother = () => {
                 rel="noopener noreferrer"
                 className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
               >
-                <FaLinkedin className="text-white text-4xl" />
+                <FaLinkedin className="text-black text-4xl" />
               </a>
             </div>
             <div className="mt-2">{member.name}</div>

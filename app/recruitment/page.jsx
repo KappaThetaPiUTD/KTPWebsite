@@ -61,58 +61,14 @@ const RecruitmentPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F0F0F] flex flex-col items-center justify-start pt-24 px-4 md:px-8 text-white">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-start pt-24 px-4 md:px-8 text-black">
       {/* Page Titles */}
-      <div className="text-[#9B1E2E] text-[28px] sm:text-[36px] md:text-header1 font-bold font-poppins text-center mb-4">
+      <div className="text-primary text-[28px] sm:text-[36px] md:text-header1 font-bold font-poppins text-center mb-4">
         Recruitment
       </div>
-
-      <div className="text-white text-[22px] sm:text-[28px] md:text-header2 font-bold font-poppins text-center mb-8">
-        Fall 2024 Rush
+      <div className="text-black text-paragraph sm:text-[36px] md:text-header1 font-poppins text-center mb-4">
+        We will release more information closer to Spring 2025.
       </div>
-
-      {/* Logo */}
-      <div className="mb-10">
-        <Image
-          src="/pictures/fall 2024 rush logo.jpg"
-          alt="Fall 2024 Rush Logo"
-          width={150}
-          height={150}
-          className="object-contain sm:w-[200px] sm:h-[200px]"
-        />
-      </div>
-
-      {/* Events Grid */}
-      <div className="flex flex-col items-center w-full mb-10">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-          {events.map((event, index) => (
-            <div
-              key={index}
-              className="bg-[#1a1a1a] p-6 rounded-md shadow-lg flex flex-col items-center text-center"
-            >
-              <div className="text-xl sm:text-2xl font-bold mb-2">
-                {event.date}
-              </div>
-              <div className="text-lg sm:text-xl mb-2">{event.event}</div>
-              <div className="text-md sm:text-lg mb-2">{event.location}</div>
-              <div className="text-md sm:text-lg mb-2">{event.time}</div>
-              <button
-                onClick={() => handleRSVPClick(event.rsvpLink)}
-                className="mt-4 px-4 py-2 bg-[#5d6b79] text-white rounded hover:bg-secondary transition"
-              >
-                RSVP
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Interest Form Section */}
-      <div className="text-white text-[24px] sm:text-[28px] md:text-header2 font-bold font-poppins text-center mb-4">
-        Interest Form
-      </div>
-
-      <FormPage />
     </div>
   );
 };
