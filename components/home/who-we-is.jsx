@@ -5,21 +5,30 @@ const WhoWeIs = () => {
   return (
     <div
       id="who-we-are"
-      className="flex flex-col items-center justify-around w-screen h-[60vh] p-8 bg-primary"
+      className="flex flex-col md:flex-row items-center justify-center w-screen h-1000 p-8 bg-primary"
       style={{ scrollMarginTop: "6rem" }}
     >
-      <div className="font-poppins font-bold text-header1 text-white text-center">
-        Who are we?
+      {/* Left Side: Image */}
+      <div className="flex-shrink-0 w-[90%] md:w-1/3 max-w-sm bg-white rounded-lg overflow-hidden border-[5px] border-white md:mr-6">
+        <Image
+          src="https://res.cloudinary.com/dha44tosd/image/upload/v1732829630/Assets%20for%20website/IMG_7602_1_xih7px.jpg" // Replace with your Cloudinary URL
+          alt="KTP Members"
+          layout="responsive"
+          width={300}
+          height={300}
+          className="rounded-lg object-cover"
+        />
       </div>
-      <div className="relative w-full max-w-4xl h-[50vh] md:h-[60vh] lg:h-[70vh]">
-        <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className="text-white px-4 sm:px-6 md:px-12 lg:px-16 xl:px-20 max-w-[70%] font-poppins text-center leading-relaxed text-[10px] sm:text-sm md:text-base lg:text-lg xl:text-xl">
-            Welcome to Kappa Theta Pi Mu Chapter at UT Dallas! We&apos;re all
-            about fostering tech skills, creativity, and community. Join us for
-            workshops, activities, and vibrant social events to grow
-            professionally, make connections, and shape the future of tech.
-          </div>
-        </div>
+
+      {/* Right Side: Text */}
+      <div className="flex flex-col items-start text-left w-[90%] md:w-1/2 text-white">
+        <h2 className="font-poppins font-bold text-header1 mb-4">Who Are We?</h2>
+        <p className="text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed">
+          Welcome to Kappa Theta Pi Mu Chapter at UT Dallas! We&apos;re all
+          about fostering tech skills, creativity, and community. Join us for
+          workshops, activities, and vibrant social events to grow
+          professionally, make connections, and shape the future of tech.
+        </p>
       </div>
     </div>
   );

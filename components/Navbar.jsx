@@ -28,7 +28,7 @@ const Navbar = () => {
 
   return (
     <div className="fixed bg-[#ffffff] w-full z-50 h-24">
-      <div className="flex justify-between items-center h-24 max-w-[1200px] mx-auto px-4 text-[#000000]">
+      <div className="flex justify-between items-center h-24 max-w-[1200px] mx-auto px-4 text-black">
         {/* Logo on the left */}
         <div className="text-center">
           <Link href={navItems[0].path}>
@@ -39,7 +39,7 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Navigation - Right Aligned */}
-        <div className="hidden md:flex space-x-6">
+        <div className="hidden md:flex">
           {navItems.slice(1).map((item) => (
             <li
               key={item.id}

@@ -17,6 +17,7 @@
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "chart.js": "^4.4.3",
     "cloudinary": "^2.2.0",
+    "d3-array": "^3.2.4",
     "framer-motion": "^11.1.7",
     "object-hash": "^3.0.0",
     "react": "^18",
@@ -32,6 +33,7 @@
     "tailwind-scrollbar": "^3.1.0"
   },
   "devDependencies": {
+    "@types/d3-array": "^3.2.1",
     "@types/node": "20.11.30",
     "@types/react": "18.2.73",
     "autoprefixer": "^10.0.1",
