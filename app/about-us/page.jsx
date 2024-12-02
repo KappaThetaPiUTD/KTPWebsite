@@ -42,16 +42,18 @@ const AboutUs = () => {
           <Quote />
         </div>
 
-        {/* Letter Section */}
-        <div className="px-10 pb-10 bg-primary">
-          <div className="text-center text-white text-4xl lg:text-header1 font-bold font-poppins pt-10 mb-8">
+        <div className="px-6 sm:px-10 pb-10 bg-primary">
+          <div className="text-center text-white text-3xl sm:text-4xl lg:text-header1 font-bold font-poppins pt-10 mb-8">
             Letter From The President
           </div>
-          <div className="flex-row px-10 hidden lg:flex">
-            <Portrait />
+          <div className="flex flex-col lg:flex-row gap-6 px-4 sm:px-10">
+            <div className="flex justify-center lg:justify-start">
+              <Portrait />
+            </div>
             <Letter />
           </div>
         </div>
+
 
         {/* Pie Chart Section */}
         <div className="flex flex-row justify-center pt-10 pb-24">

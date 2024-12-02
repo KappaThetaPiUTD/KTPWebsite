@@ -15,8 +15,8 @@ const Navbar = () => {
     setNav(false);
   };
 
+  // Navigation items (single "Home" item)
   const navItems = [
-    { id: 1, text: "Home", path: "/" },
     { id: 1, text: "HOME", path: "/" },
     { id: 2, text: "ABOUT", path: "/about-us" },
     { id: 3, text: "BROTHERS", path: "/brothers" },
@@ -31,7 +31,7 @@ const Navbar = () => {
       <div className="flex justify-between items-center h-24 max-w-[1200px] mx-auto px-4 text-black">
         {/* Logo on the left */}
         <div className="text-center">
-          <Link href={navItems[0].path}>
+          <Link href="/">
             <h1 className="text-5xl text-primary text-[#9B1E2E] cursor-pointer">
               𝚱𝚯𝚷
             </h1>
@@ -40,7 +40,7 @@ const Navbar = () => {
 
         {/* Desktop Navigation - Right Aligned */}
         <div className="hidden md:flex">
-          {navItems.slice(1).map((item) => (
+          {navItems.map((item) => (
             <li
               key={item.id}
               className="list-none relative p-4 cursor-pointer group"
@@ -69,7 +69,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation Menu */}
         <ul
-          className={`absolute md:hidden h-screen w-full top-24 bottom-0 right-0 ease-in-out transition-transform transform duration-700 bg-[#0F0F0F] z-50 ${
+          className={`absolute md:hidden h-screen w-full top-24 bottom-0 right-0 ease-in-out transition-transform transform duration-700 bg-[#FFFFFF] z-50 ${
             nav ? "translate-x-0" : "translate-x-full"
           }`}
         >
