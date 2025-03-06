@@ -10,7 +10,7 @@ const dataAcademicYear = {
   datasets: [
     {
       label: " Students",
-      data: [3, 17, 20, 6],
+      data: [1, 8, 19, 8],
       backgroundColor: [
         "#7FB3D5", // Soft Blue
         "#9ED29E", // Gentle Green
@@ -37,11 +37,12 @@ const dataMajors = {
     "Software Engineering",
     "Biology",
     "Computer Information System and Technology",
+    "Marketing"
   ],
   datasets: [
     {
       label: " Students",
-      data: [9, 27, 2, 3, 2, 2, 1, 1],
+      data: [5, 22, 1, 2, 1, 1, 1, 2, 1],
       backgroundColor: [
         "#BAA6D2", // Lavender
         "#FAC8B4", // Peach
