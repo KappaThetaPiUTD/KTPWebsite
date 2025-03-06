@@ -139,7 +139,7 @@ const activeMembers = [
   },
   {
     name: "Vignesh Selvam",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741221585/IMG_4351_z0ensz.jpg",
     linkedin: "https://www.linkedin.com/in/vignesh-2004-selvam/",
   },
   {
