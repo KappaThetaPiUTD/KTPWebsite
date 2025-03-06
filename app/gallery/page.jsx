@@ -12,7 +12,11 @@ const Gallery = () => {
   const images = [
    // { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850376/Austin%20Trip/100_1531_yphg3y.jpg', alt: 'Image 1' },
    // { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850373/Austin%20Trip/100_1532_kyjzgm.jpg', alt: 'Image 2' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1720637478/Austin%20Trip/IMG_1585_tariq_exec_image.jpg', alt: 'Image 3' },
+   // { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1720637478/Austin%20Trip/IMG_1585_tariq_exec_image.jpg', alt: 'Image 3' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714854893/Austin%20Trip/leetcode_weekly_session_images_kqkd9s.jpg', alt: 'leetcode' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714854890/Austin%20Trip/leetcode_tariq_teaching_ozyzaj.jpg', alt: 'tariq teaching' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/Austin%20Trip/first_chapter_meeting_e3yoyf.jpg', alt: 'new gen first chapter meeting' },
+
    // { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850372/Austin%20Trip/100_1536_zdnmmh.jpg', alt: 'Image 5' },
    // { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850372/Austin%20Trip/100_1537_ji9dto.jpg', alt: 'Image 4' },
    // { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850371/Austin%20Trip/100_1541_taziyw.jpg', alt: 'Image 6' },
@@ -23,9 +27,6 @@ const Gallery = () => {
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850366/Gallery/100_1549_hhphkv.jpg', alt: 'Image 12' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850366/Austin%20Trip/100_1555_zr1jtr.jpg', alt: 'Image 13' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714850362/Austin%20Trip/100_1560_ayi2vm.jpg', alt: 'Image 14' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714854893/Austin%20Trip/leetcode_weekly_session_images_kqkd9s.jpg', alt: 'leetcode' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714854890/Austin%20Trip/leetcode_tariq_teaching_ozyzaj.jpg', alt: 'tariq teaching' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/Austin%20Trip/first_chapter_meeting_e3yoyf.jpg', alt: 'new gen first chapter meeting' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/Austin%20Trip/social_legdri.jpg', alt: 'social valentines day 2024' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/Austin%20Trip/happy_ktp_hcb7r6.jpg', alt: 'happy ktp 2024' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1714855358/Austin%20Trip/valentines_day_uno_z3tgnz.jpg', alt: 'social valentines day 2024' },
@@ -38,8 +39,9 @@ const Gallery = () => {
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148663/Gallery/DSC07405_a112x3.jpg', alt: 'Broken Bow 6' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148663/Gallery/F14B0698-D79B-4CB8-9E21-C2B369FD96D1-11728-000001EA10514D98_o1zsvt.jpg', alt: 'Broken Bow 7' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148665/Gallery/IMG_2826_yoirgp.jpg', alt: 'Broken Bow 8' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148666/Gallery/IMG_2842_yfgdjw.jpg', alt: 'Broken Bow 9' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148686/Gallery/IMG_2850_dspjs8.jpg', alt: 'Broken Bow 10' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741203400/Gallery/IMG_5532_kjtadd_qx0gzi.jpg', alt: 'AWS Pres 4' },
+
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148687/Gallery/IMG_2851_bod1x9.jpg', alt: 'Broken Bow 11' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148688/Gallery/IMG_5220_vyju1x.jpg', alt: 'Truck Eating' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741203133/Gallery/IMG_5506_jwp21u_n0gsyy.jpg', alt: 'AWS Pres 1' },
