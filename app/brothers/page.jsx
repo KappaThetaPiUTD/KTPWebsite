@@ -27,7 +27,7 @@ const executiveBoardMembers = [
     linkedin: "https://www.linkedin.com/in/afsararif",
   },
   {
-    name: "Avani Melhotra",
+    name: "Avani Mehrotra",
     position: "VP of Engagement",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683156/AvaniHeadshot_sxhzel.png",
     linkedin: "https://www.linkedin.com/in/avani-mehrotra/",
