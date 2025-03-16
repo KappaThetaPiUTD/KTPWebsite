@@ -99,7 +99,7 @@ const activeMembers = [
   },
   {
     name: "Kairavi Pandya",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683117/image_15_pgpji4.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741828016/Kairavi_Pandya_Headshot_sgl4z0.jpg",
     linkedin: "https://www.linkedin.com/in/kairavi-pandya",
   },
   {
@@ -159,7 +159,7 @@ const activeMembers = [
   },
   {
     name: "Nivedh Koya",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741827747/image_5_1_mhdqxz.png",
     linkedin: "https://www.linkedin.com/nivedh-koya",
   },
   {
@@ -255,7 +255,8 @@ const gammaClassMembers = [
   "Noel Emmanuel",
   "Shreyas Ankolekar",
   "Vadhanna Venkatakrishnan",
-  "Vignesh Selvam"
+  "Vignesh Selvam",
+  "Venkat Sai Eshwar Varma Sagi"
 ].sort((a, b) => a.localeCompare(b));
 
 const splitIntoColumns = (arr, columns) => {
@@ -405,7 +406,7 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Gamma Class
       </div>
-      <div className="flex justify-center mt-4">
+      <div className="flex justify-center mt-4 mb-20">
         {gammaColumns.map((column, index) => (
           <div key={index} className="mx-4">
             {column.map((member, idx) => (
