@@ -110,11 +110,11 @@ const CompanyCollage = () => {
       alt: "constilation software",
     },
     {
-      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741210684/Brother%20Page/Companies/hiltontrans_xcmu3c.jpg",
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1742586864/Brother%20Page/Companies/Hilton_Worldwide_logo_n6hgix.webp",
       alt: "Hilton",
     },
     {
-      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741211034/Brother%20Page/Companies/signet.jpg",
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1742586929/Brother%20Page/Companies/Signet_Jewelers_logo_zfjo2q.png",
       alt: "Signet Jewlers",
     },
     {
@@ -126,7 +126,7 @@ const CompanyCollage = () => {
       alt: "DXC",
     },
     {
-      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741212540/Brother%20Page/Companies/peasron%20vue.png",
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1742586688/Brother%20Page/Companies/cb88d061e53db078620db3af24a5b7e7e87a0047_idrbm3.png",
       alt: "Pearson VUE",
     },
     {
@@ -150,7 +150,7 @@ const CompanyCollage = () => {
       alt: "TechMint",
     },
     {
-      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741213542/Brother%20Page/Companies/png-clipart-paycom-logo-tech-companies_ht1rf5.png",
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1742586766/Brother%20Page/Companies/PAYCOM_Logo_FullColor_rjguna.png",
       alt: "Paycom",
     },
     {
