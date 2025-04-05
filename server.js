@@ -14,9 +14,28 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Middleware
 app.use(bodyParser.json());
 
-// --- API Endpoints ---
+// New Member Application Submission Endpoint
+app.post("/api/applications", async (req, res) => {
+  const { name, email, phone, major, graduation_year } = req.body;
 
-// 1. QR Code Check-In Endpoint (Insert into attendance)
+  // Validate required fields
+  if (!name || !email) {
+    return res.status(400).json({ error: "Name and email are required" });
+  }
+
+  // Insert the application data into the 'applications' table
+  const { data, error } = await supabase
+    .from("applications")
+    .insert([{ name, email, phone, major, graduation_year }]);
+
+  if (error) {
+    return res.status(400).json({ error: error.message });
+  }
+
+  res.json({ message: "Application submitted successfully", data });
+});
+
+// QR Code Check-In Endpoint (Insert into attendance)
 app.post("/api/checkin", async (req, res) => {
   const { user_id, event_id, status } = req.body;
 
@@ -29,7 +48,7 @@ app.post("/api/checkin", async (req, res) => {
   res.json({ message: "Checked in successfully.", data });
 });
 
-// 2. Attendance Tracking Endpoint (Retrieve attendance records)
+// Attendance Tracking Endpoint (Retrieve attendance records)
 app.get("/api/attendance", async (req, res) => {
   const { event_id } = req.query;
   const { data, error } = await supabase
@@ -40,8 +59,22 @@ app.get("/api/attendance", async (req, res) => {
   if (error) return res.status(400).json({ error: error.message });
   res.json({ data });
 });
+// Attendance Update Endpoint (Update a specific attendance record)
+app.patch("/api/attendance/:id", async (req, res) => {
+  const { id } = req.params;
+  const { status, excused, admin_flag } = req.body;
 
-// 3. RSVP Endpoint (Insert RSVP record)
+  // Update the attendance record with new status, excused flag, and admin flag
+  const { data, error } = await supabase
+    .from("attendance")
+    .update({ status, excused, admin_flag })
+    .eq("id", id);
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.json({ message: "Attendance record updated.", data });
+});
+
+// RSVP Endpoint (Insert RSVP record)
 app.post("/api/rsvp", async (req, res) => {
   const { user_id, event_id, response } = req.body;
   const { data, error } = await supabase
@@ -51,6 +84,9 @@ app.post("/api/rsvp", async (req, res) => {
   if (error) return res.status(400).json({ error: error.message });
   res.json({ message: "RSVP submitted successfully.", data });
 });
+//QR CODE Update
+const qrCheckinRouter = require("./routes/qrCheckIn");
+app.use("/api/qr-checkin", qrCheckinRouter);
 
 // Start the server
 app.listen(port, () => {
