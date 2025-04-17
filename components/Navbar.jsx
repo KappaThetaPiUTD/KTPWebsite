@@ -24,6 +24,8 @@ const Navbar = () => {
     { id: 5, text: "BLOG", path: "/blog" },
     { id: 6, text: "GALLERY", path: "/gallery" },
     { id: 7, text: "CONTACT", path: "/contact-us" },
+    { id: 8, text: "DASHBOARD", path: "/dashboard" },
+    { id: 9, text: "SIGN IN", path: "/sign-in" },
   ];
 
   return (

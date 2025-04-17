@@ -21,6 +21,7 @@
     "d3-array": "^3.2.4",
     "express": "^4.21.2",
     "framer-motion": "^11.1.7",
+    "next-auth": "^4.24.11",
     "jsonwebtoken": "^9.0.2",
     "object-hash": "^3.0.0",
     "react-chartjs-2": "^5.2.0",
