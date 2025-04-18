@@ -6,12 +6,27 @@ const supabase = createClient(
 );
 
 export async function GET() {
-  const { data, error } = await supabase
+
+  const { searchParams } = new URL(req.url)
+  const tag = searchParams.get("tag");
+  const category = searchParams.get("category");
+
+  let query = supabase
     .from("blog_posts")
     .select("*")
     .eq("approved", true)
     .order("created_at", { ascending: false });
 
+    if(tag){
+      query = query.ilike("tags", '%${tag}%');
+    }
+
+    if(category){
+      query = query.eq("category", category);
+    }
+
+  const {data, error } = await query;
+  
   const cleanedData = (data || []).map(post => ({
     ...post,
     slug: post.slug || post.id,
@@ -49,11 +64,24 @@ export async function POST(req) {
   );
 }
 export async function PUT(req) {
-  const { postID } = await req.json();
+  const { postID, userID } = await req.json();
 
-  const { data, error } = await supabase
+  const { data: userData, error: userError } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", userID)
+    .single();
+
+  if (userError || !userData || userData.role !== "exec"){
+    return new Response(
+      JSON.stringify({ error: "Unauthorized: Execs only"}),
+      { status: 403 }
+    );
+  }
+
+  const {data, error} = await supabase
     .from("blog_posts")
-    .update({ approved: true })
+    .update({approved: true, approved_by: userID})
     .eq("id", postID);
 
   return new Response(
@@ -61,3 +89,15 @@ export async function PUT(req) {
     { status: error ? 500 : 200 }
   );
 }
+
+export async function PATCH(req) {
+  const { postID } = await req.json();
+
+  const { data, error } = await supabase.rpc("increment_likes", { postid: postID });
+
+  return new Response(
+    JSON.stringify(error ? { error: error.message } : data),
+    { status: error ? 500 : 200 }
+  );
+}
+
