@@ -95,6 +95,30 @@ export default function BlogPostPage({ params }) {
     }));
   };
 
+  const BlogPage = ({ posts }) => {
+    return (
+      <div className="blog-list">
+        {posts.map((post) => (
+          <div key={post.id} className="blog-post">
+            <h2>{post.title}</h2>
+            <p>{post.excerpt}</p>
+            {/* Make sure this part is green */}
+          {/* Post Content */}
+          {/* Post Content */}
+          <div className="prose max-w-none text-justify text-green-600">
+            {post.content.split('\n').map((paragraph, i) => (
+              <p key={i} className="mb-6 text-lg leading-relaxed !text-inherit">
+                {paragraph.trim()}
+              </p>
+            ))}
+          </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+  
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation Bar */}

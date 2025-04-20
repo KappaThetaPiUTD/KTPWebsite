@@ -87,6 +87,7 @@ export default function BlogPage() {
       : a.publishedDate - b.publishedDate;
   });
 
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-start pt-16 px-4 md:px-8">
       <div className="flex flex-col items-center space-y-2 mb-6">
@@ -139,8 +140,7 @@ export default function BlogPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 md:px-8 w-full">
         {sortedPosts.map((post) => (
           <Link href={`/blog/${post.slug}`} key={post.id} className="group">
-            <div className="bg-white shadow-lg p-6 rounded-xl transition-all duration-300 hover:shadow-xl border border-gray-200 h-full flex flex-col">
-              <div className="text-primary font-semibold mb-2 text-sm">
+              <div className="bg-white shadow-lg p-6 rounded-xl transition-all duration-300 hover:shadow-xl border border-gray-200 h-full flex flex-col hover:bg-green-50 hover:-translate-y-1 hover:border-primary">              <div className="text-primary font-semibold mb-2 text-sm">
                 Published: {post.publishedDate.toLocaleDateString('en-US', { 
                   year: 'numeric', 
                   month: 'short', 
@@ -151,7 +151,7 @@ export default function BlogPage() {
               <h3 className="text-primary font-bold text-xl mb-2 group-hover:text-primary-dark">
                 {post.title}
               </h3>
-              <p className="text-gray-600 mb-4 flex-grow">{post.content}</p>
+              <p className="text-green-800 mb-4 flex-grow">{post.content}</p>
               <div className="flex flex-wrap gap-2 mt-auto">
                 <span className={`px-3 py-1 rounded-md text-sm font-medium shadow-sm ${
                   post.category === "alumni" ? "bg-purple-200 text-purple-800" : "bg-green-200 text-primary"
