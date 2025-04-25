@@ -10,8 +10,10 @@ export async function GET() {
   const { data, error } = await supabase
     .from("blog_posts")
     .select("*")
-    .eq("approved", true)
+    .eq("is_approved", true)
     .order("created_at", { ascending: false });
+    console.log("Fetched from Supabase:", data, error);
+
 
   return new Response(
     JSON.stringify(error ? { error: error.message } : data),
@@ -34,7 +36,7 @@ export async function POST(request) {
       slug,
       category,
       readTime,
-      approved: false,
+      is_approved: false,
     }]);
 
   return new Response(
@@ -50,7 +52,7 @@ export async function PUT(request) {
 
   const { data, error } = await supabase
     .from("blog_posts")
-    .update({ approved: true })
+    .update({ is_approved: true })
     .eq("id", postID);
 
   return new Response(
@@ -58,3 +60,5 @@ export async function PUT(request) {
     { status: error ? 500 : 200 }
   );
 }
+
+

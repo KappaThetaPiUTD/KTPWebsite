@@ -8,10 +8,13 @@ export const supabase = createClient(supabaseURL, supabaseAnonKey);
 
 export const fetchPosts = async () => {
     const { data, error } = await supabase
-    .from("blog-posts")
+    .from("blog_posts")
     .select("*")
+    .eq("is_approved", true)
     .order("created_at", { ascending: false });
 
+    console.log("SUPABASE FETCH DATA:", data);
+    
     if(error){
         console.error("Error fetching posts:", error);
         return[];
@@ -23,7 +26,7 @@ export const fetchPosts = async () => {
 export const addPost = async(title, content, author) => {
     const { data, error } = await supabase
     .from("blog_posts")
-    .insert([{ title, content, author, approved: false }]);
+    .insert([{ title, content, author, is_approved: false }]);
 
     if(error){
         console.error("Error adding post:", error);
@@ -36,7 +39,7 @@ export const addPost = async(title, content, author) => {
 export const approvePost = async (postID) => {
     const { data, error } = await supabase
         .from("blog_posts")
-        .update({ approved: true })
+        .update({is_approved: true })
         .eq("id", postID);
 
         if(error){
