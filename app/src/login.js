@@ -1,4 +1,4 @@
-import { supabase } from "../supabase";
+import { supabase } from "../../lib/supabase";
 
 const Login = () => {
     const handleGoogleLogin = async () => {
@@ -16,7 +16,7 @@ const Login = () => {
 
 export default Login;
 
-import { supabase } from "../supabase";
+import { supabase } from "../../lib/supabase";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
