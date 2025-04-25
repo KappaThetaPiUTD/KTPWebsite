@@ -32,6 +32,7 @@ export default function BlogPage() {
       : dateA - dateB;
   });
 
+
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-start pt-16 px-4 md:px-8">
       <div className="flex flex-col items-center space-y-2 mb-6">
@@ -84,7 +85,7 @@ export default function BlogPage() {
               <h3 className="text-primary font-bold text-xl mb-2 group-hover:text-primary-dark">
                 {post.title}
               </h3>
-              <p className="text-gray-600 mb-4 flex-grow">{post.content}</p>
+              <p className="text-green-800 mb-4 flex-grow">{post.content}</p>
               <div className="flex flex-wrap gap-2 mt-auto">
                 <span className={`px-3 py-1 rounded-md text-sm font-medium shadow-sm ${
                   post.category === "alumni" ? "bg-purple-200 text-purple-800" : "bg-green-200 text-primary"
