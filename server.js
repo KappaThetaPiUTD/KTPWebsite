@@ -1,3 +1,5 @@
+// server.js
+
 const express = require("express");
 const { createClient } = require("@supabase/supabase-js");
 const bodyParser = require("body-parser");
@@ -14,6 +16,22 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Middleware
 app.use(bodyParser.json());
 
+//applications
+const applicationsRouter = require("./routes/applications");
+app.use("/api/applications", applicationsRouter);
+
+//QR
+const qrCheckinRouter = require("./routes/qrCheckIn");
+app.use("/api/qr-checkin", qrCheckinRouter);
+
+//attendance
+const attendanceRouter = require("./routes/attendance");
+app.use("/api/attendance", attendanceRouter);
+
+//rsvp
+const rsvpRouter = require("./routes/rsvp");
+app.use("/api/rsvp", rsvpRouter);
+=======
 // --- API Endpoints ---
 
 // 1. QR Code Check-In Endpoint (Insert into attendance)
