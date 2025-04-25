@@ -9,13 +9,12 @@ export default function BlogPage() {
   const [filter, setFilter] = useState("all");
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      const res = await fetch("/api/blog");
-      const data = await res.json();
-      console.log("Posts from API:", data);
-      setPosts(data || []);
-    };
-
+      const fetchPosts = async () => {
+        const res = await fetch("/api/blog");
+        const data = await res.json();
+        console.log("Fetched:", data);
+        setPosts(data || []);
+      };
     fetchPosts();
   }, []);
 
