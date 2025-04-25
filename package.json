@@ -47,5 +47,10 @@
     "react-dom": "^18.3.1",
     "tailwindcss": "^3.4.13",
     "typescript": "5.4.5"
-  }
+  },
+  "description": "First, install all necessary dependencies:",
+  "main": "next.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
