@@ -14,11 +14,15 @@
     "@nextui-org/react": "^2.2.10",
     "@nextui-org/system": "^2.0.15",
     "@nextui-org/theme": "^2.1.18",
+    "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "chart.js": "^4.4.3",
     "cloudinary": "^2.2.0",
     "d3-array": "^3.2.4",
+    "express": "^4.21.2",
     "framer-motion": "^11.1.7",
+    "nodemailer": "^6.10.1",
+    "jsonwebtoken": "^9.0.2",
     "next-auth": "^4.24.11",
     "object-hash": "^3.0.0",
     "react-chartjs-2": "^5.2.0",
@@ -44,5 +48,10 @@
     "react-dom": "^18.3.1",
     "tailwindcss": "^3.4.13",
     "typescript": "5.4.5"
-  }
+  },
+  "description": "First, install all necessary dependencies:",
+  "main": "next.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
