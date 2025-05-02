@@ -1,23 +1,36 @@
-
 "use client";
-import { supabase } from "../lib/supabase";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
+import { supabase } from "../lib/supabase";
 
 const Navbar = () => {
   const [nav, setNav] = useState(false);
   const [isHovered, setIsHovered] = useState(null);
+  const [user, setUser] = useState(null);
+  const router = useRouter();
 
-  const handleNav = () => {
-    setNav(!nav);
+  const handleNav = () => setNav(!nav);
+  const closeNav = () => setNav(false);
+
+  // Load user from Supabase
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    fetchUser();
+  }, []);
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      setUser(null);
+      router.push("/sign-in");
+    }
   };
 
-  const closeNav = () => {
-    setNav(false);
-  };
-
-  // Navigation items (single "Home" item)
   const navItems = [
     { id: 1, text: "HOME", path: "/" },
     { id: 2, text: "ABOUT", path: "/about-us" },
@@ -27,22 +40,20 @@ const Navbar = () => {
     { id: 6, text: "GALLERY", path: "/gallery" },
     { id: 7, text: "CONTACT", path: "/contact-us" },
     { id: 8, text: "DASHBOARD", path: "/dashboard" },
-    { id: 9, text: "SIGN IN", path: "/sign-in" },
   ];
 
   return (
     <div className="fixed bg-[#ffffff] w-full z-50 h-24">
       <div className="flex justify-between items-center h-24 max-w-[1200px] mx-auto px-4 text-black">
-        {/* Logo on the left */}
+
+        {/* Logo */}
         <div className="text-center">
           <Link href="/">
-            <h1 className="text-5xl text-primary text-[#9B1E2E] cursor-pointer">
-              𝚱𝚯𝚷
-            </h1>
+            <h1 className="text-5xl text-primary text-[#9B1E2E] cursor-pointer">𝚱𝚯𝚷</h1>
           </Link>
         </div>
 
-        {/* Desktop Navigation - Right Aligned */}
+        {/* Desktop Nav */}
         <div className="hidden md:flex">
           {navItems.map((item) => (
             <li
@@ -51,18 +62,27 @@ const Navbar = () => {
               onMouseEnter={() => setIsHovered(item.id)}
               onMouseLeave={() => setIsHovered(null)}
             >
-              <Link href={item.path}>
-                {item.text}
-              </Link>
+              <Link href={item.path}>{item.text}</Link>
               <div
                 className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center`}
                 style={{ width: isHovered === item.id ? "100%" : "0" }}
               />
             </li>
           ))}
+
+          {/* Auth-aware link */}
+          {!user ? (
+            <li className="list-none relative p-4 cursor-pointer group">
+              <Link href="/sign-in">SIGN IN</Link>
+            </li>
+          ) : (
+            <li className="list-none relative p-4 cursor-pointer group">
+              <button onClick={handleLogout} className="text-black hover:text-red-600 transition">LOGOUT</button>
+            </li>
+          )}
         </div>
 
-        {/* Mobile Navigation Icon */}
+        {/* Mobile Menu Toggle */}
         <div onClick={handleNav} className="md:hidden z-50">
           {nav ? (
             <AiOutlineClose size={20} className="text-[#000000]" />
@@ -71,19 +91,30 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* Mobile Navigation Menu */}
+        {/* Mobile Nav */}
         <ul
           className={`absolute md:hidden h-screen w-full top-24 bottom-0 right-0 ease-in-out transition-transform transform duration-700 bg-[#FFFFFF] z-50 ${
             nav ? "translate-x-0" : "translate-x-full"
           }`}
         >
           {navItems.map((item) => (
-            <li key={item.id} className="p-4 text-center text-white">
+            <li key={item.id} className="p-4 text-center text-black">
               <Link href={item.path} onClick={closeNav}>
                 {item.text}
               </Link>
             </li>
           ))}
+
+          {/* Auth-aware mobile */}
+          {!user ? (
+            <li className="p-4 text-center text-black">
+              <Link href="/sign-in" onClick={closeNav}>SIGN IN</Link>
+            </li>
+          ) : (
+            <li className="p-4 text-center text-black">
+              <button onClick={() => { handleLogout(); closeNav(); }}>LOGOUT</button>
+            </li>
+          )}
         </ul>
       </div>
     </div>
