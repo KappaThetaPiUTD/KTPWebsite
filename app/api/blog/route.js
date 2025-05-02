@@ -34,7 +34,7 @@ export async function POST(request) {
       author,
       tags,
       slug,
-      category,
+      category: category?.toLowerCase().trim(), // normalize here
       readTime,
       is_approved: false,
     }]);
@@ -44,6 +44,7 @@ export async function POST(request) {
     { status: error ? 500 : 201 }
   );
 }
+
 
 // PUT: approve a blog post
 export async function PUT(request) {
@@ -59,6 +60,7 @@ export async function PUT(request) {
     JSON.stringify(error ? { error: error.message } : data),
     { status: error ? 500 : 200 }
   );
+  
 }
 
 

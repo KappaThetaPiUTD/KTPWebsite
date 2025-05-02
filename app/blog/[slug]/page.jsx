@@ -47,6 +47,7 @@ const allBlogPosts = [
     tags: ["UI/UX", "Design", "Tutorial"],
     readTime: "15 min read",
     content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    publishedDate: new Date("2024-12-20"),
     likes: 5
   },
   {
@@ -142,16 +143,25 @@ export default function BlogPostPage({ params }) {
           <div className="w-full h-96 bg-gray-200 mb-6 rounded-lg"></div>
           
           {/* Tags */}
+          // Replace the existing tags section with this:
           <div className="flex flex-wrap gap-2 mb-4">
-            {post.tags.map((tag, index) => (
-              <span 
-                key={index} 
-                className="bg-green-200 text-primary px-3 py-1 rounded-md text-sm font-medium shadow-sm"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+  {/* Category Badge */}
+  <span className={`px-3 py-1 rounded-md text-sm font-medium shadow-sm ${
+    post.category === "alumni" ? "bg-purple-200 text-purple-800" : "bg-green-200 text-green-800"
+  }`}>
+    {post.category === "alumni" ? "Alumni" : "Brothers"}
+  </span>
+
+  {/* All Tags */}
+  {post.tags?.map((tag, index) => (
+    <span 
+      key={index} 
+      className="bg-blue-200 text-blue-800 px-3 py-1 rounded-md text-sm font-medium shadow-sm mr-2 mb-2"
+    >
+      {tag}
+    </span>
+  ))}
+</div>
 
           {/* Post Metadata */}
           <div className="flex items-center gap-6 mb-6">

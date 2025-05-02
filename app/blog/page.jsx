@@ -18,10 +18,12 @@ export default function BlogPage() {
     fetchPosts();
   }, []);
 
-  const filteredPosts = posts.filter(post => {
-    if (filter === "all") return true;
-    return post.category === filter;
-  });
+  // In your filteredPosts calculation, change to:
+const filteredPosts = posts.filter(post => {
+  if (filter === "all") return true;
+  return post.category?.trim().toLowerCase() === filter.toLowerCase();
+});
+  
 
   const sortedPosts = [...filteredPosts].sort((a, b) => {
     const dateA = new Date(a.created_at);
@@ -34,7 +36,7 @@ export default function BlogPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-start pt-16 px-4 md:px-8">
-      <div className="flex flex-col items-center space-y-2 mb-6">
+      <div className="flex flex-col items-center space-y-2 mb-6 pt-8">
         <div className="text-primary text-[28px] md:text-[36px] font-bold font-poppins text-center">
           Blog
         </div>
@@ -70,32 +72,54 @@ export default function BlogPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 md:px-8 w-full">
-        {sortedPosts.map((post) => (
-          <Link href={`/blog/${post.slug || post.id}`} key={post.id} className="group">
-            <div className="bg-white shadow-lg p-6 rounded-xl transition-all duration-300 hover:shadow-xl border border-gray-200 h-full flex flex-col">
-              <div className="text-primary font-semibold mb-2 text-sm">
-                Published: {new Date(post.created_at).toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'short', 
-                  day: 'numeric' 
-                })} • {post.readTime || "?"}
-              </div>
-              <div className="w-full h-48 bg-gray-200 rounded-lg mb-4"></div>
-              <h3 className="text-primary font-bold text-xl mb-2 group-hover:text-primary-dark">
-                {post.title}
-              </h3>
-              <p className="text-green-800 mb-4 flex-grow">{post.content}</p>
-              <div className="flex flex-wrap gap-2 mt-auto">
-                <span className={`px-3 py-1 rounded-md text-sm font-medium shadow-sm ${
-                  post.category === "alumni" ? "bg-purple-200 text-purple-800" : "bg-green-200 text-primary"
-                }`}>
-                  {post.category === "alumni" ? "Alumni" : "Brothers"}
-                </span>
-              </div>
-            </div>
-          </Link>
-        ))}
+  {sortedPosts.map((post) => (
+    <Link href={`/blog/${post.slug || post.id}`} key={post.id} className="group">
+      <div className="bg-white shadow-lg p-6 rounded-xl transition-all duration-300 hover:shadow-xl border-2 border-green-50 hover:border-green-100 h-full flex flex-col hover:-translate-y-1">
+      <div className="text-green-800 font-medium mb-2 text-sm">
+  Published: {new Date(post.created_at).toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  })} • {post.readTime?.endsWith('read') ? post.readTime : `${post.readTime || "?"} read`}
+</div>
+        <div className="w-full h-48 bg-green-50 rounded-lg mb-4 overflow-hidden">
+          <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 opacity-80 group-hover:opacity-100 transition-opacity" />
+        </div>
+        
+        <h3 className="text-green-900 font-bold text-xl mb-2 group-hover:text-green-800 transition-colors">
+          {post.title}
+        </h3>
+        
+        <p className="text-green-700 mb-4 flex-grow font-light leading-relaxed">
+          {post.content.substring(0, 100)}...
+          <span className="ml-2 text-green-500 font-medium group-hover:text-green-800 transition-colors">
+            Read more →
+          </span>
+        </p>
+
+        {/* Tags Section */}
+        <div className="flex flex-wrap gap-2 mt-auto">
+  {/* Category Badge */}
+  <span className={`px-3 py-1 rounded-md text-sm font-medium shadow-sm ${
+    post.category === "alumni" ? "bg-purple-200 text-purple-800" : "bg-green-300 text-green-800"
+  }`}>
+    {post.category === "alumni" ? "Alumni" : "Brothers"}
+  </span>
+
+  {/* Tags */}
+{(Array.isArray(post.tags) ? post.tags : (typeof post.tags === 'string' ? post.tags.split(',') : [])).map((tag, index) => (
+  <span 
+    key={index} 
+    className="bg-blue-200 text-blue-800 px-4 py-1.5 rounded-md text-sm font-medium shadow-sm min-w-[80px] inline-flex items-center justify-center whitespace-nowrap"
+  >
+    {tag.trim()}
+  </span>
+))}
+</div>
       </div>
+    </Link>
+  ))}
+</div>
     </div>
   );
 }
