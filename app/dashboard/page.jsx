@@ -1,21 +1,66 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '../../lib/supabase';
 import { FaEnvelope, FaLinkedin, FaInstagram } from 'react-icons/fa';
 import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
 
+
 export default function Dashboard() {
+  const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // 👈 track loading state
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) router.push('/sign-in');
+    else console.error("Logout failed:", error.message);
+  };
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data?.user) {
+        router.push('/sign-in');
+      } else {
+        setUser(data.user);
+      }
+      setLoading(false); // ✅ mark done loading
+    };
+    checkUser();
+  }, []);
   return (
+    
     <div className="min-h-screen bg-white px-8 py-6 font-['Public_Sans']">
       {/* Navbar */}
       <header className="flex justify-between items-center pb-6">
-        <h1 className="text-3xl font-bold text-[#1E3D2F]">ΚΘΠ</h1>
-        <nav className="flex space-x-6 text-black font-medium">
-          <a href="#" className="hover:text-gray-500">HOME</a>
-          <a href="#" className="hover:text-gray-500">ABOUT</a>
-          <a href="#" className="hover:text-gray-500">RECRUITMENT</a>
-          <a href="#" className="hover:text-gray-500">BLOG</a>
-          <a href="#" className="hover:text-gray-500">CONTACT</a>
-        </nav>
-      </header>
+  <h1 className="text-3xl font-bold text-[#1E3D2F]">ΚΘΠ</h1>
+  <nav className="flex space-x-6 text-black font-medium items-center">
+  <a href="#" className="hover:text-gray-500">HOME</a>
+  <a href="#" className="hover:text-gray-500">ABOUT</a>
+  <a href="#" className="hover:text-gray-500">BROTHERS</a>
+  <a href="#" className="hover:text-gray-500">RECRUITMENT</a>
+  <a href="#" className="hover:text-gray-500">BLOG</a>
+  <a href="#" className="hover:text-gray-500">GALLERY</a>
+  <a href="#" className="hover:text-gray-500">CONTACT</a>
+  <a href="#" className="hover:text-gray-500">DASHBOARD</a>
+
+  {!loading && (
+    !user ? (
+      <a href="/sign-in" className="hover:text-gray-500">SIGN IN</a>
+    ) : (
+      <button
+        onClick={handleLogout}
+        className="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition text-sm"
+      >
+        Logout
+      </button>
+    )
+  )}
+</nav>
+</header>
+
 
       {/* Main Dashboard */}
       <div className="grid grid-cols-3 gap-6">
