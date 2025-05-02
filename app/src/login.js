@@ -1,17 +1,17 @@
-import { supabase } from "../lib/supabase"; // Choose the correct import path
+import { supabase } from "../../lib/supabase";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
     const navigate = useNavigate();
 
-    const handleGoogleLogin = async () => {
+    const handleLogin = async (provider) => {
         const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
+            provider,
         });
 
         if (error) {
-            console.error("Login failed:", error.message);
+            console.error(`Login with ${provider} failed:`, error.message);
         }
     };
 
@@ -24,7 +24,12 @@ const Login = () => {
         checkUser();
     }, [navigate]);
 
-    return <button onClick={handleGoogleLogin}>Login with Google</button>;
+    return (
+        <div>
+            <button onClick={() => handleLogin("google")}>Login with Google</button>
+            <button onClick={() => handleLogin("discord")}>Login with Discord</button>
+        </div>
+    );
 };
 
 export default Login;
