@@ -1,12 +1,9 @@
 
 "use client";
+import { supabase } from "../lib/supabase";
 import React, { useState } from "react";
 import Link from "next/link";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
-import { supabase } from "../lib/supabase"; // adjust path if needed
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-
 
 const Navbar = () => {
   const [nav, setNav] = useState(false);
