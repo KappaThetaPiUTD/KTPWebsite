@@ -1,7 +1,7 @@
 const Mu = () => {
     return (
         <div className="text-center pl-10 pr-10">
-            <div className="text-secondary text-header1 font-bold font-georgia">
+            <div className="text-primary text-header1 font-bold font-georgia">
                 Mu Chapter
             </div>
             <div className="text-gray text-paragraph font-georgia text-center">
