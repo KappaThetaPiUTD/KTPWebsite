@@ -17,7 +17,7 @@ const Majors = () => {
 
   return (
     <div className="flex flex-col text-center pl-10 pr-10">
-      <div className="text-secondary text-header4 font-bold font-georgia">
+      <div className="text-primary text-header4 font-bold font-georgia">
         Majors
         <MajorChart data={majors} colors={colors}/>
         {/* <ul className="text-gray text-paragraph font-georgia text-center">
