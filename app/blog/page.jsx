@@ -82,9 +82,18 @@ export default function BlogPage() {
                 })} • {post.readTime?.endsWith('read') ? post.readTime : `${post.readTime || "?"} read`}
               </div>
 
-              <div className="w-full h-48 bg-green-50 rounded-lg mb-4 overflow-hidden">
-                <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 opacity-80 group-hover:opacity-100 transition-opacity" />
-              </div>
+              <div className="w-full h-48 rounded-lg mb-4 overflow-hidden bg-green-50">
+  {post.image ? (
+    <img
+      src={post.image}
+      alt={post.title}
+      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+    />
+  ) : (
+    <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 opacity-80 group-hover:opacity-100 transition-opacity" />
+  )}
+</div>
+
               
               <h3 className="text-green-900 font-bold text-xl mb-2 group-hover:text-green-800 transition-colors">
                 {post.title}

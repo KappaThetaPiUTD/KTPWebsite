@@ -59,7 +59,18 @@ export default function BlogPostPage() {
         {/* Left Side */}
         <div className="w-full lg:w-4/5 pr-8">
           <h1 className="text-3xl font-bold text-primary mb-8">Blog</h1>
-          <div className="w-full h-96 bg-gray-200 mb-6 rounded-lg"></div>
+          <div className="w-full h-96 rounded-lg mb-6 overflow-hidden bg-gray-200">
+  {post.image ? (
+    <img
+      src={post.image}
+      alt={post.title}
+      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+    />
+  ) : (
+    <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 opacity-80" />
+  )}
+</div>
+
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-4">
