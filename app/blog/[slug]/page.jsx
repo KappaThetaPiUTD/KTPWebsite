@@ -1,128 +1,49 @@
 'use client';
 
-import React, { useState } from "react";
-import Link from "next/link";
-import { FaThumbsUp } from "react-icons/fa";
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import { FaThumbsUp } from 'react-icons/fa';
+import { createClient } from '@supabase/supabase-js';
 
-// Move your blog posts data here (same as in blog/page.jsx)
-const allBlogPosts = [
-  {
-    id: 1,
-    slug: "leadership-in-tech",
-    title: "Leadership in Tech",
-    author: "Kairavi Pandya",
-    tags: ["Leadership", "Design", "UI/UX", "Alumni"],
-    readTime: "12 min read",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    publishedDate: new Date("2025-01-22"),
-    likes: 5
-  },
-  {
-    id: 2,
-    slug: "design-thinking",
-    title: "Design Thinking Workshop",
-    author: "Kairavi Pandya",
-    tags: ["Design", "Workshop", "UI/UX"],
-    readTime: "8 min read",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    publishedDate: new Date("2025-01-15"),
-    likes: 3
-  },
-  {
-    id: 3,
-    slug: "alumni-spotlight",
-    title: "Alumni Spotlight",
-    author: "Kairavi Pandya",
-    tags: ["Alumni", "Interview", "Career"],
-    readTime: "10 min read",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    publishedDate: new Date("2025-01-10"),
-    likes: 5
-  },
-  {
-    id: 4,
-    slug: "ux-best-practices",
-    title: "UX Best Practices",
-    author: "Kairavi Pandya",
-    tags: ["UI/UX", "Design", "Tutorial"],
-    readTime: "15 min read",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    publishedDate: new Date("2024-12-20"),
-    likes: 5
-  },
-  {
-    id: 5,
-    slug: "tech-interview-prep",
-    title: "Tech Interview Prep",
-    author: "Kairavi Pandya",
-    tags: ["Career", "Interview", "Workshop"],
-    readTime: "14 min read",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    publishedDate: new Date("2024-12-20"),
-    likes: 8
-  },
-  {
-    id: 6,
-    slug: "spring-recruitment",
-    title: "Spring Recruitment",
-    author: "Kairavi Pandya",
-    tags: ["Recruitment", "Events", "Brothers"],
-    readTime: "6 min read",
-    content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    publishedDate: new Date("2024-12-15"),
-    likes: 3
-  }
-];
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
-export default function BlogPostPage({ params }) {
-  // Find the post that matches the current slug
-  const postData = allBlogPosts.find(post => post.slug === params.slug);
-  
-  if (!postData) {
-    return <div>Post not found</div>;
-  }
+export default function BlogPostPage() {
+  const params = useParams();
+  const slug = decodeURIComponent(params.slug);
+  const [post, setPost] = useState(null);
+  const [isLiked, setIsLiked] = useState(false);
 
-  // Initialize state with the found post data
-  const [post, setPost] = useState({
-    ...postData,
-    isLiked: false
-  });
+  useEffect(() => {
+    const fetchPost = async () => {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (!error && data) setPost(data);
+    };
+    fetchPost();
+  }, [slug]);
 
   const handleLike = () => {
-    setPost(prevPost => ({
-      ...prevPost,
-      likes: prevPost.isLiked ? prevPost.likes - 1 : prevPost.likes + 1,
-      isLiked: !prevPost.isLiked
+    if (!post) return;
+    setPost(prev => ({
+      ...prev,
+      likes: isLiked ? prev.likes - 1 : prev.likes + 1
     }));
+    setIsLiked(prev => !prev);
   };
 
-  const BlogPage = ({ posts }) => {
-    return (
-      <div className="blog-list">
-        {posts.map((post) => (
-          <div key={post.id} className="blog-post">
-            <h2>{post.title}</h2>
-            <p>{post.excerpt}</p>
-            {/* Make sure this part is green */}
-          {/* Post Content */}
-          {/* Post Content */}
-          <div className="prose max-w-none text-justify text-green-600">
-            {post.content.split('\n').map((paragraph, i) => (
-              <p key={i} className="mb-6 text-lg leading-relaxed !text-inherit">
-                {paragraph.trim()}
-              </p>
-            ))}
-          </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-  
+  if (!post) return <div className="p-10 text-red-600">Post not found</div>;
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation Bar */}
+      {/* Navbar */}
       <nav className="flex justify-center items-center py-6 border-b border-gray-200">
         <div className="flex space-x-8 font-medium">
           <Link href="/" className="text-primary">HOME</Link>
@@ -135,94 +56,74 @@ export default function BlogPostPage({ params }) {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 py-12 flex">
-        {/* Left Content (80% width) */}
+        {/* Left Side */}
         <div className="w-full lg:w-4/5 pr-8">
           <h1 className="text-3xl font-bold text-primary mb-8">Blog</h1>
-          
-          {/* Image Block */}
           <div className="w-full h-96 bg-gray-200 mb-6 rounded-lg"></div>
-          
+
           {/* Tags */}
-          // Replace the existing tags section with this:
           <div className="flex flex-wrap gap-2 mb-4">
-  {/* Category Badge */}
-  <span className={`px-3 py-1 rounded-md text-sm font-medium shadow-sm ${
-    post.category === "alumni" ? "bg-purple-200 text-purple-800" : "bg-green-200 text-green-800"
-  }`}>
-    {post.category === "alumni" ? "Alumni" : "Brothers"}
-  </span>
+            <span className={`px-3 py-1 rounded-md text-sm font-medium shadow-sm ${
+              post.category === 'alumni' ? 'bg-purple-200 text-purple-800' : 'bg-green-200 text-green-800'
+            }`}>
+              {post.category === 'alumni' ? 'Alumni' : 'Brothers'}
+            </span>
+            {(Array.isArray(post.tags) ? post.tags : post.tags?.split(',')).map((tag, i) => (
+              <span key={i} className="bg-blue-200 text-blue-800 px-3 py-1 rounded-md text-sm font-medium shadow-sm">
+                {tag.trim()}
+              </span>
+            ))}
+          </div>
 
-  {/* All Tags */}
-  {post.tags?.map((tag, index) => (
-    <span 
-      key={index} 
-      className="bg-blue-200 text-blue-800 px-3 py-1 rounded-md text-sm font-medium shadow-sm mr-2 mb-2"
-    >
-      {tag}
-    </span>
-  ))}
-</div>
-
-          {/* Post Metadata */}
+          {/* Meta + Like */}
           <div className="flex items-center gap-6 mb-6">
-            <span className="text-sm text-primary font-medium">{post.readTime}</span>
-            <button 
+            <span className="text-sm text-primary font-medium">{post.readTime || '—'} </span>
+            <button
               onClick={handleLike}
-              className="flex items-center gap-1 text-sm text-primary font-medium hover:text-primary-dark transition-colors"
+              className="flex items-center gap-1 text-sm text-primary font-medium hover:text-primary-dark"
             >
-              <FaThumbsUp 
-                className={post.isLiked ? "text-blue-500" : "text-primary"} 
-                size={14} 
-              />
-              <span>Liked by {post.likes} people</span>
+              <FaThumbsUp className={isLiked ? 'text-blue-500' : 'text-primary'} size={14} />
+              <span>Liked by {post.likes || 0} people</span>
             </button>
           </div>
 
-          {/* Post Header */}
+          {/* Header */}
           <div className="mb-6">
             <h2 className="text-2xl font-semibold text-primary mb-4">
-              Published on: {post.publishedDate.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+              Published on: {new Date(post.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
               })}
             </h2>
             <h3 className="text-3xl font-bold text-primary">{post.title}</h3>
           </div>
 
-          {/* Post Content */}
+          {/* Content */}
           <div className="prose max-w-none text-primary text-justify">
-            {post.content.split('\n').map((paragraph, i) => (
-              <p key={i} className="mb-6 text-lg leading-relaxed">
-                {paragraph.trim()}
-              </p>
+            {post.content.split('\n').map((para, i) => (
+              <p key={i} className="mb-6 text-lg leading-relaxed">{para.trim()}</p>
             ))}
           </div>
         </div>
 
-        {/* Right Sidebar (20% width) */}
+        {/* Right Sidebar */}
         <div className="hidden lg:block w-1/5 pl-4">
           <div className="sticky top-24">
             <div className="bg-gray-100 p-6 rounded-lg mb-6">
               <h3 className="font-bold text-primary mb-4">Recent Posts</h3>
               <ul className="space-y-3">
-                {allBlogPosts.slice(0, 3).map((post) => (
-                  <li key={post.id}>
-                    <Link href={`/blog/${post.slug}`} className="text-primary hover:underline">
-                      {post.title}
-                    </Link>
-                  </li>
-                ))}
+                <li>
+                  <Link href="/blog" className="text-primary hover:underline">Go to Blog Home</Link>
+                </li>
               </ul>
             </div>
-            
+
             <div className="bg-gray-100 p-6 rounded-lg">
               <h3 className="font-bold text-primary mb-4">Categories</h3>
               <ul className="space-y-3">
-                {Array.from(new Set(allBlogPosts.flatMap(post => post.tags))).map((tag, i) => (
-                  <li key={i} className="text-primary hover:underline cursor-pointer">
-                    {tag}
-                  </li>
+                {(Array.isArray(post.tags) ? post.tags : post.tags?.split(',')).map((tag, i) => (
+                  <li key={i} className="text-primary hover:underline cursor-pointer">{tag.trim()}</li>
                 ))}
               </ul>
             </div>
