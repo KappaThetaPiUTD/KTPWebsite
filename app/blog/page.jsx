@@ -95,33 +95,47 @@ export default function BlogPage() {
 </div>
 
               
-              <h3 className="text-green-900 font-bold text-xl mb-2 group-hover:text-green-800 transition-colors">
-                {post.title}
-              </h3>
-              
-              <p className="text-green-700 mb-4 flex-grow font-light leading-relaxed">
-                {post.content.substring(0, 100)}...
-                <span className="ml-2 text-green-500 font-medium group-hover:text-green-800 transition-colors">
-                  Read more →
+            <div className="flex flex-wrap gap-2 mb-3">
+              <span className={`px-3 py-1 rounded-full text-sm font-medium shadow-sm ${
+                post.category === "alumni" ? "bg-purple-200 text-purple-800" : "bg-green-300 text-green-800"
+              }`}>
+                {post.category === "alumni" ? "Alumni" : "Brothers"}
+              </span>
+
+              {(Array.isArray(post.tags) ? post.tags : (typeof post.tags === 'string' ? post.tags.split(',') : [])).map((tag, index) => (
+                <span 
+                  key={index} 
+                  className="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-medium shadow-sm"
+                >
+                  {tag.trim()}
                 </span>
+              ))}
+            </div>
+
+            <h3 className="text-green-900 font-bold text-xl mb-2 group-hover:text-green-800 transition-colors">
+              {post.title}
+            </h3>
+
+            <p className="text-green-800 mb-1 flex-grow font-light leading-relaxed">
+              {post.content.substring(0, 100)}...
+              <span className="ml-2 text-green-900 font-medium group-hover:text-green-800 transition-colors">
+                Read more →
+              </span>
+            </p>
+
+            {post.author && (
+              <p className="text-green-800 font-medium leading-relaxed">
+                Author: {post.author.split(",").map((fullName) => {
+                  const parts = fullName.trim().split(" ");
+                  const firstName = parts[0] || "";
+                  const lastInitial = parts[1]?.charAt(0).toUpperCase() || "";
+                  return `${firstName} ${lastInitial}.`;
+                }).join(", ")}
               </p>
+            )}
 
-              <div className="flex flex-wrap gap-2 mt-auto">
-                <span className={`px-3 py-1 rounded-md text-sm font-medium shadow-sm ${
-                  post.category === "alumni" ? "bg-purple-200 text-purple-800" : "bg-green-300 text-green-800"
-                }`}>
-                  {post.category === "alumni" ? "Alumni" : "Brothers"}
-                </span>
 
-                {(Array.isArray(post.tags) ? post.tags : (typeof post.tags === 'string' ? post.tags.split(',') : [])).map((tag, index) => (
-                  <span 
-                    key={index} 
-                    className="bg-blue-200 text-blue-800 px-4 py-1.5 rounded-md text-sm font-medium shadow-sm min-w-[80px] inline-flex items-center justify-center whitespace-nowrap"
-                  >
-                    {tag.trim()}
-                  </span>
-                ))}
-              </div>
+
             </div>
           </Link>
         ))}
