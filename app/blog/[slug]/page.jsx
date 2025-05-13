@@ -74,13 +74,13 @@ export default function BlogPostPage() {
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className={`px-3 py-1 rounded-md text-sm font-medium shadow-sm ${
+            <span className={`px-3 py-1 rounded-full text-sm font-medium shadow-sm ${
               post.category === 'alumni' ? 'bg-purple-200 text-purple-800' : 'bg-green-200 text-green-800'
             }`}>
               {post.category === 'alumni' ? 'Alumni' : 'Brothers'}
             </span>
             {(Array.isArray(post.tags) ? post.tags : post.tags?.split(',')).map((tag, i) => (
-              <span key={i} className="bg-blue-200 text-blue-800 px-3 py-1 rounded-md text-sm font-medium shadow-sm">
+              <span key={i} className="bg-blue-200 text-blue-800 px-3 py-1 rounded-full text-sm font-medium shadow-sm">
                 {tag.trim()}
               </span>
             ))}
@@ -100,15 +100,28 @@ export default function BlogPostPage() {
 
           {/* Header */}
           <div className="mb-6">
-            <h2 className="text-2xl font-semibold text-primary mb-4">
+            <h2 className="text-2xl font-semibold text-primary mb-2">
               Published on: {new Date(post.created_at).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
               })}
             </h2>
+            
+            {post.author && (
+              <p className="text-green-800 font-light text-lg leading-relaxed mb-2">
+                Author: {post.author.split(",").map((fullName) => {
+                  const parts = fullName.trim().split(" ");
+                  const firstName = parts[0] || "";
+                  const lastInitial = parts[1]?.charAt(0).toUpperCase() || "";
+                  return `${firstName} ${lastInitial}.`;
+                }).join(", ")}
+              </p>
+            )}
+
             <h3 className="text-3xl font-bold text-primary">{post.title}</h3>
           </div>
+
 
           {/* Content */}
           <div className="prose max-w-none text-primary text-justify">
