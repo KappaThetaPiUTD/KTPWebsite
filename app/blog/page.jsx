@@ -156,6 +156,5 @@ export default function BlogPage() {
       </div>
     </div>
   );
-  console.log("params:", useParams());
 
 }

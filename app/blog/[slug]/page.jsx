@@ -13,11 +13,19 @@ const supabase = createClient(
 
 export default function BlogPostPage() {
   const params = useParams();
-  const slug = decodeURIComponent(params.slug);
+  const [slug, setSlug] = useState(null);
   const [post, setPost] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
+    if (params?.slug) {
+      setSlug(decodeURIComponent(params.slug));
+    }
+  }, [params]);
+
+  useEffect(() => {
+    if (!slug) return;
+
     const fetchPost = async () => {
       const { data, error } = await supabase
         .from('blog_posts')
@@ -59,18 +67,18 @@ export default function BlogPostPage() {
         {/* Left Side */}
         <div className="w-full lg:w-4/5 pr-8">
           <h1 className="text-3xl font-bold text-primary mb-8">Blog</h1>
-          <div className="w-full h-96 rounded-lg mb-6 overflow-hidden bg-gray-200">
-  {post.image ? (
-    <img
-      src={post.image}
-      alt={post.title}
-      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-    />
-  ) : (
-    <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 opacity-80" />
-  )}
-</div>
 
+          <div className="w-full h-96 rounded-lg mb-6 overflow-hidden bg-gray-200">
+            {post.image ? (
+              <img
+                src={post.image}
+                alt={post.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 opacity-80" />
+            )}
+          </div>
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2 mb-4">
@@ -122,7 +130,6 @@ export default function BlogPostPage() {
             <h3 className="text-3xl font-bold text-primary">{post.title}</h3>
           </div>
 
-
           {/* Content */}
           <div className="prose max-w-none text-primary text-justify">
             {post.content.split('\n').map((para, i) => (
@@ -142,7 +149,6 @@ export default function BlogPostPage() {
                 </li>
               </ul>
             </div>
-
             <div className="bg-gray-100 p-6 rounded-lg">
               <h3 className="font-bold text-primary mb-4">Categories</h3>
               <ul className="space-y-3">
