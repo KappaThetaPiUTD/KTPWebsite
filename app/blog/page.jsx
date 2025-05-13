@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { FaThumbtack } from "react-icons/fa";
 
 export default function BlogPage() {
   const [posts, setPosts] = useState([]);
@@ -12,7 +13,7 @@ export default function BlogPage() {
     const fetchPosts = async () => {
       const res = await fetch("/api/blog");
       const data = await res.json();
-      console.log("Fetched data type:", Array.isArray(data), data);
+      console.log("FULL POSTS DATA:", data); // Add this line
       setPosts(Array.isArray(data) ? data : data?.posts || []);
     };
     fetchPosts();
@@ -23,17 +24,22 @@ export default function BlogPage() {
     return post.category?.trim().toLowerCase() === filter.toLowerCase();
   }) : [];
 
-  const sortedPosts = [...filteredPosts].sort((a, b) => {
+  const pinnedPosts = filteredPosts.filter(post => Boolean(post.is_pinned) === true);
+  const nonPinnedPosts = filteredPosts.filter(post => Boolean(post.is_pinned) === false);
+
+  const sortPosts = (a, b) => {
     const dateA = new Date(a.created_at);
     const dateB = new Date(b.created_at);
-    return sortMethod === "newest" 
-      ? dateB - dateA
-      : dateA - dateB;
-  }
-  
-  );
+    return sortMethod === "newest" ? dateB - dateA : dateA - dateB;
+  };
+
+  const sortedPinned = [...pinnedPosts].sort(sortPosts);
+  const sortedNonPinned = [...nonPinnedPosts].sort(sortPosts);
+
+  const sortedPosts = [...sortedPinned, ...sortedNonPinned];
 
   return (
+
 <div className="min-h-screen bg-white flex flex-col items-center justify-start pt-16 pb-20 px-4 md:px-8">
       <div className="flex flex-col items-center space-y-2 mb-6 pt-8">
         <div className="text-primary text-[28px] md:text-[36px] font-bold font-poppins text-center">
@@ -73,7 +79,15 @@ export default function BlogPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 md:px-8 w-full">
         {sortedPosts.map((post) => (
           <Link href={`/blog/${post.slug || post.id}`} key={post.id} className="group">
-            <div className="bg-white shadow-lg p-6 rounded-xl transition-all duration-300 hover:shadow-xl border-2 border-green-50 hover:border-green-100 h-full flex flex-col hover:-translate-y-1">
+            <div className="bg-white shadow-lg p-6 rounded-xl transition-all duration-300 hover:shadow-xl border-2 border-green-50 hover:border-green-300 h-full flex flex-col hover:-translate-y-1 relative">
+            
+            {post.is_pinned && (
+            <div className="absolute top-4 right-4 text-green-800 z-10">
+              <FaThumbtack className="text-xl transform rotate-45" />
+              <span className="sr-only">Pinned Post</span>
+            </div>
+          )}
+              
               <div className="text-green-800 font-medium mb-2 text-sm">
                 Published: {new Date(post.created_at).toLocaleDateString('en-US', { 
                   year: 'numeric', 
@@ -90,7 +104,7 @@ export default function BlogPage() {
       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
     />
   ) : (
-    <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 opacity-80 group-hover:opacity-100 transition-opacity" />
+    <div className="w-full h-full bg-gradient-to-br from-green-50 to-green-100 opacity-100 group-hover:opacity-900 transition-opacity" />
   )}
 </div>
 
