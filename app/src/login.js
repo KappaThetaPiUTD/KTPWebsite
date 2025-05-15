@@ -1,33 +1,48 @@
+// app/src/login.js
+
+import { useState } from "react";
 import { supabase } from "../../lib/supabase";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
     const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
-    const handleLogin = async (provider) => {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider,
-        });
+    const handleLogin = async () => {
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
 
-        if (error) {
-            console.error(`Login with ${provider} failed:`, error.message);
+            if (error) {
+                console.error("Login failed:", error.message);
+                alert("Invalid email or password");
+                return;
+            }
+
+            navigate("/dashboard");
+        } catch (err) {
+            console.error("Login error:", err);
         }
     };
 
-    useEffect(() => {
-        const checkUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) navigate("/dashboard");
-        };
-
-        checkUser();
-    }, [navigate]);
-
     return (
         <div>
-            <button onClick={() => handleLogin("google")}>Login with Google</button>
-            <button onClick={() => handleLogin("discord")}>Login with Discord</button>
+            <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={handleLogin}>Login</button>
         </div>
     );
 };
