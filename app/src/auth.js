@@ -1,62 +1,73 @@
-// server/middleware/auth.js
-
-const jwt = require('jsonwebtoken');
-
-// Supabase JWT Secret (You will get this from Supabase)
-const SUPABASE_JWT_SECRET = "your-supabase-jwt-secret"; // You will find this in Supabase settings.
-
-// This middleware will verify the JWT token and attach the decoded data to `req.user`
-const authMiddleware = (req, res, next) => {
-    // Extract JWT token from Authorization header
-    const token = req.headers['authorization'];
-
-    // If no token is provided, return a 401 Unauthorized error
-    if (!token) {
-        return res.status(401).json({ message: 'No token provided' });
-    }
-
-    // Remove the 'Bearer ' part of the token (if it exists)
-    const jwtToken = token.split(' ')[1];
-
-    // Verify the token with Supabase's secret key
-    jwt.verify(jwtToken, SUPABASE_JWT_SECRET, (err, decoded) => {
-        if (err) {
-            // If verification fails, send an error
-            return res.status(401).json({ message: 'Invalid token' });
-        }
-
-        // Attach the decoded user information to the request object
-        req.user = decoded;
-
-        // Proceed to the next middleware or route handler
-        next();
-    });
-};
-
-module.exports = authMiddleware;
-
 // server/routes/user.js
 
 const express = require("express");
-const authMiddleware = require("../middleware/auth");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const router = express.Router();
+const { supabase } = require("../lib/supabase");
 
-// Example secured API endpoint
-router.get("/user-profile", authMiddleware, (req, res) => {
-    // Only accessible by authenticated users
-    const user = req.user;  // This is the decoded JWT payload (user info)
+const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
+ // Replace with your secret
+const JWT_EXPIRATION = "1h"; // Token expires in 1 hour
 
-    res.json({ message: "User profile data", user });
+// Register Route (Sign Up)
+router.post("/register", async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    try {
+        // Hash the password using bcrypt
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create user in Supabase with hashed password
+        const { error } = await supabase.auth.signUp({
+            email: email,
+            password: hashedPassword,
+        });
+
+        if (error) {
+            return res.status(400).json({ message: "Error creating user.", error: error.message });
+        }
+
+        res.status(201).json({ message: "User registered successfully." });
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+});
+
+// Login Route
+router.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    try {
+        // Fetch user from Supabase
+        const { data: { user }, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error || !user) {
+            return res.status(401).json({ message: "Invalid credentials." });
+        }
+
+        // Generate JWT for user
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            SUPABASE_JWT_SECRET,
+            { expiresIn: JWT_EXPIRATION }
+        );
+
+        res.status(200).json({ message: "Login successful.", token });
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
 });
 
 module.exports = router;
-
-const express = require("express");
-const app = express();
-const userRoutes = require("./routes/user");
-
-app.use("/api", userRoutes);
-
-app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
-});

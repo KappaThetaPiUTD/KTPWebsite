@@ -1,46 +1,50 @@
+// app/src/login.js
+
+import { useState } from "react";
 import { supabase } from "../../lib/supabase";
-
-const Login = () => {
-    const handleGoogleLogin = async () => {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
-        });
-
-        if (error) {
-            console.error("Login failed:", error.message);
-        }
-    };
-
-    return <button onClick={handleGoogleLogin}>Login with Google</button>;
-};
-
-export default Login;
-
-import { supabase } from "../../lib/supabase";
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
     const navigate = useNavigate();
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
 
-    const handleGoogleLogin = async () => {
-        const { data, error } = await supabase.auth.signInWithOAuth({
-            provider: "google",
-        });
+    const handleLogin = async () => {
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
 
-        if (error) console.error("Login failed:", error.message);
+            if (error) {
+                console.error("Login failed:", error.message);
+                alert("Invalid email or password");
+                return;
+            }
+
+            navigate("/dashboard");
+        } catch (err) {
+            console.error("Login error:", err);
+        }
     };
 
-    useEffect(() => {
-        const checkUser = async () => {
-            const { data: user } = await supabase.auth.getUser();
-            if (user) navigate("/dashboard");
-        };
-
-        checkUser();
-    }, []);
-
-    return <button onClick={handleGoogleLogin}>Login with Google</button>;
+    return (
+        <div>
+            <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+            />
+            <button onClick={handleLogin}>Login</button>
+        </div>
+    );
 };
 
 export default Login;
