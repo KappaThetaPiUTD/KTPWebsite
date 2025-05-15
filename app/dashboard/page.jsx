@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
 import { IoChevronBack, IoChevronForward, IoTrash } from 'react-icons/io5';
+import { FaEnvelope, FaLinkedin, FaInstagram } from 'react-icons/fa';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -11,13 +12,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Calendar state
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
 
-  // RSVP state
   const [rsvpStatus, setRsvpStatus] = useState({
     "Python Workshop": null,
     "Internship Workshop": null,
@@ -25,7 +24,6 @@ export default function Dashboard() {
     "Pledges Chapter": null
   });
 
-  // Check-in state
   const [checkedIn, setCheckedIn] = useState(false);
 
   useEffect(() => {
@@ -38,7 +36,6 @@ export default function Dashboard() {
     checkUser();
   }, []);
 
-  // Calendar setup
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const monthName = currentDate.toLocaleString('default', { month: 'long' });
@@ -84,168 +81,165 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-8 py-6 font-['Public_Sans']">
-      {/* Navbar */}
-      <header className="flex justify-between items-center pb-6">
-        <h1 className="text-3xl font-bold text-[#1E3D2F]">ΚΘΠ</h1>
-        <nav className="flex space-x-6 text-black font-medium items-center">
-          {["HOME", "ABOUT", "BROTHERS", "RECRUITMENT", "BLOG", "GALLERY", "CONTACT", "DASHBOARD"].map((item) => (
-            <a key={item} href="#" className="hover:text-gray-500">{item}</a>
-          ))}
-          {!loading && (
-            !user ? (
-              <a href="/sign-in" className="hover:text-gray-500">SIGN IN</a>
-            ) : (
-              <button
-                onClick={async () => {
-                  const { error } = await supabase.auth.signOut();
-                  if (!error) router.push('/sign-in');
-                }}
-                className="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
-              >
-                Logout
-              </button>
-            )
-          )}
-        </nav>
-      </header>
+    <div className="min-h-screen font-['Public_Sans'] uppercase text-sm bg-white grid grid-cols-[200px_1fr]">
 
-      <div className="grid grid-cols-3 gap-6">
-        {/* Calendar */}
-        <div className="bg-[#E0E0E0] p-6 rounded-xl shadow text-black">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-semibold">{monthName} {year}</h3>
-            <div className="flex space-x-2">
-              <button onClick={handlePrevMonth}><IoChevronBack /></button>
-              <button onClick={handleNextMonth}><IoChevronForward /></button>
-            </div>
-          </div>
-          <div className="grid grid-cols-7 text-center text-sm mb-2">
-            {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(day => (
-              <div key={day} className="font-medium">{day}</div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 text-sm">
-            {getCalendarGrid().map((day, i) => {
-              const isToday = day &&
-                today.getDate() === day &&
-                today.getMonth() === month &&
-                today.getFullYear() === year;
-              return (
-                <div key={i} className="py-2 text-center">
-                  {day && (
-                    <button
-                      onClick={() => handleDayClick(day)}
-                      className={`w-8 h-8 rounded-full mx-auto flex items-center justify-center
-                        ${isToday ? "bg-[#1E3D2F] text-white" : "text-black hover:bg-gray-200"}`}
-                    >
-                      {day}
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {selectedDate && (
-            <div className="mt-4 text-sm">
-              <h4 className="font-semibold mb-1">Events on {selectedDate}:</h4>
-              <ul className="mb-3 space-y-2">
-                {(events[selectedDate] || []).map((event, idx) => (
-                  <li key={idx}>
-                    <div className="text-xs uppercase text-gray-500">{event.time}</div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold text-black">{event.title}</span>
-                      <button onClick={() => handleDeleteEvent(selectedDate, idx)} className="text-red-600 text-sm ml-2">
-                        <IoTrash />
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <div className="flex flex-col gap-2">
-                <input
-                  type="text"
-                  placeholder="Event Title"
-                  value={newEventTitle}
-                  onChange={(e) => setNewEventTitle(e.target.value)}
-                  className="text-sm px-2 py-1 border rounded"
-                />
-                <input
-                  type="text"
-                  placeholder="Event Time (e.g. 7 PM)"
-                  value={newEventTime}
-                  onChange={(e) => setNewEventTime(e.target.value)}
-                  className="text-sm px-2 py-1 border rounded"
-                />
-                <button onClick={handleAddEvent} className="bg-[#1E3D2F] text-white px-3 py-1 rounded">
-                  Add Event
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* RSVP */}
-        <div className="bg-[#E0E0E0] p-6 rounded-xl shadow">
-          <h3 className="text-lg font-semibold text-black mb-3">RSVP</h3>
-          {["Python Workshop", "Internship Workshop", "Brothers Chapter", "Pledges Chapter"].map((event, index) => (
-            <div key={index} className="mb-4">
-              <p className="text-sm font-medium text-black">7 PM - {event}</p>
-              <div className="flex space-x-2 mt-1">
-                {["going", "maybe", "not going"].map((status) => (
-                  <button
-                    key={status}
-                    onClick={() =>
-                      setRsvpStatus((prev) => ({ ...prev, [event]: status }))
-                    }
-                    className={`px-3 py-1 text-xs rounded-lg 
-                      ${
-                        rsvpStatus[event] === status
-                          ? "bg-green-700 text-white"
-                          : "bg-[#1E3D2F] text-white hover:bg-[#163226]"
-                      }`}
-                  >
-                    {status}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Check-In */}
-        <div className="bg-[#E0E0E0] p-6 rounded-xl shadow">
-          <h3 className="text-lg font-semibold text-black mb-3">Check-In for chapter</h3>
-          <div className="flex justify-center items-center bg-white p-4 rounded-lg border mb-4">
-            <img 
-              src="https://via.placeholder.com/100" 
-              alt="QR Code"
-              onError={(e) => e.currentTarget.style.display = 'none'}
-            />
-          </div>
-          <div className="text-center">
+      {/* Sidebar */}
+      <aside className="bg-white px-4 py-6 text-black space-y-6">
+        <h2 className="text-2xl font-bold text-[#1E3D2F]">ΚΘΠ</h2>
+        <p className="text-xs text-gray-600 font-semibold">Welcome</p>
+        <nav className="space-y-2 text-xs font-semibold">
+          {[
+            { label: "Homepage", href: "/dashboard/home" },
+            { label: "Attendance Records", href: "/dashboard/attendance" },
+            { label: "Merch", href: "/dashboard/merch" },
+            { label: "RSVPED Events", href: "/dashboard/rsvp" },
+            { label: "Admin", href: "/dashboard/admin" },
+          ].map((item, idx) => (
             <button
-              onClick={() => setCheckedIn(true)}
-              className="bg-[#1E3D2F] text-white px-4 py-2 rounded hover:bg-[#163226] transition"
+              key={idx}
+              onClick={() => router.push(item.href)}
+              className="w-full text-left hover:text-[#1E3D2F] transition"
             >
-              Check In
+              {item.label}
             </button>
-            {checkedIn && (
-              <p className="text-green-700 font-medium mt-2">Checked in successfully!</p>
+          ))}
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="px-8 py-6">
+        <header className="flex justify-between items-center mb-6">
+          <nav className="flex space-x-6 text-black font-semibold items-center text-xs">
+            {["Home", "About", "Brothers", "Recruitment", "Blog", "Gallery", "Contact", "Dashboard"].map((item) => (
+              <a key={item} href="#" className="hover:text-gray-500">{item}</a>
+            ))}
+            {!loading && (
+              !user ? (
+                <a href="/sign-in" className="hover:text-gray-500">Sign In</a>
+              ) : (
+                <button
+                  onClick={async () => {
+                    const { error } = await supabase.auth.signOut();
+                    if (!error) router.push('/sign-in');
+                  }}
+                  className="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
+                >
+                  Logout
+                </button>
+              )
             )}
+          </nav>
+        </header>
+
+        <div className="grid grid-cols-2 gap-6">
+          {/* Calendar */}
+          <div className="bg-[#E0E0E0] p-6 rounded-xl shadow text-black">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-base font-semibold">{monthName} {year}</h3>
+              <div className="flex space-x-2">
+                <button onClick={handlePrevMonth}><IoChevronBack /></button>
+                <button onClick={handleNextMonth}><IoChevronForward /></button>
+              </div>
+            </div>
+            <div className="grid grid-cols-7 text-center text-xs mb-2">
+              {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(day => (
+                <div key={day} className="font-medium">{day}</div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 text-xs">
+              {getCalendarGrid().map((day, i) => {
+                const isToday = day &&
+                  today.getDate() === day &&
+                  today.getMonth() === month &&
+                  today.getFullYear() === year;
+                return (
+                  <div key={i} className="py-2 text-center">
+                    {day && (
+                      <button
+                        onClick={() => handleDayClick(day)}
+                        className={`w-8 h-8 rounded-full mx-auto flex items-center justify-center
+                          ${isToday ? "bg-[#1E3D2F] text-white" : "text-black hover:bg-gray-200"}`}
+                      >
+                        {day}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* RSVP + Check-in */}
+          <div className="space-y-6">
+            <div className="bg-[#E0E0E0] p-6 rounded-xl shadow">
+              <h3 className="text-base font-semibold text-black mb-3">RSVP</h3>
+              {["Python Workshop", "Internship Workshop", "Brothers Chapter", "Pledges Chapter"].map((event, index) => (
+                <div key={index} className="mb-4">
+                  <p className="text-xs font-medium text-black">7 PM - {event}</p>
+                  <div className="flex space-x-2 mt-1">
+                    {["going", "maybe", "not going"].map((status) => (
+                      <button
+                        key={status}
+                        onClick={() => setRsvpStatus((prev) => ({ ...prev, [event]: status }))}
+                        className={`px-3 py-1 text-xs rounded-lg 
+                          ${rsvpStatus[event] === status
+                            ? "bg-green-700 text-white"
+                            : "bg-[#1E3D2F] text-white hover:bg-[#163226]"}`}
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-[#E0E0E0] p-6 rounded-xl shadow">
+              <h3 className="text-base font-semibold text-black mb-3">Check-In for chapter</h3>
+              <div className="flex justify-between items-center bg-white p-4 rounded-lg border mb-4">
+                <div className="rounded-full bg-[#1E3D2F] text-white w-8 h-8 flex items-center justify-center text-sm">
+                  {user?.email?.[0]?.toUpperCase() || "S"}
+                </div>
+                <img 
+                  src="https://via.placeholder.com/80" 
+                  alt="QR Code"
+                  onError={(e) => e.currentTarget.style.display = 'none'}
+                />
+              </div>
+              <div className="text-center">
+                <button
+                  onClick={() => setCheckedIn(true)}
+                  className="bg-[#1E3D2F] text-white px-4 py-2 rounded hover:bg-[#163226] transition"
+                >
+                  Check In
+                </button>
+                {checkedIn && (
+                  <p className="text-green-700 font-medium mt-2">Checked in successfully!</p>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Bottom Info Boxes */}
-        <div className="col-span-3 grid grid-cols-3 gap-6 mt-4">
+        {/* Bottom Section */}
+        <div className="grid grid-cols-3 gap-6 mt-6">
           {["Attendance Record", "Strikes", "Social Quote"].map((label, i) => (
-            <div key={i} className="bg-[#E0E0E0] p-6 rounded-xl shadow text-center text-black font-medium">
+            <div key={i} className="bg-[#E0E0E0] p-6 rounded-xl shadow text-center text-black font-semibold">
               {label}
             </div>
           ))}
         </div>
-      </div>
+
+        {/* Footer */}
+        <footer className="mt-10 bg-[#1E3D2F] text-white text-xs p-4 flex justify-between items-center rounded-t-lg">
+          <p>The University of Texas at Dallas<br /><strong>Kappa Theta Pi - Mu Chapter</strong></p>
+          <div className="flex space-x-4 text-white">
+            <FaEnvelope />
+            <FaLinkedin />
+            <FaInstagram />
+          </div>
+        </footer>
+      </main>
     </div>
   );
 }

@@ -14,7 +14,6 @@ const Navbar = () => {
   const handleNav = () => setNav(!nav);
   const closeNav = () => setNav(false);
 
-  // Load user from Supabase
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -55,22 +54,23 @@ const Navbar = () => {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex">
-          {navItems.map((item) => (
-            <li
-              key={item.id}
-              className="list-none relative p-4 cursor-pointer group"
-              onMouseEnter={() => setIsHovered(item.id)}
-              onMouseLeave={() => setIsHovered(null)}
-            >
-              <Link href={item.path}>{item.text}</Link>
-              <div
-                className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center`}
-                style={{ width: isHovered === item.id ? "100%" : "0" }}
-              />
-            </li>
-          ))}
+          {navItems
+            .filter((item) => item.text !== "DASHBOARD" || user)
+            .map((item) => (
+              <li
+                key={item.id}
+                className="list-none relative p-4 cursor-pointer group"
+                onMouseEnter={() => setIsHovered(item.id)}
+                onMouseLeave={() => setIsHovered(null)}
+              >
+                <Link href={item.path}>{item.text}</Link>
+                <div
+                  className={`absolute bottom-0 left-0 right-0 h-0.5 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-center`}
+                  style={{ width: isHovered === item.id ? "100%" : "0" }}
+                />
+              </li>
+            ))}
 
-          {/* Auth-aware link */}
           {!user ? (
             <li className="list-none relative p-4 cursor-pointer group">
               <Link href="/sign-in">SIGN IN</Link>
@@ -97,15 +97,16 @@ const Navbar = () => {
             nav ? "translate-x-0" : "translate-x-full"
           }`}
         >
-          {navItems.map((item) => (
-            <li key={item.id} className="p-4 text-center text-black">
-              <Link href={item.path} onClick={closeNav}>
-                {item.text}
-              </Link>
-            </li>
-          ))}
+          {navItems
+            .filter((item) => item.text !== "DASHBOARD" || user)
+            .map((item) => (
+              <li key={item.id} className="p-4 text-center text-black">
+                <Link href={item.path} onClick={closeNav}>
+                  {item.text}
+                </Link>
+              </li>
+            ))}
 
-          {/* Auth-aware mobile */}
           {!user ? (
             <li className="p-4 text-center text-black">
               <Link href="/sign-in" onClick={closeNav}>SIGN IN</Link>
