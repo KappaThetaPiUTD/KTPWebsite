@@ -1,8 +1,8 @@
 // server.js
 
-const express = require("express");
-const { createClient } = require("@supabase/supabase-js");
-const bodyParser = require("body-parser");
+import express from "express";
+import { createClient } from "@supabase/supabase-js";
+import bodyParser from "body-parser";
 
 const app = express();
 const port = 3000;
@@ -17,21 +17,21 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 app.use(bodyParser.json());
 
 //applications
-const applicationsRouter = require("./routes/applications");
+import applicationsRouter from "./routes/applications.js";
 app.use("/api/applications", applicationsRouter);
 
 //QR
-const qrCheckinRouter = require("./routes/qrCheckIn");
+import qrCheckinRouter from "./routes/qrCheckIn.js";
 app.use("/api/qr-checkin", qrCheckinRouter);
 
 //attendance
-const attendanceRouter = require("./routes/attendance");
+import attendanceRouter from "./routes/attendance.js";
 app.use("/api/attendance", attendanceRouter);
 
 //rsvp
-const rsvpRouter = require("./routes/rsvp");
+import rsvpRouter from "./routes/rsvp.js";
 app.use("/api/rsvp", rsvpRouter);
-=======
+//=======
 // --- API Endpoints ---
 
 // 1. QR Code Check-In Endpoint (Insert into attendance)
@@ -73,4 +73,8 @@ app.post("/api/rsvp", async (req, res) => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
+});
+
+app.get("/", (req, res) => {
+  res.send("Server is running!");
 });

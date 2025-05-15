@@ -1,8 +1,15 @@
 // routes/applications.js
-const express = require("express");
+import express from "express";
+import {
+  submitApplication,
+  getAllApplications,
+  updateApplication,
+} from "../controllers/applicationsController.js";
+
 const router = express.Router();
-const { submitApplication } = require("../controllers/applicationsController");
 
 router.post("/", submitApplication);
+router.get("/", getAllApplications);
+router.patch("/:id", updateApplication);
 
-module.exports = router;
+export default router;
