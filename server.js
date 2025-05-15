@@ -31,7 +31,7 @@ app.use("/api/attendance", attendanceRouter);
 //rsvp
 const rsvpRouter = require("./routes/rsvp");
 app.use("/api/rsvp", rsvpRouter);
-=======
+//=======
 // --- API Endpoints ---
 
 // 1. QR Code Check-In Endpoint (Insert into attendance)
