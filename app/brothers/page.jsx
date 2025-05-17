@@ -224,7 +224,6 @@ const betaClassMembers = [
   "Arya Thombre",
   "Avani Mehrotra",
   "Ethan Varghese",
-  "Gloria Tu",
   "Hima Nagi Reddy",
   "Krisha Amaravathi",
   "Laiba Piracha",
@@ -259,6 +258,29 @@ const gammaClassMembers = [
   "Venkat Sai Eshwar Varma Sagi"
 ].sort((a, b) => a.localeCompare(b));
 
+const deltaClassMembers = [
+ "Aaron Gheevarghese",
+ "Abdul Qazzafi",
+ "Abhinav Atluri",
+ "Aditya Dixit",
+ "Anvi Siddabhattuni",
+ "Ariha Kothari",
+ "Arnav Jain",
+ "Ayaan Khan",
+ "Ayush Velhal",
+ "Jeevika Balaji",
+ "Joel Philipose",
+ "Krish Patel",
+ "Nihita Soma",
+ "Praneel Sreepada",
+ "Rahil Islam",
+ "Rishi Ramesh",
+ "Ruthvik Penmatsa",
+ "Sachin Selvakumar",
+ "Sahaj Dahal",
+ "Simon Beyene"
+].sort((a, b) => a.localeCompare(b));
+
 const splitIntoColumns = (arr, columns) => {
   const result = [];
   const columnSize = Math.ceil(arr.length / columns);
@@ -274,6 +296,7 @@ const Brother = () => {
   const alphaColumns = splitIntoColumns(alphaClassMembers, 3);
   const betaColumns = splitIntoColumns(betaClassMembers, 3);
   const gammaColumns = splitIntoColumns(gammaClassMembers, 3);
+  const deltaColumns = splitIntoColumns(deltaClassMembers, 3);
 
   return (
     <div className="w-screen h-full bg-white pt-24 text-black">
@@ -408,6 +431,21 @@ const Brother = () => {
       </div>
       <div className="flex justify-center mt-4 mb-20">
         {gammaColumns.map((column, index) => (
+          <div key={index} className="mx-4">
+            {column.map((member, idx) => (
+              <div key={idx} className="m-2 text-center">
+                {member}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
+        Delta Class
+      </div>
+      <div className="flex justify-center mt-4 mb-20">
+        {deltaColumns.map((column, index) => (
           <div key={index} className="mx-4">
             {column.map((member, idx) => (
               <div key={idx} className="m-2 text-center">
