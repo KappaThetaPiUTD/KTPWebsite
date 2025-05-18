@@ -3,72 +3,63 @@
 const express = require("express");
 const { createClient } = require("@supabase/supabase-js");
 const bodyParser = require("body-parser");
+const cors = require("cors"); // add CORS
 
 const app = express();
-const port = 3000;
-
-// Replace with your Supabase project details
-const supabaseUrl = "https://bagvfgqosklxljktkwpd.supabase.co";
-const supabaseKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJhZ3ZmZ3Fvc2tseGxqa3Rrd3BkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1OTA1NjQsImV4cCI6MjA1ODE2NjU2NH0.TcukwWDnKGnah5nJ3K_Nh-baRW7Kkmw8PDBzm6s_ZFw";
-const supabase = createClient(supabaseUrl, supabaseKey);
+const port = 3000; 
 
 // Middleware
 app.use(bodyParser.json());
+// Enable CORS to allow requests from your frontend origin
+app.use(
+  cors({
+    origin: "http://localhost:3000", // adjust if your frontend runs elsewhere
+    credentials: true,
+  })
+);
 
-//applications
+// Your existing routers
 const applicationsRouter = require("./routes/applications");
 app.use("/api/applications", applicationsRouter);
 
-//QR
 const qrCheckinRouter = require("./routes/qrCheckIn");
 app.use("/api/qr-checkin", qrCheckinRouter);
 
-//attendance
 const attendanceRouter = require("./routes/attendance");
 app.use("/api/attendance", attendanceRouter);
 
-//rsvp
 const rsvpRouter = require("./routes/rsvp");
 app.use("/api/rsvp", rsvpRouter);
-=======
-// --- API Endpoints ---
 
-// 1. QR Code Check-In Endpoint (Insert into attendance)
-app.post("/api/checkin", async (req, res) => {
-  const { user_id, event_id, status } = req.body;
+// Your /api/verify-code endpoint
+app.post("/api/verify-code", async (req, res) => {
+  const { code } = req.body;
 
-  // For basic functionality, we assume status is provided (e.g., "present")
-  const { data, error } = await supabase
-    .from("attendance")
-    .insert([{ user_id, event_id, status }]);
+  if (!code) {
+    return res.status(400).json({ success: false, message: "Code is required" });
+  }
 
-  if (error) return res.status(400).json({ error: error.message });
-  res.json({ message: "Checked in successfully.", data });
+  try {
+    const { data, error } = await supabase
+      .from("access_code")
+      .select("code")
+      .eq("code", code)
+      .single();
+
+    if (error) throw error;
+
+    if (data && data.code === code) {
+      // Optionally set cookie here or just return success
+      return res.status(200).json({ success: true });
+    } else {
+      return res.status(401).json({ success: false, message: "Invalid code" });
+    }
+  } catch (err) {
+    console.error("Error verifying access code:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
 });
 
-// 2. Attendance Tracking Endpoint (Retrieve attendance records)
-app.get("/api/attendance", async (req, res) => {
-  const { event_id } = req.query;
-  const { data, error } = await supabase
-    .from("attendance")
-    .select("*")
-    .eq("event_id", event_id);
-
-  if (error) return res.status(400).json({ error: error.message });
-  res.json({ data });
-});
-
-// 3. RSVP Endpoint (Insert RSVP record)
-app.post("/api/rsvp", async (req, res) => {
-  const { user_id, event_id, response } = req.body;
-  const { data, error } = await supabase
-    .from("rsvps")
-    .insert([{ user_id, event_id, response }]);
-
-  if (error) return res.status(400).json({ error: error.message });
-  res.json({ message: "RSVP submitted successfully.", data });
-});
 
 // Start the server
 app.listen(port, () => {
