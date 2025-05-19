@@ -19,7 +19,13 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: "Invalid code" }, { status: 401 });
     }
 
-    return NextResponse.json({ success: true }, { status: 200 });
+    // ✅ Set the cookie in the response header
+    const response = NextResponse.json({ success: true });
+    response.headers.set(
+      "Set-Cookie",
+      `access_verified=true; Path=/; Max-Age=3600; SameSite=Lax`
+    );
+    return response;
   } catch (err) {
     console.error("Error verifying access code:", err);
     return NextResponse.json({ success: false, message: "Server error" }, { status: 500 });

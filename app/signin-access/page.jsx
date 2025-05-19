@@ -27,8 +27,7 @@ export default function AccessCodePage() {
   
       if (result.success) {
         // Set cookie so middleware allows /sign-in
-        document.cookie = "access_verified=true; path=/";
-        router.replace("/sign-in"); // Use replace instead of push
+        router.replace("/sign-in");
       } else {
         setError(result.message || "Invalid code");
       }

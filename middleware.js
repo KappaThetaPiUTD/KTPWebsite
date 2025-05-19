@@ -6,7 +6,8 @@ export function middleware(request) {
 
   if (pathname === "/sign-in") {
     const accessVerified = request.cookies.get("access_verified");
-    if (accessVerified !== "true") {
+
+    if (accessVerified?.value !== "true") {
       const url = request.nextUrl.clone();
       url.pathname = "/signin-access";
       return NextResponse.redirect(url);
