@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AccessCodePage() {
@@ -17,22 +17,23 @@ export default function AccessCodePage() {
     }
 
     try {
-        fetch("http://localhost:3000/api/verify-code", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ code }),
-          });
-          
-          
-        
+      const response = await fetch("http://localhost:3000/api/verify-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+
       const result = await response.json();
 
       if (result.success) {
+        // Set cookie so middleware allows /sign-in
+        document.cookie = "access_verified=true; path=/";
         router.push("/sign-in");
       } else {
         setError(result.message || "Invalid code");
       }
     } catch (err) {
+      console.error("Error submitting code:", err);
       setError("Something went wrong. Please try again later.");
     }
   };
