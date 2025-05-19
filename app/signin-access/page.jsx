@@ -10,25 +10,25 @@ export default function AccessCodePage() {
 
   const handleCodeSubmit = async () => {
     setError("");
-
+  
     if (!code.trim()) {
       setError("Please enter the access code.");
       return;
     }
-
+  
     try {
       const response = await fetch("http://localhost:3000/api/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
-
+  
       const result = await response.json();
-
+  
       if (result.success) {
         // Set cookie so middleware allows /sign-in
         document.cookie = "access_verified=true; path=/";
-        router.push("/sign-in");
+        router.replace("/sign-in"); // Use replace instead of push
       } else {
         setError(result.message || "Invalid code");
       }
@@ -37,6 +37,7 @@ export default function AccessCodePage() {
       setError("Something went wrong. Please try again later.");
     }
   };
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
