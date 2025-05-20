@@ -1,4 +1,3 @@
-// pages/signin.tsx or components/SignIn.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -10,16 +9,11 @@ export default function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [resetSent, setResetSent] = useState(false);
 
-  // ✅ Sign in with email/password
   const handleEmailSignIn = async (e) => {
     e.preventDefault();
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       console.error("Email login failed:", error.message);
     } else {
@@ -27,20 +21,31 @@ export default function SignIn() {
     }
   };
 
-  // ✅ Sign in with Google
   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
     if (error) console.error("Google login failed:", error.message);
   };
 
-  // ✅ Sign in with Discord
   const handleDiscordLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "discord",
-    });
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "discord" });
     if (error) console.error("Discord login failed:", error.message);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      alert("Please enter your email to reset password.");
+      return;
+    }
+
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${location.origin}/reset-password`, // Adjust this route as needed
+    });
+
+    if (error) {
+      alert("Failed to send reset email: " + error.message);
+    } else {
+      setResetSent(true);
+    }
   };
 
   useEffect(() => {
@@ -54,7 +59,7 @@ export default function SignIn() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <h2 className="text-3xl font-bold text-center mb-4 text-black">Sign Up</h2>
+        <h2 className="text-3xl font-bold text-center mb-4 text-black">Sign in</h2>
 
         {/* ✅ Email/Password Form */}
         <form onSubmit={handleEmailSignIn} className="space-y-4 mt-4">
@@ -85,12 +90,25 @@ export default function SignIn() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <div className="text-right mt-1">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Forgot password?
+              </button>
+              {resetSent && (
+                <p className="text-xs text-green-600 mt-1">Reset email sent!</p>
+              )}
+            </div>
           </div>
+
           <button
             type="submit"
             className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition"
           >
-            Sign Up
+            Sign in
           </button>
         </form>
 
