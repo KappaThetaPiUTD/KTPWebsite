@@ -59,7 +59,7 @@ export default function SignIn() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <h2 className="text-3xl font-bold text-center mb-4 text-black">Sign in</h2>
+        <h2 className="text-3xl font-bold text-center mb-4 text-black">Sign Up</h2>
 
         {/* ✅ Email/Password Form */}
         <form onSubmit={handleEmailSignIn} className="space-y-4 mt-4">
