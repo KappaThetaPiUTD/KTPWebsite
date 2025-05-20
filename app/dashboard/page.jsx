@@ -3,32 +3,22 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
-import { IoChevronBack, IoChevronForward, IoTrash } from 'react-icons/io5';
-import { FaEnvelope, FaLinkedin, FaInstagram } from 'react-icons/fa';
+import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
 
 export default function Dashboard() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
-
   const [events, setEvents] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [newEventTitle, setNewEventTitle] = useState("");
   const [newEventTime, setNewEventTime] = useState("");
-
-  const [rsvpStatus, setRsvpStatus] = useState({
-    "Python Workshop": null,
-    "Internship Workshop": null,
-    "Brothers Chapter": null,
-    "Pledges Chapter": null
-  });
-
   const [checkedIn, setCheckedIn] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
       if (!data?.user) router.push('/sign-in');
       else setUser(data.user);
       setLoading(false);
@@ -72,14 +62,6 @@ export default function Dashboard() {
     setNewEventTime("");
   };
 
-  const handleDeleteEvent = (dateKey, index) => {
-    setEvents(prev => {
-      const updated = [...prev[dateKey]];
-      updated.splice(index, 1);
-      return { ...prev, [dateKey]: updated };
-    });
-  };
-
   return (
     <div className="min-h-screen font-['Public_Sans'] uppercase text-sm bg-white grid grid-cols-[200px_1fr]">
 
@@ -88,21 +70,11 @@ export default function Dashboard() {
         <h2 className="text-2xl font-bold text-[#1E3D2F]">ΚΘΠ</h2>
         <p className="text-xs text-gray-600 font-semibold">Welcome</p>
         <nav className="space-y-2 text-xs font-semibold">
-          {[
-            { label: "Homepage", href: "/dashboard/home" },
-            { label: "Attendance Records", href: "/dashboard/attendance" },
-            { label: "Merch", href: "/dashboard/merch" },
-            { label: "RSVPED Events", href: "/dashboard/rsvp" },
-            { label: "Admin", href: "/dashboard/admin" },
-          ].map((item, idx) => (
-            <button
-              key={idx}
-              onClick={() => router.push(item.href)}
-              className="w-full text-left hover:text-[#1E3D2F] transition"
-            >
-              {item.label}
-            </button>
-          ))}
+          <button className="w-full text-left text-gray-400 cursor-default">Homepage</button>
+          <button onClick={() => router.push("/dashboard/attendance")} className="w-full text-left hover:text-[#1E3D2F] transition">Attendance Records</button>
+          <button onClick={() => router.push("/dashboard/merch")} className="w-full text-left hover:text-[#1E3D2F] transition">Merch</button>
+          <button onClick={() => router.push("/dashboard/rsvp")} className="w-full text-left hover:text-[#1E3D2F] transition">RSVPED Events</button>
+          <button onClick={() => router.push("/dashboard/admin")} className="w-full text-left hover:text-[#1E3D2F] transition">Admin</button>
         </nav>
       </aside>
 
@@ -169,59 +141,34 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* RSVP + Check-in */}
-          <div className="space-y-6">
-            <div className="bg-[#E0E0E0] p-6 rounded-xl shadow">
-              <h3 className="text-base font-semibold text-black mb-3">RSVP</h3>
-              {["Python Workshop", "Internship Workshop", "Brothers Chapter", "Pledges Chapter"].map((event, index) => (
-                <div key={index} className="mb-4">
-                  <p className="text-xs font-medium text-black">7 PM - {event}</p>
-                  <div className="flex space-x-2 mt-1">
-                    {["going", "maybe", "not going"].map((status) => (
-                      <button
-                        key={status}
-                        onClick={() => setRsvpStatus((prev) => ({ ...prev, [event]: status }))}
-                        className={`px-3 py-1 text-xs rounded-lg 
-                          ${rsvpStatus[event] === status
-                            ? "bg-green-700 text-white"
-                            : "bg-[#1E3D2F] text-white hover:bg-[#163226]"}`}
-                      >
-                        {status}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
+          {/* Check-in only (RSVP removed) */}
+          <div className="bg-[#E0E0E0] p-6 rounded-xl shadow">
+            <h3 className="text-base font-semibold text-black mb-3">Check-In for chapter</h3>
+            <div className="flex justify-between items-center bg-white p-4 rounded-lg border mb-4">
+              <div className="rounded-full bg-[#1E3D2F] text-white w-8 h-8 flex items-center justify-center text-sm">
+                {user?.email?.[0]?.toUpperCase() || "S"}
+              </div>
+              <img 
+                src="https://via.placeholder.com/80" 
+                alt="QR Code"
+                onError={(e) => e.currentTarget.style.display = 'none'}
+              />
             </div>
-
-            <div className="bg-[#E0E0E0] p-6 rounded-xl shadow">
-              <h3 className="text-base font-semibold text-black mb-3">Check-In for chapter</h3>
-              <div className="flex justify-between items-center bg-white p-4 rounded-lg border mb-4">
-                <div className="rounded-full bg-[#1E3D2F] text-white w-8 h-8 flex items-center justify-center text-sm">
-                  {user?.email?.[0]?.toUpperCase() || "S"}
-                </div>
-                <img 
-                  src="https://via.placeholder.com/80" 
-                  alt="QR Code"
-                  onError={(e) => e.currentTarget.style.display = 'none'}
-                />
-              </div>
-              <div className="text-center">
-                <button
-                  onClick={() => setCheckedIn(true)}
-                  className="bg-[#1E3D2F] text-white px-4 py-2 rounded hover:bg-[#163226] transition"
-                >
-                  Check In
-                </button>
-                {checkedIn && (
-                  <p className="text-green-700 font-medium mt-2">Checked in successfully!</p>
-                )}
-              </div>
+            <div className="text-center">
+              <button
+                onClick={() => setCheckedIn(true)}
+                className="bg-[#1E3D2F] text-white px-4 py-2 rounded hover:bg-[#163226] transition"
+              >
+                Check In
+              </button>
+              {checkedIn && (
+                <p className="text-green-700 font-medium mt-2">Checked in successfully!</p>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Bottom Section */}
+        {/* Bottom Info Cards */}
         <div className="grid grid-cols-3 gap-6 mt-6">
           {["Attendance Record", "Strikes", "Social Quote"].map((label, i) => (
             <div key={i} className="bg-[#E0E0E0] p-6 rounded-xl shadow text-center text-black font-semibold">
@@ -229,16 +176,6 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
-
-        {/* Footer */}
-        <footer className="mt-10 bg-[#1E3D2F] text-white text-xs p-4 flex justify-between items-center rounded-t-lg">
-          <p>The University of Texas at Dallas<br /><strong>Kappa Theta Pi - Mu Chapter</strong></p>
-          <div className="flex space-x-4 text-white">
-            <FaEnvelope />
-            <FaLinkedin />
-            <FaInstagram />
-          </div>
-        </footer>
       </main>
     </div>
   );
