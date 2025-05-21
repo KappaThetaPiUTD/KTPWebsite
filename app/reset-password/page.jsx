@@ -1,32 +1,55 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default function ResetPassword() {
+  const supabase = createClientComponentClient();
   const router = useRouter();
-  const searchParams = useSearchParams();
+
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isValid, setIsValid] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    const userId = searchParams.get("user_id");
-
-    if (!token || !userId) {
-      setErrorMessage("Invalid or expired reset link.");
-    } else {
-      setIsValid(true); // Only render form if valid link
-    }
-  }, [searchParams]);
+    const exchangeToken = async () => {
+      // Step 1: Get tokens from URL hash
+      const hash = window.location.hash.substring(1); // remove "#"
+      const params = new URLSearchParams(hash);
+      const access_token = params.get("access_token");
+      const refresh_token = params.get("refresh_token");
+  
+      if (access_token && refresh_token) {
+        // Step 2: Sign out any existing session
+        await supabase.auth.signOut();
+  
+        // Step 3: Set new session using reset link tokens
+        const { error } = await supabase.auth.setSession({
+          access_token,
+          refresh_token,
+        });
+  
+        if (error) {
+          setErrorMessage("Invalid or expired reset link.");
+        } else {
+          setIsReady(true);
+        }
+      } else {
+        setErrorMessage("Reset link is missing tokens.");
+      }
+    };
+  
+    exchangeToken();
+  }, [supabase]);
+  
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
+
     if (newPassword !== confirmPassword) {
       setErrorMessage("Passwords do not match.");
       return;
@@ -34,79 +57,75 @@ export default function ResetPassword() {
 
     setLoading(true);
     setErrorMessage("");
-    try {
-      const response = await axios.post("/api/auth/reset-password", {
-        token: searchParams.get("token"),
-        user_id: searchParams.get("user_id"),
-        newPassword,
-      });
 
-      setSuccessMessage("Password reset successful! You can now log in.");
-      setTimeout(() => {
-        router.push("/signin");
-      }, 2000);
-    } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message || "Password reset failed. Try again."
-      );
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+      if (error) {
+        setErrorMessage(error.message || "Password reset failed.");
+      } else {
+        setSuccessMessage("Password reset successful! Redirecting to login...");
+        setTimeout(() => router.push("/login"), 2500);
+      }
+    } catch (err) {
+      setErrorMessage("Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  if (!isReady && !successMessage && !errorMessage) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <p className="text-black">Validating reset link...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <h2 className="text-3xl font-bold text-center mb-4 text-black">
-          Reset Password
-        </h2>
-        {errorMessage && (
-          <p className="text-red-600 mb-4">{errorMessage}</p>
-        )}
-        {successMessage && (
-          <p className="text-green-600 mb-4">{successMessage}</p>
-        )}
+        <h2 className="text-3xl font-bold text-center mb-4 text-black">Reset Password</h2>
 
-        {isValid ? (
-          <form onSubmit={handlePasswordReset} className="space-y-4 mt-4">
-            <div>
-              <label htmlFor="newPassword" className="block text-sm font-medium text-black">
-                New Password
-              </label>
-              <input
-                type="password"
-                id="newPassword"
-                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-black">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
+        {errorMessage && <p className="text-red-600 mb-4">{errorMessage}</p>}
+        {successMessage && <p className="text-green-600 mb-4">{successMessage}</p>}
 
-            <button
-              type="submit"
-              className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition"
-              disabled={loading}
-            >
-              {loading ? "Resetting Password..." : "Reset Password"}
-            </button>
-          </form>
-        ) : (
-          <p className="text-red-600 mt-4 text-center">Invalid or expired link.</p>
-        )}
+        <form onSubmit={handlePasswordReset} className="space-y-6 mt-4">
+          <div>
+            <label htmlFor="newPassword" className="block text-sm font-medium text-black">
+              New Password
+            </label>
+            <input
+              type="password"
+              id="newPassword"
+              className="mt-1 w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-black">
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              id="confirmPassword"
+              className="mt-1 w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition"
+            disabled={loading}
+          >
+            {loading ? "Resetting Password..." : "Reset Password"}
+          </button>
+        </form>
       </div>
     </div>
   );
