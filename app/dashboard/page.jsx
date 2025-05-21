@@ -66,43 +66,22 @@ export default function Dashboard() {
     <div className="min-h-screen font-['Public_Sans'] uppercase text-sm bg-white grid grid-cols-[200px_1fr]">
 
       {/* Sidebar */}
-      <aside className="bg-white px-4 py-6 text-black space-y-6">
-        <h2 className="text-2xl font-bold text-[#1E3D2F]">ΚΘΠ</h2>
-        <p className="text-xs text-gray-600 font-semibold">Welcome</p>
-        <nav className="space-y-2 text-xs font-semibold">
-          <button className="w-full text-left text-gray-400 cursor-default">Homepage</button>
-          <button onClick={() => router.push("/dashboard/attendance")} className="w-full text-left hover:text-[#1E3D2F] transition">Attendance Records</button>
-          <button onClick={() => router.push("/dashboard/merch")} className="w-full text-left hover:text-[#1E3D2F] transition">Merch</button>
-          <button onClick={() => router.push("/dashboard/rsvp")} className="w-full text-left hover:text-[#1E3D2F] transition">RSVPED Events</button>
-          <button onClick={() => router.push("/dashboard/admin")} className="w-full text-left hover:text-[#1E3D2F] transition">Admin</button>
-        </nav>
-      </aside>
+      <aside className="bg-white px-6 py-8 text-black space-y-6 font-sans">
+  <h2 className="text-2xl font-bold text-[#1E3D2F] tracking-wide">ΚΘΠ</h2>
+  <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Welcome</p>
+  <nav className="space-y-4">
+    <button className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Homepage</button>
+    <button onClick={() => router.push("/dashboard/attendance")} className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Attendance Records</button>
+    <button onClick={() => router.push("/dashboard/merch")} className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Merch</button>
+    <button onClick={() => router.push("/dashboard/rsvp")} className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">RSVPED Events</button>
+    <button onClick={() => router.push("/dashboard/admin")} className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Admin</button>
+  </nav>
+</aside>
+
+
 
       {/* Main Content */}
       <main className="px-8 py-6">
-        <header className="flex justify-between items-center mb-6">
-          <nav className="flex space-x-6 text-black font-semibold items-center text-xs">
-            {["Home", "About", "Brothers", "Recruitment", "Blog", "Gallery", "Contact", "Dashboard"].map((item) => (
-              <a key={item} href="#" className="hover:text-gray-500">{item}</a>
-            ))}
-            {!loading && (
-              !user ? (
-                <a href="/sign-in" className="hover:text-gray-500">Sign In</a>
-              ) : (
-                <button
-                  onClick={async () => {
-                    const { error } = await supabase.auth.signOut();
-                    if (!error) router.push('/sign-in');
-                  }}
-                  className="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
-                >
-                  Logout
-                </button>
-              )
-            )}
-          </nav>
-        </header>
-
         <div className="grid grid-cols-2 gap-6">
           {/* Calendar */}
           <div className="bg-[#E0E0E0] p-6 rounded-xl shadow text-black">
@@ -141,7 +120,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Check-in only (RSVP removed) */}
+          {/* Check-in Section */}
           <div className="bg-[#E0E0E0] p-6 rounded-xl shadow">
             <h3 className="text-base font-semibold text-black mb-3">Check-In for chapter</h3>
             <div className="flex justify-between items-center bg-white p-4 rounded-lg border mb-4">
