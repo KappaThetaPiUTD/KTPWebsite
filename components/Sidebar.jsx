@@ -27,28 +27,22 @@ export default function Sidebar() {
       </div>
 
       {/* Sidebar */}
-      <aside className="bg-white px-6 py-8 text-black font-inter space-y-6 hidden md:block min-w-[200px]">
-        {/* Logo */}
-        <h2 className="text-2xl font-bold text-[#1E3D2F] tracking-wide">ΚΘΠ</h2>
+      <aside className="bg-white px-6 py-10 text-black space-y-6 font-sans">
+      <nav className="space-y-4">
+    {navItems.map(({ label, href }) => (
+      <Link
+        key={label}
+        href={href}
+        className={`block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition ${
+          pathname === href ? "underline text-black" : ""
+        }`}
+      >
+        {label}
+      </Link>
+    ))}
+  </nav>
+</aside>
 
-        {/* Welcome label */}
-        <p className="text-sm text-gray-600 font-medium uppercase tracking-wide">Welcome</p>
-
-        {/* Navigation */}
-        <nav className="space-y-4">
-          {navItems.map(({ label, href }) => (
-            <Link
-              key={href}
-              href={href}
-              className={`block text-left text-base font-medium transition duration-150 hover:underline ${
-                pathname === href ? 'underline decoration-black font-semibold' : ''
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
     </>
   );
 }
