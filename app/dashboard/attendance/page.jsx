@@ -20,8 +20,8 @@ export default function AttendancePage() {
   if (loading) return <div className="text-center mt-10">Loading...</div>;
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
+<div className="flex min-h-screen font-['Inter'] bg-white text-[#1E3D2F] px-4 py-20 sm:px-6 md:px-10 gap-10">
+<Sidebar />
       <main className="flex-1 p-6">
         <h1 className="text-2xl font-bold mb-4">Attendance Records</h1>
         <div className="bg-[#E0E0E0] p-6 rounded-xl shadow text-center text-black font-semibold">

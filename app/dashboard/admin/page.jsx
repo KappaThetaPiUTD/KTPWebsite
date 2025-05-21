@@ -20,7 +20,7 @@ export default function AdminPage() {
   if (loading) return <div className="text-center mt-10 text-[#1E3D2F]">Loading...</div>;
 
   return (
-<div className="flex min-h-screen font-['Inter'] bg-white text-[#1E3D2F] px-4 py-10 sm:px-6 md:px-10 gap-10">
+<div className="flex min-h-screen font-['Inter'] bg-white text-[#1E3D2F] px-4 py-20 sm:px-6 md:px-10 gap-10">
 {/* Sidebar */}
       <Sidebar />
 

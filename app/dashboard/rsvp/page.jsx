@@ -32,8 +32,8 @@ export default function RSVPPage() {
   if (loading) return <div className="text-center mt-10">Loading...</div>;
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
+<div className="flex min-h-screen font-['Inter'] bg-white text-[#1E3D2F] px-4 py-20 sm:px-6 md:px-10 gap-10">
+{/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
