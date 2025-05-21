@@ -63,7 +63,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen font-['Public_Sans'] uppercase text-sm bg-white grid grid-cols-[200px_1fr]">
+    <div className="min-h-screen pt-24 font-['Public_Sans'] uppercase text-sm bg-white grid grid-cols-[200px_1fr]">
 
       {/* Sidebar */}
       <aside className="bg-white px-6 py-8 text-black space-y-6 font-sans">
