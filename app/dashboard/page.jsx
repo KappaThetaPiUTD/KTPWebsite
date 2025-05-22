@@ -11,18 +11,7 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [events, setEvents] = useState({
-    "2025-05-21": [
-      { title: "Brothers Chapter", time: "7 PM" },
-      { title: "Pledges Chapter", time: "8:30 PM" },
-    ],
-    "2025-05-25": [
-      { title: "Service Event", time: "2 PM" },
-    ],
-    "2025-06-03": [
-      { title: "Summer Kickoff", time: "5 PM" },
-    ],
-  });
+
   const [selectedDate, setSelectedDate] = useState(null);
   const [checkedIn, setCheckedIn] = useState(false);
 
@@ -97,6 +86,39 @@ export default function Dashboard() {
     setNewEventTitle("");
     setNewEventTime("");
   };
+
+  const [events, setEvents] = useState({});
+  const [eventList, setEventList] = useState([]);
+
+useEffect(() => {
+  const fetchEvents = async () => {
+    try {
+      const res = await fetch("http://localhost:5001/api/events");
+      const json = await res.json();
+      if (json.data) {
+        // Format for calendar
+        const formatted = {};
+        json.data.forEach(event => {
+          const key = new Date(event.event_date).toISOString().split("T")[0];
+          if (!formatted[key]) formatted[key] = [];
+          formatted[key].push({
+            title: event.event_name,
+            time: new Date(event.event_date).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          });
+        });
+        setEvents(formatted);
+        setEventList(json.data); // for upcoming section
+      }
+    } catch (err) {
+      console.error("Failed to fetch events:", err);
+    }
+  };
+
+  fetchEvents();
+}, []);
 
   // Show loading while checking authentication
   if (loading) {
@@ -202,6 +224,30 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
+        <div className="mt-10 bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
+  <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
+  <ul className="text-sm space-y-2">
+    {eventList.length > 0 ? (
+      eventList.map((event, idx) => (
+        <li key={idx}>
+          <span className="font-medium">
+            {new Date(event.event_date).toLocaleString(undefined, {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>{" "}
+          — {event.event_name}
+        </li>
+      ))
+    ) : (
+      <p className="text-xs text-gray-500">No events available.</p>
+    )}
+  </ul>
+</div>
+
       </main>
     </div>
   );
