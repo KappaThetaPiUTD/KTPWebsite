@@ -1,11 +1,12 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const {
+import {
   updateAttendanceStatus,
   getAttendanceByEvent,
-} = require("../controllers/attendanceController");
+} from "../controllers/attendanceController.js";
 
 router.get("/", getAttendanceByEvent); // GET /api/attendance?event_id=...
 router.patch("/:id", updateAttendanceStatus); // PATCH /api/attendance/:id
 
-module.exports = router;
+//module.exports = router;
+export default router;

@@ -1,37 +1,49 @@
 // server.js
 
-const express = require("express");
-const { createClient } = require("@supabase/supabase-js");
-const bodyParser = require("body-parser");
-const cors = require("cors"); // add CORS
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase setup (replace with your actual env vars or hardcoded values if testing)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 const app = express();
-const port = 3000; 
+const port = 3000;
 
 // Middleware
 app.use(bodyParser.json());
-// Enable CORS to allow requests from your frontend origin
 app.use(
   cors({
-    origin: "http://localhost:3000", // adjust if your frontend runs elsewhere
+    origin: "http://localhost:3000", // adjust if needed
     credentials: true,
   })
 );
 
-// Your existing routers
-const applicationsRouter = require("./routes/applications");
+// Routers
+import applicationsRouter from "./routes/applications.js";
 app.use("/api/applications", applicationsRouter);
 
-const qrCheckinRouter = require("./routes/qrCheckIn");
+import qrCheckinRouter from "./routes/qrCheckIn.js";
 app.use("/api/qr-checkin", qrCheckinRouter);
 
-const attendanceRouter = require("./routes/attendance");
+import attendanceRouter from "./routes/attendance.js";
 app.use("/api/attendance", attendanceRouter);
 
-const rsvpRouter = require("./routes/rsvp");
+import rsvpRouter from "./routes/rsvp.js";
 app.use("/api/rsvp", rsvpRouter);
 
-// Your /api/verify-code endpoint
+// QR Code Check-In Endpoint (manual insert, example)
+app.post("/api/checkin", async (req, res) => {
+  const { user_id, event_id, status } = req.body;
+  // Implement your logic here (e.g., insert into attendance table)
+  res.json({ success: true }); // placeholder
+});
+
+// Verify Access Code Endpoint
 app.post("/api/verify-code", async (req, res) => {
   const { code } = req.body;
 
@@ -48,8 +60,7 @@ app.post("/api/verify-code", async (req, res) => {
 
     if (error) throw error;
 
-    if (data && data.code === code) {
-      // Optionally set cookie here or just return success
+    if (data?.code === code) {
       return res.status(200).json({ success: true });
     } else {
       return res.status(401).json({ success: false, message: "Invalid code" });
@@ -60,6 +71,10 @@ app.post("/api/verify-code", async (req, res) => {
   }
 });
 
+// Health check
+app.get("/", (req, res) => {
+  res.send("Server is running!");
+});
 
 // Start the server
 app.listen(port, () => {

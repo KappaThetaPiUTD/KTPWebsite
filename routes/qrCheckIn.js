@@ -1,8 +1,10 @@
 // routes/qrCheckin.js
-const express = require("express");
-const { handleQrCheckin } = require("../controllers/qrCheckInController");
+import express from "express";
+import { handleQrCheckin } from "../controllers/qrCheckInController.js";
+//const { handleQrCheckin } = qrCheckInController;
 const router = express.Router();
 
 router.post("/", handleQrCheckin);
 
-module.exports = router;
+//module.exports = router;
+export default router;

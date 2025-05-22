@@ -1,7 +1,9 @@
-const express = require("express");
+// routes/rsvp.js
+import express from "express";
 const router = express.Router();
-const { submitRSVP } = require("../controllers/rsvpController");
+import { submitRSVP } from "../controllers/rsvpController.js";
 
 router.post("/", submitRSVP);
 
-module.exports = router;
+//module.exports = router;
+export default router;

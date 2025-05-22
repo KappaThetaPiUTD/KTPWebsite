@@ -1,6 +1,7 @@
 // controllers/qrCheckinController.js
-const jwt = require("jsonwebtoken");
-const supabase = require("../supabaseClient"); // Your Supabase client
+import pkg from "jsonwebtoken";
+const { jwt } = pkg;
+import { supabase } from "../supabaseClient.js"; // Your Supabase client
 
 async function handleQrCheckin(req, res) {
   const { qrToken } = req.body;
@@ -63,4 +64,5 @@ async function handleQrCheckin(req, res) {
   });
 }
 
-module.exports = { handleQrCheckin };
+//module.exports = { handleQrCheckin };
+export { handleQrCheckin };

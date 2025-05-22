@@ -1,9 +1,16 @@
 // routes/applications.js
-const express = require("express");
+import express from "express";
+import {
+  submitApplication,
+  getAllApplications,
+  updateApplication,
+} from "../controllers/applicationsController.js";
+
 const router = express.Router();
-const { submitApplication } = require("../controllers/applicationsController");
 
 router.post("/", submitApplication);
+router.get("/", getAllApplications);
+router.patch("/:id", updateApplication);
 
 module.exports = router;
 
@@ -21,3 +28,4 @@ app.use("/api/auth", authRouter);
 app.listen(3000, () => {
     console.log("Server running on port 3000");
 });
+export default router;
