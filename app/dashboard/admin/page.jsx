@@ -32,85 +32,134 @@ export default function AdminPage() {
     fetchRSVPs();
   }, []);
 
-  if (loading) return <div className="text-center mt-10 text-primary">Loading...</div>;
+  if (loading) return <div className="text-center mt-20 text-sm text-gray-500">Loading...</div>;
 
   return (
-    <div className="flex min-h-screen font-['Inter'] bg-white text-primary px-4 py-20 sm:px-6 md:px-10 gap-10">
-      <Sidebar />
+    <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
 
-      <main className="flex-1 px-6 py-10 md:px-12 lg:px-20">
-        <h1 className="text-3xl font-bold mb-8">Admin Dashboard</h1>
+      {/* Sidebar */}
+      <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
+        <Sidebar />
+      </aside>
 
-        {/* Profile Box */}
-        <div className="bg-gray-100 rounded-xl shadow-lg max-w-xl mx-auto p-8 space-y-5 text-center border border-black mb-10">
-          <img
-            src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.email}`}
-            alt="Profile"
-            className="w-24 h-24 mx-auto rounded-full border border-primary"
-          />
-          <h2 className="text-xl font-semibold">
-            {user.user_metadata?.full_name || "No Name Provided"}
-          </h2>
-          <p>Email: {user.email}</p>
-          <p>Graduation Year: {user.user_metadata?.grad_year || "Not set"}</p>
-          <p>Role: {user.role || "User"}</p>
-        </div>
+      {/* Main Content */}
+      <main className="px-8 py-6 w-full space-y-12">
+        <h1 className="text-2xl font-bold text-primary">Admin Dashboard</h1>
 
-        {/* Attendance Section */}
-        <section className="mb-10">
-          <h2 className="text-2xl font-bold mb-4">Attendance Records</h2>
+        {/* Attendance Table */}
+        <section>
+          <h2 className="text-lg font-semibold mb-3 text-primary">Attendance Records</h2>
           <div className="overflow-x-auto border border-gray-300 rounded-lg">
-            <table className="min-w-full text-left text-sm">
+            <table className="min-w-full text-sm">
               <thead className="bg-primary text-white">
                 <tr>
-                  <th className="px-4 py-2">Name</th>
-                  <th className="px-4 py-2">Email</th>
-                  <th className="px-4 py-2">Time Checked In</th>
+                  <th className="px-4 py-2 text-left">Name</th>
+                  <th className="px-4 py-2 text-left">Email</th>
+                  <th className="px-4 py-2 text-left">Time Checked In</th>
                 </tr>
               </thead>
               <tbody>
-                {attendanceData.map((entry, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="px-4 py-2">{entry.name}</td>
-                    <td className="px-4 py-2">{entry.email}</td>
-                    <td className="px-4 py-2">{entry.checked_in_time || "N/A"}</td>
-                  </tr>
-                ))}
-              </tbody>
+  {attendanceData.map((entry, index) => (
+    <tr key={index} className="border-t bg-primary hover:bg-primary/90 text-white">
+      <td className="px-4 py-2">{entry.name || "N/A"}</td>
+      <td className="px-4 py-2">{entry.email}</td>
+      <td className="px-4 py-2">{entry.checked_in_time || "N/A"}</td>
+    </tr>
+  ))}
+</tbody>
             </table>
           </div>
         </section>
 
-        {/* RSVP Section */}
-        <section className="mt-12">
-  <h2 className="text-2xl font-bold mb-4">RSVP Submissions</h2>
-  <div className="overflow-x-auto border border-gray-300 rounded-lg">
-    <table className="min-w-full text-left text-sm">
-      <thead className="bg-primary text-white">
-        <tr>
-          <th className="px-4 py-2">Name</th>
-          <th className="px-4 py-2">Email</th>
-          <th className="px-4 py-2">Event</th>
-          <th className="px-4 py-2">RSVP Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        {rsvpData.map((entry, index) => (
-          <tr key={index} className="border-t hover:bg-gray-50">
-            <td className="px-4 py-2">{entry.name || "N/A"}</td>
-            <td className="px-4 py-2">{entry.email}</td>
-            <td className="px-4 py-2">{entry.event || "General"}</td>
-            <td className="px-4 py-2">
-              {entry.rsvp_time
-                ? new Date(entry.rsvp_time).toLocaleString()
-                : "Not recorded"}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</section>
+        {/* RSVP Table */}
+        <section>
+          <h2 className="text-lg font-semibold mb-3 text-primary">RSVP Submissions</h2>
+          <div className="overflow-x-auto border border-gray-300 rounded-lg">
+            <table className="min-w-full text-sm">
+              <thead className="bg-primary text-white">
+                <tr>
+                  <th className="px-4 py-2 text-left">Name</th>
+                  <th className="px-4 py-2 text-left">Email</th>
+                  <th className="px-4 py-2 text-left">Event</th>
+                  <th className="px-4 py-2 text-left">RSVP Time</th>
+                </tr>
+              </thead>
+              <tbody>
+  {rsvpData.map((entry, index) => (
+    <tr key={index} className="border-t bg-primary hover:bg-primary/90 text-white">
+      <td className="px-4 py-2">{entry.name || "N/A"}</td>
+      <td className="px-4 py-2">{entry.email}</td>
+      <td className="px-4 py-2">{entry.event || "General"}</td>
+      <td className="px-4 py-2">
+        {entry.rsvp_time
+          ? new Date(entry.rsvp_time).toLocaleString()
+          : "Not recorded"}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
+            </table>
+          </div>
+        </section>
+
+        {/* Create Event */}
+        <section>
+          <h2 className="text-lg font-semibold mb-3 text-primary">Create Event</h2>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const title = e.target.title.value;
+              const date = e.target.date.value;
+              const time = e.target.time.value;
+
+              const { error } = await supabase.from("events").insert([
+                { title, date, time },
+              ]);
+
+              if (error) {
+                alert("Error creating event: " + error.message);
+              } else {
+                alert("Event created successfully!");
+                e.target.reset();
+              }
+            }}
+            className="max-w-xl bg-gray-50 border border-gray-300 rounded-xl p-6 mx-auto"
+          >
+            <div className="mb-4">
+              <label className="block font-medium mb-1">Title</label>
+              <input
+                name="title"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block font-medium mb-1">Date</label>
+              <input
+                name="date"
+                type="date"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block font-medium mb-1">Time</label>
+              <input
+                name="time"
+                type="time"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition"
+            >
+              Add Event
+            </button>
+          </form>
+        </section>
       </main>
     </div>
   );

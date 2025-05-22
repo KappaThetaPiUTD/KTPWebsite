@@ -10,6 +10,7 @@ const navItems = [
   { label: "Attendance Records", href: "/dashboard/attendance" },
   { label: "Merch", href: "/dashboard/merch" },
   { label: "RSVPED Events", href: "/dashboard/rsvp" },
+  { label: "Profile", href: "/dashboard/profile" },
   { label: "Admin", href: "/dashboard/admin" },
 ];
 
