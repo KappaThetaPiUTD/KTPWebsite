@@ -12,13 +12,13 @@ const supabase = createClient(
 );
 
 const app = express();
-const port = 3000;
+const port = 5001;
 
 // Middleware
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "http://localhost:3000", // adjust if needed
+    origin: "http://localhost:5001", // adjust if needed
     credentials: true,
   })
 );
