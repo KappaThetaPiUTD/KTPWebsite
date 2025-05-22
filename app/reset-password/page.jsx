@@ -17,35 +17,33 @@ export default function ResetPassword() {
 
   useEffect(() => {
     const exchangeToken = async () => {
-      // Step 1: Get tokens from URL hash
-      const hash = window.location.hash.substring(1); // remove "#"
+      const hash = window.location.hash.substring(1);
       const params = new URLSearchParams(hash);
       const access_token = params.get("access_token");
       const refresh_token = params.get("refresh_token");
-  
+
       if (access_token && refresh_token) {
-        // Step 2: Sign out any existing session
         await supabase.auth.signOut();
-  
-        // Step 3: Set new session using reset link tokens
+
         const { error } = await supabase.auth.setSession({
           access_token,
           refresh_token,
         });
-  
+
         if (error) {
           setErrorMessage("Invalid or expired reset link.");
         } else {
+          // ✅ Set the fromResetFlow flag for middleware to check
+          document.cookie = "fromResetFlow=true; path=/";
           setIsReady(true);
         }
       } else {
         setErrorMessage("Reset link is missing tokens.");
       }
     };
-  
+
     exchangeToken();
   }, [supabase]);
-  
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
@@ -64,6 +62,9 @@ export default function ResetPassword() {
       if (error) {
         setErrorMessage(error.message || "Password reset failed.");
       } else {
+        // ✅ Clear the cookie now that reset is done
+        document.cookie = "fromResetFlow=; path=/; max-age=0";
+
         setSuccessMessage("Password reset successful! Redirecting to login...");
         setTimeout(() => router.push("/login"), 2500);
       }
