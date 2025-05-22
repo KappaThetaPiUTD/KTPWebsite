@@ -1,5 +1,5 @@
 // controllers/attendanceController.js
-const supabase = require("../supabaseClient");
+import { supabase } from "../supabaseClient.js";
 
 const VALID_STATUSES = ["present", "late", "excused", "unexcused"];
 
@@ -66,7 +66,4 @@ async function getAttendanceByEvent(req, res) {
   res.json({ data });
 }
 
-module.exports = {
-  updateAttendanceStatus,
-  getAttendanceByEvent,
-};
+export { updateAttendanceStatus, getAttendanceByEvent };

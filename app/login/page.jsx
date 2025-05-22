@@ -1,77 +1,143 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
+import { FaGoogle, FaDiscord } from "react-icons/fa";
+import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 
-export default function CodeLogin() {
+export default function SignUp() {
   const router = useRouter();
-  const [code, setCode] = useState(Array(8).fill(""));
-  const [error, setError] = useState("");
-  const inputsRef = useRef([]);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [resetSent, setResetSent] = useState(false);
 
-  const handleChange = (e, index) => {
-    const value = e.target.value.replace(/\D/, ""); // only digits
-    if (!value) return;
-    const newCode = [...code];
-    newCode[index] = value[0];
-    setCode(newCode);
-    if (index < 7) {
-      inputsRef.current[index + 1]?.focus();
-    }
-  };
-
-  const handleBackspace = (e, index) => {
-    if (e.key === "Backspace" && !code[index] && index > 0) {
-      const newCode = [...code];
-      newCode[index - 1] = "";
-      setCode(newCode);
-      inputsRef.current[index - 1]?.focus();
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleEmailSignUp = async (e) => {
     e.preventDefault();
-    const fullCode = code.join("");
-    if (fullCode.length !== 8) {
-      setError("Please enter all 8 digits.");
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert("Sign-up failed: " + error.message);
+    } else {
+      alert("Check your email to confirm your account.");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+    if (error) console.error("Google login failed:", error.message);
+  };
+
+  const handleDiscordLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "discord" });
+    if (error) console.error("Discord login failed:", error.message);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      alert("Please enter your email to reset password.");
       return;
     }
-    // TODO: Replace this with your Supabase verification logic
-    console.log("Submitted code:", fullCode);
-    router.push("/dashboard");
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${location.origin}/reset-password`,
+    });
+
+    if (error) {
+      alert("Failed to send reset email: " + error.message);
+    } else {
+      setResetSent(true);
+    }
   };
 
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) router.push("/dashboard");
+    };
+    checkUser();
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4 font-['Public_Sans']">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <h2 className="text-3xl font-bold text-center mb-6 text-black uppercase">Enter Access Code</h2>
+        <h2 className="text-3xl font-bold text-center mb-4 text-black">Login</h2>
 
-        <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-6">
-          <div className="flex justify-center space-x-2">
-            {code.map((digit, i) => (
-              <input
-                key={i}
-                ref={(el) => (inputsRef.current[i] = el)}
-                type="text"
-                inputMode="numeric"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(e, i)}
-                onKeyDown={(e) => handleBackspace(e, i)}
-                className="w-10 h-12 text-center border border-gray-300 rounded-lg text-xl font-semibold text-black focus:ring-2 focus:ring-[#1E3D2F]"
-              />
-            ))}
+        {/* ✅ Email/Password Form */}
+        <form onSubmit={handleEmailSignUp} className="space-y-4 mt-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-black">
+              E-mail
+            </label>
+            <input
+              type="email"
+              id="email"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
+              placeholder="example@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
-
-          {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-black">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <div className="text-right mt-1">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Forgot password?
+              </button>
+              {resetSent && (
+                <p className="text-xs text-green-600 mt-1">Reset email sent!</p>
+              )}
+            </div>
+          </div>
 
           <button
             type="submit"
-            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#163226] transition uppercase font-semibold"
+            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition"
           >
-            Login
+            Sign Up
           </button>
         </form>
+
+        {/* Separator */}
+        <div className="flex items-center my-4">
+          <hr className="flex-grow border-gray-300" />
+          <span className="mx-3 text-gray-500 text-sm">or</span>
+          <hr className="flex-grow border-gray-300" />
+        </div>
+
+        {/* OAuth Buttons */}
+        <div className="space-y-3">
+          <button
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg text-black hover:bg-gray-100 transition"
+          >
+            <FaGoogle className="mr-2 text-lg" /> Continue with Google
+          </button>
+          <button
+            onClick={handleDiscordLogin}
+            className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg text-black hover:bg-gray-100 transition"
+          >
+            <FaDiscord className="mr-2 text-lg text-[#5865F2]" /> Continue with Discord
+          </button>
+        </div>
       </div>
     </div>
   );

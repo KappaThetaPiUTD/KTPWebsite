@@ -1,5 +1,5 @@
-const supabase = require("../supabaseClient");
-const nodemailer = require("nodemailer");
+import supabase from "../supabaseClient.js";
+import nodemailer from "nodemailer";
 
 async function submitRSVP(req, res) {
   const { user_id, event_id, response } = req.body;
@@ -67,4 +67,4 @@ async function sendConfirmationEmail(to, eventName, eventDate) {
   return transporter.sendMail(mailOptions);
 }
 
-module.exports = { submitRSVP };
+export { submitRSVP };
