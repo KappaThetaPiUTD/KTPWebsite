@@ -5,19 +5,23 @@ import { FaGoogle, FaDiscord } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 
-export default function SignIn() {
+export default function SignUp() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [resetSent, setResetSent] = useState(false);
 
-  const handleEmailSignIn = async (e) => {
+  const handleEmailSignUp = async (e) => {
     e.preventDefault();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
     if (error) {
-      console.error("Email login failed:", error.message);
+      alert("Sign-up failed: " + error.message);
     } else {
-      router.push("/dashboard");
+      alert("Check your email to confirm your account.");
     }
   };
 
@@ -37,8 +41,8 @@ export default function SignIn() {
       return;
     }
 
-    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${location.origin}/reset-password`, // Adjust this route as needed
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${location.origin}/reset-password`,
     });
 
     if (error) {
@@ -59,10 +63,10 @@ export default function SignIn() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-        <h2 className="text-3xl font-bold text-center mb-4 text-black">Sign Up</h2>
+        <h2 className="text-3xl font-bold text-center mb-4 text-black">Login</h2>
 
         {/* ✅ Email/Password Form */}
-        <form onSubmit={handleEmailSignIn} className="space-y-4 mt-4">
+        <form onSubmit={handleEmailSignUp} className="space-y-4 mt-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-black">
               E-mail
@@ -108,7 +112,7 @@ export default function SignIn() {
             type="submit"
             className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition"
           >
-            Sign in
+            Sign Up
           </button>
         </form>
 

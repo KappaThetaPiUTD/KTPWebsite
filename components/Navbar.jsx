@@ -20,13 +20,19 @@ const Navbar = () => {
       setUser(user);
     };
     fetchUser();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      fetchUser(); // update on login/logout
+    });
+
+    return () => listener?.subscription.unsubscribe();
   }, []);
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (!error) {
       setUser(null);
-      router.push("/sign-in");
+      router.push("/login");
     }
   };
 
@@ -72,12 +78,19 @@ const Navbar = () => {
             ))}
 
           {!user ? (
-            <li className="list-none relative p-4 cursor-pointer group">
-              <Link href="/sign-in">SIGN IN</Link>
-            </li>
+            <>
+              <li className="list-none relative p-4 cursor-pointer group">
+                <Link href="/login">LOGIN</Link>
+              </li>
+              <li className="list-none relative p-4 cursor-pointer group">
+                <Link href="/sign-in">SIGN UP</Link>
+              </li>
+            </>
           ) : (
             <li className="list-none relative p-4 cursor-pointer group">
-              <button onClick={handleLogout} className="text-black hover:text-red-600 transition">LOGOUT</button>
+              <button onClick={handleLogout} className="text-black hover:text-red-600 transition">
+                LOGOUT
+              </button>
             </li>
           )}
         </div>
@@ -108,12 +121,19 @@ const Navbar = () => {
             ))}
 
           {!user ? (
-            <li className="p-4 text-center text-black">
-              <Link href="/sign-in" onClick={closeNav}>SIGN IN</Link>
-            </li>
+            <>
+              <li className="p-4 text-center text-black">
+                <Link href="/login" onClick={closeNav}>LOGIN</Link>
+              </li>
+              <li className="p-4 text-center text-black">
+                <Link href="/sign-in" onClick={closeNav}>SIGN UP</Link>
+              </li>
+            </>
           ) : (
             <li className="p-4 text-center text-black">
-              <button onClick={() => { handleLogout(); closeNav(); }}>LOGOUT</button>
+              <button onClick={() => { handleLogout(); closeNav(); }}>
+                LOGOUT
+              </button>
             </li>
           )}
         </ul>
