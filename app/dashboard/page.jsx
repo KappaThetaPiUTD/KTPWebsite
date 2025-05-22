@@ -1,9 +1,10 @@
+// Dashboard.jsx — Interactive Calendar with Event View Only
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '../../lib/supabase';
-import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "../../lib/supabase";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -11,15 +12,26 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState({
-    '2025-05-21': [
-      { title: 'Brothers Chapter', time: '7 PM' },
-      { title: 'Pledges Chapter', time: '8:30 PM' }
-    ]
+    "2025-05-21": [
+      { title: "Brothers Chapter", time: "7 PM" },
+      { title: "Pledges Chapter", time: "8:30 PM" },
+    ],
+    "2025-05-25": [
+      { title: "Service Event", time: "2 PM" },
+    ],
+    "2025-06-03": [
+      { title: "Summer Kickoff", time: "5 PM" },
+    ],
   });
   const [selectedDate, setSelectedDate] = useState(null);
   const [checkedIn, setCheckedIn] = useState(false);
 
   useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (!data?.user) router.push("/sign-in");
+      else setUser(data.user);
+      setLoading(false);
     const checkAuth = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -50,7 +62,7 @@ export default function Dashboard() {
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
-  const monthName = currentDate.toLocaleString('default', { month: 'long' });
+  const monthName = currentDate.toLocaleString("default", { month: "long" });
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
@@ -94,19 +106,19 @@ export default function Dashboard() {
 
   // If we get here, user is authenticated
   return (
-    <div className="min-h-screen bg-[#f9f9f9] pt-24 font-['Public_Sans'] uppercase text-sm text-black grid grid-cols-[220px_1fr]">
-
-      {/* Sidebar */}
-      <aside className="bg-white px-6 py-8 space-y-6 border-r border-gray-200 shadow-sm">
+    <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
+      <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
         <nav className="space-y-4">
-          <button className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Homepage</button>
-          <button onClick={() => router.push("/dashboard/attendance")} className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Attendance Records</button>
-          <button onClick={() => router.push("/dashboard/merch")} className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Merch</button>
-          <button onClick={() => router.push("/dashboard/rsvp")} className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">RSVPED Events</button>
-          <button onClick={() => router.push("/dashboard/admin")} className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Admin</button>
+          {["Homepage", "Attendance Records", "Merch", "RSVPED Events", "Profile", "Admin"].map((label, i) => (
+            <button key={i} className="block text-left text-base font-medium hover:text-primary hover:underline transition">
+              {label}
+            </button>
+          ))}
         </nav>
       </aside>
 
+      <main className="px-8 py-6 w-full">
+        <h1 className="text-xl font-bold mb-6">Welcome, {user?.user_metadata?.full_name || "Member"}</h1>
       {/* Main Content */}
       <main className="px-8 py-6">
         <header className="flex justify-between items-center mb-6">
@@ -137,13 +149,13 @@ export default function Dashboard() {
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-base font-semibold">{monthName} {year}</h3>
               <div className="flex space-x-2">
-                <button onClick={handlePrevMonth}><IoChevronBack /></button>
-                <button onClick={handleNextMonth}><IoChevronForward /></button>
+                <button aria-label="Previous Month" onClick={handlePrevMonth}><IoChevronBack /></button>
+                <button aria-label="Next Month" onClick={handleNextMonth}><IoChevronForward /></button>
               </div>
             </div>
             <div className="grid grid-cols-7 text-center text-xs mb-2">
-              {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map(day => (
-                <div key={day} className="font-medium">{day}</div>
+              {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
+                <div key={d} className="font-medium">{d}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 text-xs">
@@ -156,8 +168,7 @@ export default function Dashboard() {
                     {day && (
                       <button
                         onClick={() => handleDayClick(day)}
-                        className={`w-8 h-8 rounded-full mx-auto flex items-center justify-center relative
-                          ${isToday ? "bg-[#136B48] text-white" : "hover:bg-gray-200 text-black"}`}
+                        className={`w-8 h-8 rounded-full mx-auto flex items-center justify-center relative transition ${isToday ? "bg-primary text-white" : "hover:bg-gray-200 text-black"}`}
                       >
                         {day}
                         {hasEvent && <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full" />}
@@ -167,26 +178,32 @@ export default function Dashboard() {
                 );
               })}
             </div>
+            {selectedDate && events[selectedDate]?.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-sm font-semibold mb-2 text-primary">Events on {selectedDate}:</h4>
+                <ul className="list-disc list-inside text-xs space-y-1">
+                  {events[selectedDate].map((evt, idx) => (
+                    <li key={idx}>{evt.time} - <strong>{evt.title}</strong></li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {selectedDate && !events[selectedDate] && (
+              <p className="text-xs mt-4 text-gray-500">No events scheduled for {selectedDate}.</p>
+            )}
           </div>
 
-          {/* Check-in Section */}
+          {/* Check-in */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
-            <h3 className="text-base font-semibold text-black mb-3">Check-In for chapter</h3>
-            <div className="flex justify-between items-center bg-white p-4 rounded-lg border mb-4">
-              <div className="rounded-full bg-[#1E3D2F] text-white w-8 h-8 flex items-center justify-center text-sm">
+            <h3 className="text-base font-semibold mb-3">Check-In for Chapter</h3>
+            <div className="flex justify-between items-center bg-white p-4 border rounded-lg mb-4">
+              <div className="rounded-full bg-primary text-white w-8 h-8 flex items-center justify-center text-sm">
                 {user?.email?.[0]?.toUpperCase() || "S"}
               </div>
-              <img 
-                src="https://via.placeholder.com/80" 
-                alt="QR Code"
-                onError={(e) => e.currentTarget.style.display = 'none'}
-              />
+              <img src="https://via.placeholder.com/80" alt="QR Code" onError={(e) => (e.currentTarget.style.display = "none")} />
             </div>
             <div className="text-center">
-              <button
-                onClick={() => setCheckedIn(true)}
-                className="bg-[#1E3D2F] text-white px-4 py-2 rounded hover:bg-[#163226] transition"
-              >
+              <button onClick={() => setCheckedIn(true)} className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition">
                 Check In
               </button>
               {checkedIn && (
@@ -196,11 +213,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Bottom Info Cards */}
+        {/* Info Boxes */}
         <div className="grid grid-cols-3 gap-6 mt-6">
-          {["Attendance Record", "Strikes", "Social Quote"].map((label, i) => (
-            <div key={i} className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm text-center text-black font-semibold">
-              {label}
+          {["Attendance Record", "Strikes", "Social Quote"].map((text, idx) => (
+            <div key={idx} className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm text-center font-semibold">
+              {text}
             </div>
           ))}
         </div>

@@ -29,49 +29,58 @@ export default function RSVPPage() {
     getUser();
   }, [router]);
 
-  if (loading) return <div className="text-center mt-10">Loading...</div>;
+  if (loading) return <div className="text-center mt-20 text-sm text-gray-500">Loading...</div>;
 
   return (
-<div className="flex min-h-screen font-['Inter'] bg-white text-[#1E3D2F] px-4 py-20 sm:px-6 md:px-10 gap-10">
-{/* Sidebar */}
-      <Sidebar />
+    <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
+
+      {/* Sidebar */}
+      <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
+        <Sidebar />
+      </aside>
 
       {/* Main Content */}
-      
-      <div className="flex-1 p-6 overflow-y-auto bg-white">
-        <h1 className="text-2xl font-bold mb-6 text-black">Welcome, {user?.email}!</h1>
+      <main className="px-8 py-6 w-full">
+        <h1 className="text-xl font-bold mb-6 text-primary">
+          Welcome, {user?.email}!
+        </h1>
 
-        <div className="bg-[#E0E0E0] rounded-xl p-6 shadow-md text-black">
-          <h2 className="text-xl font-semibold mb-4">RSVP Events</h2>
-          <p className="mb-4">Let us know your attendance for upcoming events:</p>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold mb-2 text-primary">RSVP Events</h2>
+          <p className="text-sm text-gray-700 mb-6">
+            Let us know your attendance for upcoming events:
+          </p>
 
-          {Object.keys(rsvpStatus).map((event, idx) => (
-            <div key={idx} className="mb-4">
-              <p className="text-sm font-medium">{event}</p>
-              <div className="flex gap-2 mt-2">
-                {["going", "maybe", "not going"].map((status) => (
-                  <button
-                    key={status}
-                    onClick={() =>
-                      setRsvpStatus((prev) => ({
-                        ...prev,
-                        [event]: status,
-                      }))
-                    }
-                    className={`px-3 py-1 text-xs rounded-lg ${
-                      rsvpStatus[event] === status
-                        ? "bg-green-700 text-white"
-                        : "bg-[#1E3D2F] text-white hover:bg-[#163226]"
-                    }`}
-                  >
-                    {status}
-                  </button>
-                ))}
+          <div className="space-y-6">
+            {Object.keys(rsvpStatus).map((event, idx) => (
+              <div key={idx}>
+                <p className="font-medium text-sm mb-2">{event}</p>
+                <div className="flex flex-wrap gap-3">
+                  {["going", "maybe", "not going"].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() =>
+                        setRsvpStatus((prev) => ({
+                          ...prev,
+                          [event]: status,
+                        }))
+                      }
+                      className={`px-4 py-1 rounded-full text-xs font-semibold transition
+                        ${
+                          rsvpStatus[event] === status
+                            ? "bg-primary/80 text-white"
+                            : "bg-primary text-white hover:bg-primary/90"
+                        }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

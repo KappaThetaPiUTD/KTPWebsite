@@ -68,14 +68,14 @@ export default function SignIn() {
               E-mail
             </label>
             <input
-              type="email"
-              id="email"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
-              placeholder="example@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+  type="email"
+  id="email"
+  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-green-700"
+  placeholder="example@email.com"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  required
+/>
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-black">
