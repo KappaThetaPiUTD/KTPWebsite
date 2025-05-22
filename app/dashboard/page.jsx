@@ -17,14 +17,33 @@ export default function Dashboard() {
   const [checkedIn, setCheckedIn] = useState(false);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data?.user) router.push('/sign-in');
-      else setUser(data.user);
-      setLoading(false);
+    const checkAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Auth error:', error);
+          router.push('/login');
+          return;
+        }
+
+        if (!session || !session.user) {
+          // No valid session, redirect to login
+          router.push('/login');
+          return;
+        }
+
+        // User is authenticated
+        setUser(session.user);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        router.push('/login');
+      }
     };
-    checkUser();
-  }, []);
+
+    checkAuth();
+  }, [router]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -62,6 +81,16 @@ export default function Dashboard() {
     setNewEventTime("");
   };
 
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-lg text-black">Loading...</div>
+      </div>
+    );
+  }
+
+  // If we get here, user is authenticated
   return (
     <div className="min-h-screen font-['Public_Sans'] uppercase text-sm bg-white grid grid-cols-[200px_1fr]">
 
@@ -92,7 +121,7 @@ export default function Dashboard() {
                 <button
                   onClick={async () => {
                     const { error } = await supabase.auth.signOut();
-                    if (!error) router.push('/sign-in');
+                    if (!error) router.push('/login');
                   }}
                   className="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
                 >
