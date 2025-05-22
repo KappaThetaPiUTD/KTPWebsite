@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
 import { supabase } from "../lib/supabase";
 
@@ -10,6 +10,7 @@ const Navbar = () => {
   const [isHovered, setIsHovered] = useState(null);
   const [user, setUser] = useState(null);
   const router = useRouter();
+  const pathname = usePathname(); // Add this to get current path
 
   const handleNav = () => setNav(!nav);
   const closeNav = () => setNav(false);
@@ -47,6 +48,9 @@ const Navbar = () => {
     { id: 8, text: "DASHBOARD", path: "/dashboard" },
   ];
 
+  // Hide dashboard if user is not logged in OR if on reset password page
+  const shouldShowDashboard = user && pathname !== '/reset-password';
+
   return (
     <div className="fixed bg-[#ffffff] w-full z-50 h-24">
       <div className="flex justify-between items-center h-24 max-w-[1200px] mx-auto px-4 text-black">
@@ -61,7 +65,7 @@ const Navbar = () => {
         {/* Desktop Nav */}
         <div className="hidden md:flex">
           {navItems
-            .filter((item) => item.text !== "DASHBOARD" || user)
+            .filter((item) => item.text !== "DASHBOARD" || shouldShowDashboard)
             .map((item) => (
               <li
                 key={item.id}
@@ -111,7 +115,7 @@ const Navbar = () => {
           }`}
         >
           {navItems
-            .filter((item) => item.text !== "DASHBOARD" || user)
+            .filter((item) => item.text !== "DASHBOARD" || shouldShowDashboard)
             .map((item) => (
               <li key={item.id} className="p-4 text-center text-black">
                 <Link href={item.path} onClick={closeNav}>

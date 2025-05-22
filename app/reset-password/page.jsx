@@ -63,7 +63,7 @@ export default function ResetPassword() {
         setErrorMessage(error.message || "Password reset failed.");
       } else {
         // ✅ Clear the cookie now that reset is done
-        document.cookie = "fromResetFlow=; path=/; max-age=0";
+        document.cookie = "fromResetFlow=false; path=/; max-age=0;";
 
         setSuccessMessage("Password reset successful! Redirecting to login...");
         setTimeout(() => router.push("/login"), 2500);

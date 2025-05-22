@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const { supabase } = require("../lib/supabase");
 const router = express.Router();
 
+/*
 const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
 const JWT_EXPIRATION = "1h";
 
@@ -55,6 +56,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
+*/
 // Forgot Password - Generate Reset Link
 router.post("/forgot-password", async (req, res) => {
     const { email } = req.body;

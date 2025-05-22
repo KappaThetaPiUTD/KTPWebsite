@@ -15,6 +15,7 @@
     "@nextui-org/system": "^2.0.15",
     "@nextui-org/theme": "^2.1.18",
     "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/auth-helpers-react": "^0.5.0",
     "@supabase/supabase-js": "^2.49.4",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "axios": "^1.9.0",

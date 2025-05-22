@@ -1,51 +1,66 @@
-// app/src/login.js
+"use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { FaGoogle, FaDiscord } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
+export default function Login() {  // I renamed from SignUp to Login for clarity, rename file too if needed
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [resetSent, setResetSent] = useState(false);
 
-const Login = () => {
-    const navigate = useNavigate();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+  // For logging in with email + password
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    console.log("Login result:", { data, error })
+    console.log("User after login:", data?.user)
+    console.log("Session after login:", data?.session)
+    if (error) {
+      alert("Login failed: " + error.message);
+    } else {
+      router.push("/dashboard"); // Navigate after successful login
+    }
+  };
 
-    const handleLogin = async () => {
-        try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password
-            });
+  const handleGoogleLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+    if (error) console.error("Google login failed:", error.message);
+  };
 
-            if (error) {
-                console.error("Login failed:", error.message);
-                alert("Invalid email or password");
-                return;
-            }
+  const handleDiscordLogin = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider: "discord" });
+    if (error) console.error("Discord login failed:", error.message);
+  };
 
-            navigate("/dashboard");
-        } catch (err) {
-            console.error("Login error:", err);
-        }
+  const handleForgotPassword = async () => {
+    if (!email) {
+      alert("Please enter your email to reset password.");
+      return;
+    }
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${location.origin}/reset-password`,
+    });
+
+    if (error) {
+      alert("Failed to send reset email: " + error.message);
+    } else {
+      setResetSent(true);
+    }
+  };
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data?.user) router.push("/dashboard");
     };
+    checkUser();
+  }, []);
 
-    return (
-        <div>
-            <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button onClick={handleLogin}>Login</button>
-        </div>
-    );
-};
-
-export default Login;
+}
