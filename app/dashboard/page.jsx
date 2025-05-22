@@ -58,8 +58,8 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[#f9f9f9] pt-24 font-['Public_Sans'] uppercase text-sm text-black grid grid-cols-[220px_1fr]">
 
       {/* Sidebar */}
-      <aside className="bg-white px-6 py-8 space-y-6 border-r border-gray-200 shadow-sm">
-        <nav className="space-y-4">
+      <aside className="bg-white px-6 py-10 font-['Inter'] space-y-6 border-r border-black shadow-sm">
+      <nav className="space-y-4">
           <button className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Homepage</button>
           <button onClick={() => router.push("/dashboard/attendance")} className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Attendance Records</button>
           <button onClick={() => router.push("/dashboard/merch")} className="block text-left text-base font-medium hover:text-[#1E3D2F] hover:underline transition">Merch</button>
@@ -123,12 +123,13 @@ export default function Dashboard() {
               />
             </div>
             <div className="text-center">
-              <button
-                onClick={() => setCheckedIn(true)}
-                className="bg-[#1E3D2F] text-white px-4 py-2 rounded hover:bg-[#163226] transition"
-              >
-                Check In
-              </button>
+            <button
+  onClick={() => setCheckedIn(true)}
+  className="bg-[#136B48] text-white px-4 py-2 rounded hover:bg-[#0f5a3a] transition"
+>
+  Check In
+</button>
+
               {checkedIn && (
                 <p className="text-green-700 font-medium mt-2">Checked in successfully!</p>
               )}
