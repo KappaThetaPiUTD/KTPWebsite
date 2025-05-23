@@ -27,14 +27,33 @@ export default function Dashboard() {
   const [checkedIn, setCheckedIn] = useState(false);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data?.user) router.push("/sign-in");
-      else setUser(data.user);
-      setLoading(false);
+    const checkAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Auth error:', error);
+          router.push('/login');
+          return;
+        }
+
+        if (!session || !session.user) {
+          // No valid session, redirect to login
+          router.push('/login');
+          return;
+        }
+
+        // User is authenticated
+        setUser(session.user);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        router.push('/login');
+      }
     };
-    checkUser();
-  }, []);
+
+    checkAuth();
+  }, [router]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -61,6 +80,27 @@ export default function Dashboard() {
     setSelectedDate(key);
   };
 
+  const handleAddEvent = () => {
+    if (!newEventTitle.trim() || !newEventTime.trim()) return;
+    const event = { title: newEventTitle.trim(), time: newEventTime.trim() };
+    setEvents(prev => ({
+      ...prev,
+      [selectedDate]: [...(prev[selectedDate] || []), event]
+    }));
+    setNewEventTitle("");
+    setNewEventTime("");
+  };
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-lg text-black">Loading...</div>
+      </div>
+    );
+  }
+
+  // If we get here, user is authenticated
   return (
     <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
       <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
@@ -72,9 +112,31 @@ export default function Dashboard() {
           ))}
         </nav>
       </aside>
-
+ {/* Main Content */}
       <main className="px-8 py-6 w-full">
         <h1 className="text-xl font-bold mb-6">Welcome, {user?.user_metadata?.full_name || "Member"}</h1>
+        <header className="flex justify-between items-center mb-6">
+          <nav className="flex space-x-6 text-black font-semibold items-center text-xs">
+            {["Home", "About", "Brothers", "Recruitment", "Blog", "Gallery", "Contact", "Dashboard"].map((item) => (
+              <a key={item} href="#" className="hover:text-gray-500">{item}</a>
+            ))}
+            {!loading && (
+              !user ? (
+                <a href="/sign-in" className="hover:text-gray-500">Sign In</a>
+              ) : (
+                <button
+                  onClick={async () => {
+                    const { error } = await supabase.auth.signOut();
+                    if (!error) router.push('/login');
+                  }}
+                  className="px-4 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-xs"
+                >
+                  Logout
+                </button>
+              )
+            )}
+          </nav>
+        </header>
 
         <div className="grid grid-cols-2 gap-6">
           {/* Calendar */}
