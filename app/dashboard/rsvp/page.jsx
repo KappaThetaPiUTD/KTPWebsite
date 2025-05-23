@@ -41,9 +41,6 @@ export default function RSVPPage() {
 
       {/* Main Content */}
       <main className="px-8 py-6 w-full">
-        <h1 className="text-xl font-bold mb-6 text-primary">
-          Welcome, {user?.email}!
-        </h1>
 
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold mb-2 text-primary">RSVP Events</h2>

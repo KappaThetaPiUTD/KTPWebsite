@@ -35,8 +35,26 @@ export default function AttendancePage() {
 
       {/* Sidebar */}
       <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
-        <Sidebar />
-      </aside>
+  <nav className="space-y-4">
+    {[
+      { label: "Homepage", path: "/dashboard" },
+      { label: "Attendance Records", path: "/dashboard/attendance" },
+      { label: "Merch", path: "/dashboard/merch" },
+      { label: "RSVPED Events", path: "/dashboard/rsvp" },
+      { label: "Profile", path: "/dashboard/profile" },
+      { label: "Admin", path: "/dashboard/admin" },
+    ].map((item, i) => (
+      <a
+        key={i}
+        href={item.path}
+        className="block text-left text-base font-medium hover:text-primary hover:underline transition"
+      >
+        {item.label}
+      </a>
+    ))}
+  </nav>
+</aside>
+
 
       {/* Main Content */}
       <main className="px-8 py-6 w-full">
