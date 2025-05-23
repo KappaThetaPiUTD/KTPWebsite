@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from '../supabaseClient'; // adjust path if needed
+import { supabase } from '../lib/supabase'; // Fixed: should match your other files
 
 const useUserRole = () => {
   const [role, setRole] = useState(null);
@@ -18,7 +18,7 @@ const useUserRole = () => {
       }
 
       const { data, error } = await supabase
-        .from('users') // or 'profiles' depending on your schema
+        .from('users') // This is correct based on your table structure
         .select('role')
         .eq('id', user.id)
         .single();
