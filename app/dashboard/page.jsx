@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
+import Sidebar from "../../components/Sidebar";
+
 
 export default function Dashboard() {
   const router = useRouter();
@@ -138,25 +140,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
 <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
-  <nav className="space-y-4">
-    {[
-      { label: "Homepage", path: "/dashboard" },
-      { label: "Attendance Records", path: "/dashboard/attendance" },
-      { label: "Merch", path: "/dashboard/merch" },
-      { label: "RSVPED Events", path: "/dashboard/rsvp" },
-      { label: "Profile", path: "/dashboard/profile" },
-      { label: "Admin", path: "/dashboard/admin" },
-    ].map((item, i) => (
-      <a
-        key={i}
-        href={item.path}
-        className="block text-left text-base font-medium hover:text-primary hover:underline transition"
-      >
-        {item.label}
-      </a>
-    ))}
-  </nav>
-</aside>
+        <Sidebar />
+      </aside>
 
 
       <main className="px-8 py-6 w-full">
@@ -232,7 +217,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-3 gap-6 mt-6">
-          {["Attendance Record", "Strikes", "Social Quote"].map((text, idx) => (
+          {["Attendance Record", "Strikes", "Social Quota"].map((text, idx) => (
             <div key={idx} className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm text-center font-semibold">
               {text}
             </div>
@@ -260,6 +245,32 @@ export default function Dashboard() {
             ) : (
               <p className="text-xs text-gray-500">No events available.</p>
             )}
+          </ul>
+        </div>
+        <div className="mt-10 bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
+          <h3 className="text-base font-semibold mb-4">RSVP to Events</h3>
+          <ul className="space-y-4">
+            {eventList.slice(0, 3).map((event, idx) => (
+              <li key={idx} className="flex justify-between items-center border-b pb-3">
+                <div>
+                  <p className="text-sm font-medium">{event.event_name}</p>
+                  <p className="text-xs text-gray-500">
+                    {new Date(event.event_date).toLocaleString(undefined, {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <button onClick={() => handleRSVP(event.id, "going")} className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200">Going</button>
+                  <button onClick={() => handleRSVP(event.id, "maybe")} className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded hover:bg-yellow-200">Maybe</button>
+                  <button onClick={() => handleRSVP(event.id, "no")} className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200">Not Going</button>
+                </div>
+              </li>
+            ))}
           </ul>
         </div>
       </main>

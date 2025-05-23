@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import Sidebar from "../../../components/Sidebar";
+import { FiEdit2 } from "react-icons/fi";
 
 export default function AdminPage() {
   const [user, setUser] = useState(null);
@@ -44,7 +45,16 @@ export default function AdminPage() {
 
       {/* Main Content */}
       <main className="px-8 py-6 w-full">
-        <h1 className="text-xl font-bold mb-6 text-[#1E3D2F]">Profile</h1>
+      <div className="flex items-center justify-between mb-6">
+  <h1 className="text-xl font-bold text-[#1E3D2F]">Profile</h1>
+  <button
+    className="p-2 rounded-full hover:bg-gray-100 transition"
+    title="Edit Profile"
+    onClick={() => alert("Edit profile clicked!")} // Replace this with your actual handler
+  >
+    <FiEdit2 className="text-xl text-[#1E3D2F]" />
+  </button>
+</div>
 
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm max-w-xl mx-auto p-6 text-center">
           <div className="flex flex-col items-center">
