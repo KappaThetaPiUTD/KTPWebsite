@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
-import { getUserRole } from "../../src/rbac";
+import { getUserRole } from "../../../src/rbac";
 import Sidebar from "../../../components/Sidebar";
 
 export default function AdminPage() {
@@ -16,44 +16,27 @@ export default function AdminPage() {
   useEffect(() => {
     const checkAuthAndRole = async () => {
       try {
-        // Check user authentication
         const { data } = await supabase.auth.getUser();
         if (data?.user) {
           setUser(data.user);
-          
-          // Check user role
           const { role, error: roleError } = await getUserRole();
-          
-          console.log('Role check result:', { role, roleError });
-          console.log('Auth User ID:', data.user.id);
-          console.log('Auth User Email:', data.user.email);
 
-          
-          if (roleError) {
-            console.error('Error getting user role:', roleError);
+          if (roleError || role?.toLowerCase() !== "executive") {
             setAccessDenied(true);
             setLoading(false);
             return;
           }
 
           setUserRole(role);
-
-          // Check if user has executive access
-          if (role?.toLowerCase() !== 'executive') {
-            setAccessDenied(true);
-            setLoading(false);
-            return;
-          }
-
-          // User has access, fetch admin data
           fetchAttendance();
           fetchRSVPs();
+        } else {
+          setAccessDenied(true);
         }
-        
-        setLoading(false);
-      } catch (error) {
-        console.error('Error in admin access check:', error);
+      } catch (err) {
+        console.error("Auth error:", err);
         setAccessDenied(true);
+      } finally {
         setLoading(false);
       }
     };
@@ -73,12 +56,10 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
-        <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
-          <Sidebar />
-        </aside>
-        <main className="px-8 py-6 w-full flex items-center justify-center">
-          <div className="text-center text-sm text-gray-500">Loading...</div>
+      <div className="min-h-screen grid grid-cols-[220px_1fr] pt-24">
+        <Sidebar />
+        <main className="flex items-center justify-center text-sm text-gray-500">
+          Loading...
         </main>
       </div>
     );
@@ -86,18 +67,16 @@ export default function AdminPage() {
 
   if (accessDenied) {
     return (
-      <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
-        <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
-          <Sidebar />
-        </aside>
-        <main className="px-8 py-6 w-full flex items-center justify-center">
-          <div className="text-center p-8 bg-red-50 rounded-lg border border-red-200 max-w-md">
+      <div className="min-h-screen grid grid-cols-[220px_1fr] pt-24">
+        <Sidebar />
+        <main className="flex items-center justify-center px-8">
+          <div className="bg-red-50 border border-red-200 p-6 rounded-lg max-w-md text-center">
             <h2 className="text-2xl font-bold text-red-700 mb-4">Access Restricted</h2>
-            <p className="text-red-600 mb-4">
+            <p className="text-red-600 mb-2">
               You need executive privileges to access the admin panel.
             </p>
             <p className="text-sm text-gray-600">
-              Current role: <span className="font-semibold capitalize">{userRole || 'Unknown'}</span>
+              Current role: <span className="font-semibold capitalize">{userRole || "Unknown"}</span>
             </p>
           </div>
         </main>
@@ -105,22 +84,16 @@ export default function AdminPage() {
     );
   }
 
-  // User has executive access - show full admin page
   return (
-    <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
+    <div className="min-h-screen grid grid-cols-[220px_1fr] bg-white pt-24 text-sm font-['Public_Sans']">
+      <Sidebar />
 
-      {/* Sidebar */}
-      <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
-        <Sidebar />
-      </aside>
-
-      {/* Main Content */}
-      <main className="px-8 py-6 w-full space-y-12">
+      <main className="px-8 py-6 space-y-12">
         <h1 className="text-2xl font-bold text-primary">Admin Dashboard</h1>
 
-        {/* Attendance Table */}
+        {/* Attendance Records */}
         <section>
-          <h2 className="text-lg font-semibold mb-3 text-primary">Attendance Records</h2>
+          <h2 className="text-lg font-semibold text-primary mb-3">Attendance Records</h2>
           <div className="overflow-x-auto border border-gray-300 rounded-lg">
             <table className="min-w-full text-sm">
               <thead className="bg-primary text-white">
@@ -143,9 +116,9 @@ export default function AdminPage() {
           </div>
         </section>
 
-        {/* RSVP Table */}
+        {/* RSVP Data */}
         <section>
-          <h2 className="text-lg font-semibold mb-3 text-primary">RSVP Submissions</h2>
+          <h2 className="text-lg font-semibold text-primary mb-3">RSVP Submissions</h2>
           <div className="overflow-x-auto border border-gray-300 rounded-lg">
             <table className="min-w-full text-sm">
               <thead className="bg-primary text-white">
@@ -176,7 +149,7 @@ export default function AdminPage() {
 
         {/* Create Event */}
         <section>
-          <h2 className="text-lg font-semibold mb-3 text-primary">Create Event</h2>
+          <h2 className="text-lg font-semibold text-primary mb-3">Create Event</h2>
           <form
             onSubmit={async (e) => {
               e.preventDefault();
@@ -199,29 +172,15 @@ export default function AdminPage() {
           >
             <div className="mb-4">
               <label className="block font-medium mb-1">Title</label>
-              <input
-                name="title"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-              />
+              <input name="title" required className="w-full px-3 py-2 border border-gray-300 rounded" />
             </div>
             <div className="mb-4">
               <label className="block font-medium mb-1">Date</label>
-              <input
-                name="date"
-                type="date"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-              />
+              <input name="date" type="date" required className="w-full px-3 py-2 border border-gray-300 rounded" />
             </div>
             <div className="mb-4">
               <label className="block font-medium mb-1">Time</label>
-              <input
-                name="time"
-                type="time"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded"
-              />
+              <input name="time" type="time" required className="w-full px-3 py-2 border border-gray-300 rounded" />
             </div>
             <button
               type="submit"

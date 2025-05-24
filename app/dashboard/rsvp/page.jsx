@@ -9,12 +9,8 @@ export default function RSVPPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [rsvpStatus, setRsvpStatus] = useState({
-    "Python Workshop": null,
-    "Internship Workshop": null,
-    "Brothers Chapter": null,
-    "Pledges Chapter": null,
-  });
+  const [events, setEvents] = useState([]);
+  const [rsvpStatus, setRsvpStatus] = useState({});
 
   useEffect(() => {
     const getUser = async () => {
@@ -29,17 +25,32 @@ export default function RSVPPage() {
     getUser();
   }, [router]);
 
-  if (loading) return <div className="text-center mt-20 text-sm text-gray-500">Loading...</div>;
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const { data, error } = await supabase.from("events").select("*");
+      if (!error && data) {
+        setEvents(data);
+        const status = {};
+        data.forEach((event) => {
+          status[event.event_name] = null;
+        });
+        setRsvpStatus(status);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  if (loading)
+    return (
+      <div className="text-center mt-20 text-sm text-gray-500">Loading...</div>
+    );
 
   return (
     <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
-
-      {/* Sidebar */}
       <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
         <Sidebar />
       </aside>
 
-      {/* Main Content */}
       <main className="px-8 py-6 w-full">
         <h1 className="text-xl font-bold mb-6 text-primary">
           Welcome, {user?.email}!
@@ -52,9 +63,9 @@ export default function RSVPPage() {
           </p>
 
           <div className="space-y-6">
-            {Object.keys(rsvpStatus).map((event, idx) => (
-              <div key={idx}>
-                <p className="font-medium text-sm mb-2">{event}</p>
+            {events.map((event) => (
+              <div key={event.id}>
+                <p className="font-medium text-sm mb-2">{event.event_name}</p>
                 <div className="flex flex-wrap gap-3">
                   {["going", "maybe", "not going"].map((status) => (
                     <button
@@ -62,14 +73,14 @@ export default function RSVPPage() {
                       onClick={() =>
                         setRsvpStatus((prev) => ({
                           ...prev,
-                          [event]: status,
+                          [event.event_name]: status,
                         }))
                       }
-                      className={`px-4 py-1 rounded-full text-xs font-semibold transition
+                      className={`px-4 py-1 text-white rounded-full text-xs font-semibold transition
                         ${
-                          rsvpStatus[event] === status
-                            ? "bg-primary/80 text-white"
-                            : "bg-primary text-white hover:bg-primary/90"
+                          rsvpStatus[event.event_name] === status
+                            ? "bg-primary/80"
+                            : "bg-primary hover:bg-primary/90"
                         }`}
                     >
                       {status}
