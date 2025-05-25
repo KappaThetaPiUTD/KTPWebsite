@@ -5,33 +5,45 @@ import { FaGoogle, FaDiscord } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 
-export default function SignUp() {
+export default function Login() { // Changed from SignUp to Login
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [resetSent, setResetSent] = useState(false);
 
-  const handleEmailSignUp = async (e) => {
+  // Changed from handleEmailSignUp to handleEmailLogin
+  const handleEmailLogin = async (e) => {
     e.preventDefault();
-    const { data, error } = await supabase.auth.signUp({
+    // Changed from signUp to signInWithPassword
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      alert("Sign-up failed: " + error.message);
+      alert("Login failed: " + error.message); // Changed message
     } else {
-      alert("Check your email to confirm your account.");
+      router.push("/dashboard");
     }
   };
 
   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
     if (error) console.error("Google login failed:", error.message);
   };
 
   const handleDiscordLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "discord" });
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider: "discord",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
     if (error) console.error("Discord login failed:", error.message);
   };
 
@@ -66,8 +78,8 @@ export default function SignUp() {
         <h2 className="text-3xl font-bold text-center mb-4 text-black">Login</h2>
 
         {/* ✅ Email/Password Form */}
-        <form onSubmit={handleEmailSignUp} className="space-y-4 mt-4">
-          <div>
+        <form onSubmit={handleEmailLogin} className="space-y-4 mt-4">
+        <div>
             <label htmlFor="email" className="block text-sm font-medium text-black">
               E-mail
             </label>
@@ -108,12 +120,10 @@ export default function SignUp() {
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition"
-          >
-            Sign Up
-          </button>
+          <button type="submit" 
+          className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition">
+          Log In
+        </button>
         </form>
 
         {/* Separator */}
