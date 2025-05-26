@@ -11,22 +11,31 @@ export default function Dashboard() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
+
   const [selectedDate, setSelectedDate] = useState(null);
   const [checkedIn, setCheckedIn] = useState(false);
   const [events, setEvents] = useState({});
   const [eventList, setEventList] = useState([]);
-  const [rsvpStatus, setRsvpStatus] = useState({});
+
 
   useEffect(() => {
     const checkAuth = async () => {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
 
-      if (error || !session || !session.user) {
+        if (error || !session || !session.user) {
+          router.push("/login");
+          return;
+        }
+
+        setUser(session.user);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error checking auth:", error);
         router.push("/login");
-        return;
       }
 
       setUser(session.user);
@@ -251,7 +260,7 @@ export default function Dashboard() {
                 onClick={handleCheckIn}
                 className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition"
               >
-                Check In
+              Check In
               </button>
               {checkedIn && (
                 <p className="text-green-700 font-medium mt-2">Checked in successfully!</p>

@@ -5,36 +5,45 @@ import { FaGoogle, FaDiscord } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 
-export default function Login() {  // I renamed from SignUp to Login for clarity, rename file too if needed
+export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [resetSent, setResetSent] = useState(false);
 
-  // For logging in with email + password
+  // Changed from handleEmailSignUp to handleEmailLogin
   const handleEmailLogin = async (e) => {
     e.preventDefault();
+    // Changed from signUp to signInWithPassword
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    console.log("Login result:", { data, error })
-    console.log("User after login:", data?.user)
-    console.log("Session after login:", data?.session)
+
     if (error) {
       alert("Login failed: " + error.message);
     } else {
-      router.push("/dashboard"); // Navigate after successful login
+      router.push("/dashboard");
     }
   };
 
   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "google" });
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
     if (error) console.error("Google login failed:", error.message);
   };
 
   const handleDiscordLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "discord" });
+    const { error } = await supabase.auth.signInWithOAuth({ 
+      provider: "discord",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
     if (error) console.error("Discord login failed:", error.message);
   };
 
