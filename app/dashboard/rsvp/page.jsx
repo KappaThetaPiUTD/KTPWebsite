@@ -91,6 +91,7 @@ export default function RSVPPage() {
 
       {/* Main Content */}
       <main className="px-8 py-6 w-full">
+      <h1 className="text-2xl font-bold text-primary">EVENTS AND RSVP</h1>
         <h2 className="text-lg font-semibold mb-6 text-primary">RSVP Summary</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -110,9 +111,10 @@ export default function RSVPPage() {
                 <h3 className="text-sm font-bold mb-2">{labelMap[category]}</h3>
                 {filtered.length > 0 ? (
                   <ul className="text-xs space-y-1">
-                    {filtered.map(([eventName]) => (
-                      <li key={eventName}>{eventName}</li>
-                    ))}
+                  {filtered.map(([eventId]) => {
+                    const event = events.find((e) => e.id === parseInt(eventId));
+                    return <li key={eventId}>{event?.event_name || eventId}</li>;
+                  })}
                   </ul>
                 ) : (
                   <p className="text-xs text-gray-500">No events</p>

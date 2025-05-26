@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [checkedIn, setCheckedIn] = useState(false);
   const [events, setEvents] = useState({});
   const [eventList, setEventList] = useState([]);
+  const [rsvpStatus, setRsvpStatus] = useState({});
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -64,6 +65,24 @@ export default function Dashboard() {
     fetchEvents();
   }, []);
 
+  useEffect(() => {
+    const fetchRSVPStatus = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("rsvps")
+        .select("event_id, response")
+        .eq("user_id", user.id);
+
+      const statusMap = {};
+      data?.forEach(({ event_id, response }) => {
+        statusMap[event_id] = response;
+      });
+      setRsvpStatus(statusMap);
+    };
+
+    fetchRSVPStatus();
+  }, [user]);
+
   const handleCheckIn = async () => {
     const event = eventList[0];
     if (!event) return alert("No upcoming event found.");
@@ -99,24 +118,25 @@ export default function Dashboard() {
   const handleRSVP = async (event, response) => {
     if (!user) return alert("Please log in first.");
     const { error } = await supabase.from("rsvps").upsert(
-      [{
-        event_id: event.id,
-        event_title: event.event_name,
-        user_id: user.id,
-        response,
-      }],
+      [
+        {
+          event_id: event.id,
+          event_title: event.event_name,
+          user_id: user.id,
+          response,
+        },
+      ],
       { onConflict: ["event_id", "user_id"] }
     );
-    
+
     if (error) {
       console.error("RSVP failed:", error);
       alert(`RSVP failed: ${error.message}`);
     } else {
+      setRsvpStatus((prev) => ({ ...prev, [event.id]: response }));
       alert(`RSVPed as "${response}" to ${event.event_name}!`);
     }
   };
-  
-  
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -162,7 +182,6 @@ export default function Dashboard() {
         <h1 className="text-xl font-bold mb-6">Welcome, {user?.user_metadata?.full_name || "Member"}</h1>
 
         <div className="grid grid-cols-2 gap-6">
-          {/* Calendar */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-base font-semibold">{monthName} {year}</h3>
@@ -215,7 +234,6 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Check-in box */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
             <h3 className="text-base font-semibold mb-3">Check-In for Chapter</h3>
             <div className="flex justify-between items-center bg-white p-4 border rounded-lg mb-4">
@@ -242,7 +260,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Summary Cards */}
         <div className="grid grid-cols-3 gap-6 mt-6">
           {["Attendance Record", "Strikes", "Social Quota"].map((text, idx) => (
             <div key={idx} className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm text-center font-semibold">
@@ -251,52 +268,48 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* Upcoming Events with RSVP */}
         <div className="mt-10 bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
           <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
           <ul className="text-sm space-y-2">
             {eventList.length > 0 ? (
               [...eventList]
-                  .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
-                  .slice(0, 5)
-                  .map((event, idx) => (
-
-                
-                <li key={idx} className="flex items-center justify-between">
-                  <span>
-                    <span className="font-medium">
-                      {new Date(event.event_date).toLocaleString(undefined, {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>{" "}
-                    — {event.event_name}
-                  </span>
-                  <div className="flex gap-2 mt-2">
-                    <button
-                      onClick={() => handleRSVP(event, "going")}
-                      className="bg-green-500 text-white px-2 py-1 text-xs rounded"
-                    >
-                      Going
-                    </button>
-                    <button
-                      onClick={() => handleRSVP(event, "maybe")}
-                      className="bg-yellow-500 text-white px-2 py-1 text-xs rounded"
-                    >
-                      Maybe
-                    </button>
-                    <button
-                      onClick={() => handleRSVP(event, "no")}
-                      className="bg-red-500 text-white px-2 py-1 text-xs rounded"
-                    >
-                      No
-                    </button>
-                  </div>
-                </li>
-              ))
+                .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
+                .slice(0, 5)
+                .map((event, idx) => (
+                  <li key={idx} className="flex items-center justify-between">
+                    <span>
+                      <span className="font-medium">
+                        {new Date(event.event_date).toLocaleString(undefined, {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>{" "}— {event.event_name}
+                    </span>
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() => handleRSVP(event, "going")}
+                        className="bg-green-500 text-white px-2 py-1 text-xs rounded"
+                      >
+                        Going
+                      </button>
+                      <button
+                        onClick={() => handleRSVP(event, "maybe")}
+                        className="bg-yellow-500 text-white px-2 py-1 text-xs rounded"
+                      >
+                        Maybe
+                      </button>
+                      <button
+                        onClick={() => handleRSVP(event, "no")}
+                        className="bg-red-500 text-white px-2 py-1 text-xs rounded"
+                      >
+                        No
+                      </button>
+                    </div>
+                  </li>
+                ))
             ) : (
               <p className="text-xs text-gray-500">No events available.</p>
             )}
