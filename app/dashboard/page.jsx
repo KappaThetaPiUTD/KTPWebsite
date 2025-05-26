@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
+import Sidebar from "../../components/Sidebar";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -103,7 +104,7 @@ export default function Dashboard() {
         event_id: event.id,
         event_title: event.event_name,
         user_id: user.id,
-        response: response, // 👈 dynamic based on which button was clicked
+        response,
       },
     ]);
 
@@ -152,61 +153,31 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
       <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
-        <nav className="space-y-4">
-          {[
-            "Homepage",
-            "Attendance Records",
-            "Merch",
-            "RSVPED Events",
-            "Profile",
-            "Admin",
-          ].map((label, i) => (
-            <button
-              key={i}
-              className="block text-left text-base font-medium hover:text-primary hover:underline transition"
-            >
-              {label}
-            </button>
-          ))}
-        </nav>
+        <Sidebar />
       </aside>
 
       <main className="px-8 py-6 w-full">
-        <h1 className="text-xl font-bold mb-6">
-          Welcome, {user?.user_metadata?.full_name || "Member"}
-        </h1>
+        <h1 className="text-xl font-bold mb-6">Welcome, {user?.user_metadata?.full_name || "Member"}</h1>
 
         <div className="grid grid-cols-2 gap-6">
           {/* Calendar */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-base font-semibold">
-                {monthName} {year}
-              </h3>
+              <h3 className="text-base font-semibold">{monthName} {year}</h3>
               <div className="flex space-x-2">
-                <button aria-label="Previous Month" onClick={handlePrevMonth}>
-                  <IoChevronBack />
-                </button>
-                <button aria-label="Next Month" onClick={handleNextMonth}>
-                  <IoChevronForward />
-                </button>
+                <button aria-label="Previous Month" onClick={handlePrevMonth}><IoChevronBack /></button>
+                <button aria-label="Next Month" onClick={handleNextMonth}><IoChevronForward /></button>
               </div>
             </div>
             <div className="grid grid-cols-7 text-center text-xs mb-2">
               {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
-                <div key={d} className="font-medium">
-                  {d}
-                </div>
+                <div key={d} className="font-medium">{d}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 text-xs">
               {getCalendarGrid().map((day, i) => {
                 const dateKey = formatDateKey(year, month, day);
-                const isToday =
-                  day &&
-                  today.getDate() === day &&
-                  today.getMonth() === month &&
-                  today.getFullYear() === year;
+                const isToday = day && today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
                 const hasEvent = events[dateKey]?.length;
                 return (
                   <div key={i} className="py-2 text-center">
@@ -214,9 +185,7 @@ export default function Dashboard() {
                       <button
                         onClick={() => handleDayClick(day)}
                         className={`w-8 h-8 rounded-full mx-auto flex items-center justify-center relative transition ${
-                          isToday
-                            ? "bg-primary text-white"
-                            : "hover:bg-gray-200 text-black"
+                          isToday ? "bg-primary text-white" : "hover:bg-gray-200 text-black"
                         }`}
                       >
                         {day}
@@ -231,30 +200,22 @@ export default function Dashboard() {
             </div>
             {selectedDate && events[selectedDate]?.length > 0 && (
               <div className="mt-4">
-                <h4 className="text-sm font-semibold mb-2 text-primary">
-                  Events on {selectedDate}:
-                </h4>
+                <h4 className="text-sm font-semibold mb-2 text-primary">Events on {selectedDate}:</h4>
                 <ul className="list-disc list-inside text-xs space-y-1">
                   {events[selectedDate].map((evt, idx) => (
-                    <li key={idx}>
-                      {evt.time} - <strong>{evt.title}</strong>
-                    </li>
+                    <li key={idx}>{evt.time} - <strong>{evt.title}</strong></li>
                   ))}
                 </ul>
               </div>
             )}
             {selectedDate && !events[selectedDate] && (
-              <p className="text-xs mt-4 text-gray-500">
-                No events scheduled for {selectedDate}.
-              </p>
+              <p className="text-xs mt-4 text-gray-500">No events scheduled for {selectedDate}.</p>
             )}
           </div>
 
           {/* Check-in box */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
-            <h3 className="text-base font-semibold mb-3">
-              Check-In for Chapter
-            </h3>
+            <h3 className="text-base font-semibold mb-3">Check-In for Chapter</h3>
             <div className="flex justify-between items-center bg-white p-4 border rounded-lg mb-4">
               <div className="rounded-full bg-primary text-white px-4 py-2 text-xs font-semibold truncate max-w-[10rem] text-center">
                 {user?.user_metadata?.full_name || "N/A"}
@@ -273,9 +234,7 @@ export default function Dashboard() {
                 Check In
               </button>
               {checkedIn && (
-                <p className="text-green-700 font-medium mt-2">
-                  Checked in successfully!
-                </p>
+                <p className="text-green-700 font-medium mt-2">Checked in successfully!</p>
               )}
             </div>
           </div>
@@ -283,11 +242,8 @@ export default function Dashboard() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-3 gap-6 mt-6">
-          {["Attendance Record", "Strikes", "Social Quote"].map((text, idx) => (
-            <div
-              key={idx}
-              className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm text-center font-semibold"
-            >
+          {["Attendance Record", "Strikes", "Social Quota"].map((text, idx) => (
+            <div key={idx} className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm text-center font-semibold">
               {text}
             </div>
           ))}

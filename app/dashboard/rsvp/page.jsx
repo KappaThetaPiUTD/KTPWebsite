@@ -32,9 +32,8 @@ export default function RSVPPage() {
       const { data, error } = await supabase.from("events").select("*");
       if (!error && data) {
         setEvents(data);
-        // Initialize RSVP status
         const status = {};
-        data.forEach(event => {
+        data.forEach((event) => {
           status[event.event_name] = null;
         });
         setRsvpStatus(status);
@@ -42,6 +41,30 @@ export default function RSVPPage() {
     };
     fetchEvents();
   }, []);
+
+  const handleRSVP = async (event, response) => {
+    if (!user) return alert("Please log in first.");
+
+    const { error } = await supabase.from("rsvps").insert([
+      {
+        event_id: event.id,
+        event_title: event.event_name,
+        user_id: user.id,
+        response,
+      },
+    ]);
+
+    if (error) {
+      console.error("RSVP failed:", error.message);
+      alert("RSVP failed.");
+    } else {
+      setRsvpStatus((prev) => ({
+        ...prev,
+        [event.event_name]: response,
+      }));
+      alert(`RSVPed as "${response}" to ${event.event_name}!`);
+    }
+  };
 
   if (loading) return <div className="text-center mt-20 text-sm text-gray-500">Loading...</div>;
 
@@ -54,32 +77,53 @@ export default function RSVPPage() {
 
       {/* Main Content */}
       <main className="px-8 py-6 w-full">
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold mb-2 text-primary">RSVP Events</h2>
-          <p className="text-sm text-gray-700 mb-6">
-            Let us know your attendance for upcoming events:
-          </p>
+        <h2 className="text-lg font-semibold mb-6 text-primary">RSVP Summary</h2>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {["going", "maybe", "not going", "unanswered"].map((category) => {
+            const labelMap = {
+              going: "Going",
+              maybe: "Maybe",
+              "not going": "No",
+              unanswered: "Haven't Responded",
+            };
+            const filtered = Object.entries(rsvpStatus).filter(
+              ([_, status]) => (status || "unanswered") === category
+            );
+
+            return (
+              <div key={category} className="border rounded-lg p-4 shadow-sm">
+                <h3 className="text-sm font-bold mb-2">{labelMap[category]}</h3>
+                {filtered.length > 0 ? (
+                  <ul className="text-xs space-y-1">
+                    {filtered.map(([eventName]) => (
+                      <li key={eventName}>{eventName}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-gray-500">No events</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-10 bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+          <h2 className="text-lg font-semibold mb-4 text-primary">Update Your RSVP</h2>
           <div className="space-y-6">
-            {events.map((event) => (
-              <div key={event.id}>
+            {events.map((event, idx) => (
+              <div key={idx}>
                 <p className="font-medium text-sm mb-2">{event.event_name}</p>
                 <div className="flex flex-wrap gap-3">
                   {["going", "maybe", "not going"].map((status) => (
                     <button
                       key={status}
-                      onClick={() =>
-                        setRsvpStatus((prev) => ({
-                          ...prev,
-                          [event.event_name]: status,
-                        }))
-                      }
-                      className={`px-4 py-1 text-white rounded-full text-xs font-semibold transition
-                        ${
-                          rsvpStatus[event.event_name] === status
-                            ? "bg-primary/80 text-white"
-                            : "bg-primary text-white hover:bg-primary/90"
-                        }`}
+                      onClick={() => handleRSVP(event, status)}
+                      className={`px-4 py-1 text-white rounded-full text-xs font-semibold transition ${
+                        rsvpStatus[event.event_name] === status
+                          ? "bg-primary/80 text-white"
+                          : "bg-primary text-white hover:bg-primary/90"
+                      }`}
                     >
                       {status}
                     </button>

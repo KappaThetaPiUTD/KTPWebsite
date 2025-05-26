@@ -11,7 +11,6 @@ export default function AdminPage() {
   const [rsvpData, setRsvpData] = useState([]);
   const [repeat, setRepeat] = useState("None");
 
-
   useEffect(() => {
     const fetchUser = async () => {
       const { data } = await supabase.auth.getUser();
