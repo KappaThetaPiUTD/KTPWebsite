@@ -98,18 +98,16 @@ export default function Dashboard() {
 
   const handleRSVP = async (event, response) => {
     if (!user) return alert("Please log in first.");
-  
-    const rsvpPayload = {
-      event_id: event.id,
-      event_title: event.event_name,
-      user_id: user.id,
-      response,
-    };
-  
-    console.log("RSVP payload:", rsvpPayload);
-  
-    const { error } = await supabase.from("rsvps").insert([rsvpPayload]);
-  
+    const { error } = await supabase.from("rsvps").upsert(
+      [{
+        event_id: event.id,
+        event_title: event.event_name,
+        user_id: user.id,
+        response,
+      }],
+      { onConflict: ["event_id", "user_id"] }
+    );
+    
     if (error) {
       console.error("RSVP failed:", error);
       alert(`RSVP failed: ${error.message}`);
@@ -117,6 +115,7 @@ export default function Dashboard() {
       alert(`RSVPed as "${response}" to ${event.event_name}!`);
     }
   };
+  
   
 
   const year = currentDate.getFullYear();

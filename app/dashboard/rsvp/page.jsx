@@ -26,45 +26,59 @@ export default function RSVPPage() {
     getUser();
   }, [router]);
 
-  // Fetch events from Supabase
   useEffect(() => {
-    const fetchEvents = async () => {
-      const { data, error } = await supabase.from("events").select("*");
-      if (!error && data) {
-        setEvents(data);
-        const status = {};
-        data.forEach((event) => {
-          status[event.event_name] = null;
-        });
-        setRsvpStatus(status);
-      }
+    const fetchData = async () => {
+      const [{ data: events }, { data: rsvps }] = await Promise.all([
+        supabase.from("events").select("id, event_name"),
+        supabase.from("rsvps").select("event_id, response").eq("user_id", user.id),
+      ]);
+  
+      if (events) setEvents(events);
+  
+      const eventMap = {};
+      events?.forEach((e) => {
+        eventMap[e.id] = e.event_name;
+      });
+  
+      const statusMap = {};
+      events.forEach(({ id, event_name }) => {
+        const rsvp = rsvps?.find(r => r.event_id === id);
+        statusMap[event_name] = rsvp ? rsvp.response : "unanswered";
+      });
+      
+  
+      setRsvpStatus(statusMap);
     };
-    fetchEvents();
-  }, []);
+  
+    if (user) fetchData();
+  }, [user]);
+  
+
+
 
   const handleRSVP = async (event, response) => {
     if (!user) return alert("Please log in first.");
-
-    const { error } = await supabase.from("rsvps").insert([
-      {
+  
+    const { error } = await supabase.from("rsvps").upsert(
+      [{
         event_id: event.id,
         event_title: event.event_name,
         user_id: user.id,
         response,
-      },
-    ]);
-
+      }],
+      { onConflict: ["event_id", "user_id"] }
+    );
+    
+  
     if (error) {
       console.error("RSVP failed:", error.message);
       alert("RSVP failed.");
     } else {
-      setRsvpStatus((prev) => ({
-        ...prev,
-        [event.event_name]: response,
-      }));
+      setRsvpStatus((prev) => ({ ...prev, [event.id]: response }));
       alert(`RSVPed as "${response}" to ${event.event_name}!`);
     }
   };
+  
 
   if (loading) return <div className="text-center mt-20 text-sm text-gray-500">Loading...</div>;
 
@@ -115,19 +129,18 @@ export default function RSVPPage() {
               <div key={idx}>
                 <p className="font-medium text-sm mb-2">{event.event_name}</p>
                 <div className="flex flex-wrap gap-3">
-                  {["going", "maybe", "not going"].map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => handleRSVP(event, status)}
-                      className={`px-4 py-1 text-white rounded-full text-xs font-semibold transition ${
-                        rsvpStatus[event.event_name] === status
-                          ? "bg-primary/80 text-white"
-                          : "bg-primary text-white hover:bg-primary/90"
-                      }`}
-                    >
-                      {status}
-                    </button>
-                  ))}
+                {["going", "maybe", "not going"].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => handleRSVP(event, status)}
+                    className={`px-4 py-1 text-white rounded-full text-xs font-semibold transition ${
+                      rsvpStatus[event.id] === status ? "bg-primary/80" : "bg-primary hover:bg-primary/90"
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+
                 </div>
               </div>
             ))}
