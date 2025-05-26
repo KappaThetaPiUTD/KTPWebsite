@@ -24,7 +24,9 @@ export default function AdminPage() {
     };
 
     const fetchRSVPs = async () => {
-      const { data } = await supabase.from("rsvps").select("*");
+      const { data, error } = await supabase
+        .from("rsvps")
+        .select("id, event_id, response, response_updated_at, user_id, event_title, profiles (full_name, email)");
       setRsvpData(data || []);
     };
 
@@ -81,19 +83,21 @@ export default function AdminPage() {
                   <th className="px-4 py-2 text-left">Name</th>
                   <th className="px-4 py-2 text-left">Email</th>
                   <th className="px-4 py-2 text-left">Event</th>
-                  <th className="px-4 py-2 text-left">RSVP Time</th>
+                  <th className="px-4 py-2 text-left">Response</th>
+                  <th className="px-4 py-2 text-left">Last Updated</th>
                 </tr>
               </thead>
               <tbody>
                 {rsvpData.map((entry, index) => (
                   <tr key={index} className="border-t bg-primary hover:bg-primary/90 text-white">
-                    <td className="px-4 py-2">{entry.name || "N/A"}</td>
-                    <td className="px-4 py-2">{entry.email}</td>
-                    <td className="px-4 py-2">{entry.event || "General"}</td>
+                    <td className="px-4 py-2">{entry.profiles?.full_name || "N/A"}</td>
+                    <td className="px-4 py-2">{entry.profiles?.email || "N/A"}</td>
+                    <td className="px-4 py-2">{entry.event_title || "N/A"}</td>
+                    <td className="px-4 py-2 capitalize">{entry.response || "N/A"}</td>
                     <td className="px-4 py-2">
-                      {entry.rsvp_time
-                        ? new Date(entry.rsvp_time).toLocaleString()
-                        : "Not recorded"}
+                      {entry.response_updated_at
+                        ? new Date(entry.response_updated_at).toLocaleString()
+                        : "N/A"}
                     </td>
                   </tr>
                 ))}
@@ -101,9 +105,8 @@ export default function AdminPage() {
             </table>
           </div>
         </section>
-
-          {/* Create Event */}
-          <section>
+        {/* Create Event */}
+        <section>
           <h2 className="text-lg font-semibold mb-3 text-primary">Create Event</h2>
           <form
             onSubmit={async (e) => {
