@@ -38,7 +38,6 @@ export default function AttendancePage() {
         <Sidebar />
       </aside>
 
-
       {/* Main Content */}
       <main className="px-8 py-6 w-full">
         <h1 className="text-xl font-bold mb-6 text-[#1E3D2F]">Attendance Records</h1>

@@ -22,14 +22,22 @@ async function handleQrCheckin(req, res) {
     return res.status(400).json({ error: "Invalid token data" });
   }
 
-  // 2. Get event start time
+  // 2. Get event start time + type
   const { data: event, error: eventErr } = await supabase
     .from("events")
-    .select("event_date")
+    .select("event_date, event_type")
     .eq("id", event_id)
     .single();
+
   if (eventErr) {
     return res.status(400).json({ error: eventErr.message });
+  }
+
+  // ✅ Only allow check-in for "chapter" events
+  if (event.event_type !== "chapter") {
+    return res
+      .status(403)
+      .json({ error: "Only chapter events allow QR check-in." });
   }
 
   // 3. Determine status (late or present)

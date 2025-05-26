@@ -9,13 +9,10 @@ export default function RSVPPage() {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [rsvpStatus, setRsvpStatus] = useState({
-    "Python Workshop": null,
-    "Internship Workshop": null,
-    "Brothers Chapter": null,
-    "Pledges Chapter": null,
-  });
+  const [events, setEvents] = useState([]);
+  const [rsvpStatus, setRsvpStatus] = useState({});
 
+  // Check for user authentication
   useEffect(() => {
     const getUser = async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -29,11 +26,50 @@ export default function RSVPPage() {
     getUser();
   }, [router]);
 
+  // Fetch events from Supabase
+  useEffect(() => {
+    const fetchEvents = async () => {
+      const { data, error } = await supabase.from("events").select("*");
+      if (!error && data) {
+        setEvents(data);
+        const status = {};
+        data.forEach((event) => {
+          status[event.event_name] = null;
+        });
+        setRsvpStatus(status);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  const handleRSVP = async (event, response) => {
+    if (!user) return alert("Please log in first.");
+
+    const { error } = await supabase.from("rsvps").insert([
+      {
+        event_id: event.id,
+        event_title: event.event_name,
+        user_id: user.id,
+        response,
+      },
+    ]);
+
+    if (error) {
+      console.error("RSVP failed:", error.message);
+      alert("RSVP failed.");
+    } else {
+      setRsvpStatus((prev) => ({
+        ...prev,
+        [event.event_name]: response,
+      }));
+      alert(`RSVPed as "${response}" to ${event.event_name}!`);
+    }
+  };
+
   if (loading) return <div className="text-center mt-20 text-sm text-gray-500">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
-
       {/* Sidebar */}
       <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
         <Sidebar />
@@ -46,10 +82,10 @@ export default function RSVPPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {["going", "maybe", "not going", "unanswered"].map((category) => {
             const labelMap = {
-              "going": "Going",
-              "maybe": "Maybe",
+              going: "Going",
+              maybe: "Maybe",
               "not going": "No",
-              "unanswered": "Haven't Responded",
+              unanswered: "Haven't Responded",
             };
             const filtered = Object.entries(rsvpStatus).filter(
               ([_, status]) => (status || "unanswered") === category
@@ -75,21 +111,16 @@ export default function RSVPPage() {
         <div className="mt-10 bg-white border border-gray-200 rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold mb-4 text-primary">Update Your RSVP</h2>
           <div className="space-y-6">
-            {Object.keys(rsvpStatus).map((event, idx) => (
+            {events.map((event, idx) => (
               <div key={idx}>
-                <p className="font-medium text-sm mb-2">{event}</p>
+                <p className="font-medium text-sm mb-2">{event.event_name}</p>
                 <div className="flex flex-wrap gap-3">
                   {["going", "maybe", "not going"].map((status) => (
                     <button
                       key={status}
-                      onClick={() =>
-                        setRsvpStatus((prev) => ({
-                          ...prev,
-                          [event]: status,
-                        }))
-                      }
-                      className={`px-4 py-1 rounded-full text-xs font-semibold transition ${
-                        rsvpStatus[event] === status
+                      onClick={() => handleRSVP(event, status)}
+                      className={`px-4 py-1 text-white rounded-full text-xs font-semibold transition ${
+                        rsvpStatus[event.event_name] === status
                           ? "bg-primary/80 text-white"
                           : "bg-primary text-white hover:bg-primary/90"
                       }`}
