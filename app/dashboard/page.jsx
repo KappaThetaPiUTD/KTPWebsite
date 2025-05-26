@@ -98,23 +98,26 @@ export default function Dashboard() {
 
   const handleRSVP = async (event, response) => {
     if (!user) return alert("Please log in first.");
-
-    const { error } = await supabase.from("rsvps").insert([
-      {
-        event_id: event.id,
-        event_title: event.event_name,
-        user_id: user.id,
-        response,
-      },
-    ]);
-
+  
+    const rsvpPayload = {
+      event_id: event.id,
+      event_title: event.event_name,
+      user_id: user.id,
+      response,
+    };
+  
+    console.log("RSVP payload:", rsvpPayload);
+  
+    const { error } = await supabase.from("rsvps").insert([rsvpPayload]);
+  
     if (error) {
-      console.error("RSVP failed:", error.message);
-      alert("RSVP failed.");
+      console.error("RSVP failed:", error);
+      alert(`RSVP failed: ${error.message}`);
     } else {
       alert(`RSVPed as "${response}" to ${event.event_name}!`);
     }
   };
+  
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -254,7 +257,12 @@ export default function Dashboard() {
           <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
           <ul className="text-sm space-y-2">
             {eventList.length > 0 ? (
-              eventList.map((event, idx) => (
+              [...eventList]
+                  .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
+                  .slice(0, 5)
+                  .map((event, idx) => (
+
+                
                 <li key={idx} className="flex items-center justify-between">
                   <span>
                     <span className="font-medium">
