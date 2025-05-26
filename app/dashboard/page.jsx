@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
+import Sidebar from "../../components/Sidebar";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const [checkedIn, setCheckedIn] = useState(false);
   const [events, setEvents] = useState({});
   const [eventList, setEventList] = useState([]);
+
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -35,6 +37,9 @@ export default function Dashboard() {
         console.error("Error checking auth:", error);
         router.push("/login");
       }
+
+      setUser(session.user);
+      setLoading(false);
     };
 
     checkAuth();
@@ -47,7 +52,7 @@ export default function Dashboard() {
         const json = await res.json();
         if (json.data) {
           const formatted = {};
-          json.data.forEach(event => {
+          json.data.forEach((event) => {
             const key = new Date(event.event_date).toISOString().split("T")[0];
             if (!formatted[key]) formatted[key] = [];
             formatted[key].push({
@@ -68,6 +73,24 @@ export default function Dashboard() {
 
     fetchEvents();
   }, []);
+
+  useEffect(() => {
+    const fetchRSVPStatus = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("rsvps")
+        .select("event_id, response")
+        .eq("user_id", user.id);
+
+      const statusMap = {};
+      data?.forEach(({ event_id, response }) => {
+        statusMap[event_id] = response;
+      });
+      setRsvpStatus(statusMap);
+    };
+
+    fetchRSVPStatus();
+  }, [user]);
 
   const handleCheckIn = async () => {
     const event = eventList[0];
@@ -98,6 +121,29 @@ export default function Dashboard() {
     } catch (err) {
       console.error(err);
       alert("An error occurred during check-in.");
+    }
+  };
+
+  const handleRSVP = async (event, response) => {
+    if (!user) return alert("Please log in first.");
+    const { error } = await supabase.from("rsvps").upsert(
+      [
+        {
+          event_id: event.id,
+          event_title: event.event_name,
+          user_id: user.id,
+          response,
+        },
+      ],
+      { onConflict: ["event_id", "user_id"] }
+    );
+
+    if (error) {
+      console.error("RSVP failed:", error);
+      alert(`RSVP failed: ${error.message}`);
+    } else {
+      setRsvpStatus((prev) => ({ ...prev, [event.id]: response }));
+      alert(`RSVPed as "${response}" to ${event.event_name}!`);
     }
   };
 
@@ -138,13 +184,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
       <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
-        <nav className="space-y-4">
-          {["Homepage", "Attendance Records", "Merch", "RSVPED Events", "Profile", "Admin"].map((label, i) => (
-            <button key={i} className="block text-left text-base font-medium hover:text-primary hover:underline transition">
-              {label}
-            </button>
-          ))}
-        </nav>
+        <Sidebar />
       </aside>
 
       <main className="px-8 py-6 w-full">
@@ -174,10 +214,14 @@ export default function Dashboard() {
                     {day && (
                       <button
                         onClick={() => handleDayClick(day)}
-                        className={`w-8 h-8 rounded-full mx-auto flex items-center justify-center relative transition ${isToday ? "bg-primary text-white" : "hover:bg-gray-200 text-black"}`}
+                        className={`w-8 h-8 rounded-full mx-auto flex items-center justify-center relative transition ${
+                          isToday ? "bg-primary text-white" : "hover:bg-gray-200 text-black"
+                        }`}
                       >
                         {day}
-                        {hasEvent && <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full" />}
+                        {hasEvent && (
+                          <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full" />
+                        )}
                       </button>
                     )}
                   </div>
@@ -202,15 +246,21 @@ export default function Dashboard() {
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
             <h3 className="text-base font-semibold mb-3">Check-In for Chapter</h3>
             <div className="flex justify-between items-center bg-white p-4 border rounded-lg mb-4">
-            <div className="rounded-full bg-primary text-white px-4 py-2 text-xs font-semibold truncate max-w-[10rem] text-center">
+              <div className="rounded-full bg-primary text-white px-4 py-2 text-xs font-semibold truncate max-w-[10rem] text-center">
                 {user?.user_metadata?.full_name || "N/A"}
               </div>
-
-              <img src="https://via.placeholder.com/80" alt="QR Code" onError={(e) => (e.currentTarget.style.display = "none")} />
+              <img
+                src="https://via.placeholder.com/80"
+                alt="QR Code"
+                onError={(e) => (e.currentTarget.style.display = "none")}
+              />
             </div>
             <div className="text-center">
-              <button onClick={handleCheckIn} className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition">
-                Check In
+              <button
+                onClick={handleCheckIn}
+                className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 transition"
+              >
+              Check In
               </button>
               {checkedIn && (
                 <p className="text-green-700 font-medium mt-2">Checked in successfully!</p>
@@ -220,7 +270,7 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-3 gap-6 mt-6">
-          {["Attendance Record", "Strikes", "Social Quote"].map((text, idx) => (
+          {["Attendance Record", "Strikes", "Social Quota"].map((text, idx) => (
             <div key={idx} className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm text-center font-semibold">
               {text}
             </div>
@@ -231,20 +281,44 @@ export default function Dashboard() {
           <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
           <ul className="text-sm space-y-2">
             {eventList.length > 0 ? (
-              eventList.map((event, idx) => (
-                <li key={idx}>
-                  <span className="font-medium">
-                    {new Date(event.event_date).toLocaleString(undefined, {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>{" "}
-                  — {event.event_name}
-                </li>
-              ))
+              [...eventList]
+                .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
+                .slice(0, 5)
+                .map((event, idx) => (
+                  <li key={idx} className="flex items-center justify-between">
+                    <span>
+                      <span className="font-medium">
+                        {new Date(event.event_date).toLocaleString(undefined, {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>{" "}— {event.event_name}
+                    </span>
+                    <div className="flex gap-2 mt-2">
+                      <button
+                        onClick={() => handleRSVP(event, "going")}
+                        className="bg-green-500 text-white px-2 py-1 text-xs rounded"
+                      >
+                        Going
+                      </button>
+                      <button
+                        onClick={() => handleRSVP(event, "maybe")}
+                        className="bg-yellow-500 text-white px-2 py-1 text-xs rounded"
+                      >
+                        Maybe
+                      </button>
+                      <button
+                        onClick={() => handleRSVP(event, "no")}
+                        className="bg-red-500 text-white px-2 py-1 text-xs rounded"
+                      >
+                        No
+                      </button>
+                    </div>
+                  </li>
+                ))
             ) : (
               <p className="text-xs text-gray-500">No events available.</p>
             )}
