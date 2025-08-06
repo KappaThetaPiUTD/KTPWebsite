@@ -84,13 +84,13 @@ export default function SignIn() {
             <input
               type="password"
               id="password"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="mt-1 w-full px-4 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <div className="text-right mt-1">
+            {/* <div className="text-right mt-1">
               <button
                 type="button"
                 onClick={handleForgotPassword}
@@ -101,7 +101,7 @@ export default function SignIn() {
               {resetSent && (
                 <p className="text-xs text-green-600 mt-1">Reset email sent!</p>
               )}
-            </div>
+            </div> */}
           </div>
 
           <button
