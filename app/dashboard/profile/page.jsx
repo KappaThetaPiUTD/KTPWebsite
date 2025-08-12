@@ -16,26 +16,41 @@ export default function AdminPage() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const { data: authData } = await supabase.auth.getUser();
-      const userId = authData?.user?.id;
-      if (!userId) return setLoading(false);
+      try {
+        const { data: authData, error: authError } =
+          await supabase.auth.getUser();
+        const userId = authData?.user?.id;
 
-      setUser(authData.user);
-      setFullName(authData.user.user_metadata?.full_name || "");
-      setGradYear(authData.user.user_metadata?.grad_year || "");
+        if (!userId || authError) {
+          console.error("Auth error or user not found", authError);
+          return setLoading(false);
+        }
 
-      const { data: profileRow } = await supabase
-        .from("users")
-        .select("role, phone")
-        .eq("uuid", userId)
-        .single();
+        setUser(authData.user);
+        setFullName(authData.user.user_metadata?.full_name || "");
+        setGradYear(authData.user.user_metadata?.grad_year || "");
 
-      if (profileRow) {
-        setPhone(profileRow.phone || "");
-        setRole(profileRow.role || "");
+        const { data: profileRow, error: profileError } = await supabase
+          .from("users")
+          .select("role, phone")
+          .eq("uuid", userId)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching profile row:", profileError);
+        }
+
+        if (!profileRow) {
+          console.warn("No profile found for user ID:", userId);
+        } else {
+          setPhone(profileRow.phone || "");
+          setRole(profileRow.role || "");
+        }
+      } catch (err) {
+        console.error("Unexpected error in fetchUserData:", err);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     fetchUserData();
@@ -66,7 +81,11 @@ export default function AdminPage() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex justify-center items-center text-gray-500">Loading...</div>;
+    return (
+      <div className="min-h-screen flex justify-center items-center text-gray-500">
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -86,7 +105,11 @@ export default function AdminPage() {
               else setIsEditing(true);
             }}
           >
-            {isEditing ? <FiSave className="text-xl text-[#1E3D2F]" /> : <FiEdit2 className="text-xl text-[#1E3D2F]" />}
+            {isEditing ? (
+              <FiSave className="text-xl text-[#1E3D2F]" />
+            ) : (
+              <FiEdit2 className="text-xl text-[#1E3D2F]" />
+            )}
           </button>
         </div>
 
@@ -144,10 +167,18 @@ export default function AdminPage() {
                 <h2 className="text-lg font-semibold text-[#1E3D2F]">
                   {fullName || "No Name Provided"}
                 </h2>
-                <p className="text-sm text-gray-700 mt-2">Email: {user?.email}</p>
-                <p className="text-sm text-gray-700">Graduation Year: {gradYear || "Not set"}</p>
-                <p className="text-sm text-gray-700">Phone: {phone || "Not set"}</p>
-                <p className="text-sm text-gray-700">Role: {role || "Not set"}</p>
+                <p className="text-sm text-gray-700 mt-2">
+                  Email: {user?.email}
+                </p>
+                <p className="text-sm text-gray-700">
+                  Graduation Year: {gradYear || "Not set"}
+                </p>
+                <p className="text-sm text-gray-700">
+                  Phone: {phone || "Not set"}
+                </p>
+                <p className="text-sm text-gray-700">
+                  Role: {role || "Not set"}
+                </p>
               </>
             )}
           </div>
