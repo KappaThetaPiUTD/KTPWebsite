@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-const [allUsers, setAllUsers] = useState([]);
 
 import { supabase } from "../../../lib/supabase";
 import { getUserRole } from "../../src/rbac";
@@ -15,6 +14,7 @@ export default function AdminPage() {
   const [attendanceData, setAttendanceData] = useState([]);
   const [rsvpData, setRsvpData] = useState([]);
   const [repeat, setRepeat] = useState("None");
+  const [allUsers, setAllUsers] = useState([]);
 
   useEffect(() => {
     const checkAuthAndRole = async () => {

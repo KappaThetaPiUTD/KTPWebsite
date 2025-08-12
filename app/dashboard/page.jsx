@@ -16,7 +16,10 @@ export default function Dashboard() {
   const [checkedIn, setCheckedIn] = useState(false);
   const [events, setEvents] = useState({});
   const [eventList, setEventList] = useState([]);
+  const [strikeLogs, setStrikeLogs] = useState([]);
+  const [rsvpStatus, setRsvpStatus] = useState({}); // ← you used this later
 
+  // Auth check
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -31,19 +34,39 @@ export default function Dashboard() {
         }
 
         setUser(session.user);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error checking auth:", error);
+      } catch (err) {
+        console.error("Error checking auth:", err);
         router.push("/login");
+        return;
+      } finally {
+        setLoading(false);
       }
-
-      setUser(session.user);
-      setLoading(false);
     };
 
     checkAuth();
   }, [router]);
 
+  // Fetch strike logs when user is known
+  useEffect(() => {
+    if (!user) return;
+
+    (async () => {
+      const { data, error } = await supabase
+        .from("strikes_log") // make sure table name matches exactly
+        .select("created_at, reason")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching strike logs:", error);
+        setStrikeLogs([]);
+      } else {
+        setStrikeLogs(data || []);
+      }
+    })();
+  }, [user]);
+
+  // Fetch events for calendar/list
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -73,33 +96,35 @@ export default function Dashboard() {
     fetchEvents();
   }, []);
 
+  // Fetch current user's RSVP status map
   useEffect(() => {
-    const fetchRSVPStatus = async () => {
-      if (!user) return;
-      const { data } = await supabase
+    if (!user) return;
+
+    (async () => {
+      const { data, error } = await supabase
         .from("rsvps")
         .select("event_id, response")
         .eq("user_id", user.id);
 
+      if (error) {
+        console.error("Failed to fetch RSVPs:", error);
+        setRsvpStatus({});
+        return;
+      }
+
       const statusMap = {};
-      data?.forEach(({ event_id, response }) => {
+      (data || []).forEach(({ event_id, response }) => {
         statusMap[event_id] = response;
       });
       setRsvpStatus(statusMap);
-    };
-
-    fetchRSVPStatus();
+    })();
   }, [user]);
 
   const handleCheckIn = async () => {
     const event = eventList[0];
     if (!event) return alert("No upcoming event found.");
 
-    const payload = {
-      user_id: user.id,
-      event_id: event.id,
-    };
-
+    const payload = { user_id: user.id, event_id: event.id };
     const base64Payload = btoa(JSON.stringify(payload));
     const fakeToken = `header.${base64Payload}.signature`;
 
@@ -111,9 +136,8 @@ export default function Dashboard() {
       });
 
       const json = await res.json();
-      if (res.ok) {
-        setCheckedIn(true);
-      } else {
+      if (res.ok) setCheckedIn(true);
+      else {
         console.error(json.error);
         alert("Check-in failed: " + json.error);
       }
@@ -125,6 +149,7 @@ export default function Dashboard() {
 
   const handleRSVP = async (event, response) => {
     if (!user) return alert("Please log in first.");
+
     const { error } = await supabase.from("rsvps").upsert(
       [
         {
@@ -146,6 +171,7 @@ export default function Dashboard() {
     }
   };
 
+  // Calendar helpers
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const monthName = currentDate.toLocaleString("default", { month: "long" });
@@ -158,7 +184,7 @@ export default function Dashboard() {
 
   const getCalendarGrid = () => {
     const grid = [];
-    const offset = (firstDay + 6) % 7;
+    const offset = (firstDay + 6) % 7; // make Monday first
     for (let i = 0; i < offset; i++) grid.push(null);
     for (let day = 1; day <= daysInMonth; day++) grid.push(day);
     return grid;
@@ -190,7 +216,9 @@ export default function Dashboard() {
         <h1 className="text-xl font-bold mb-6">
           Welcome, {user?.user_metadata?.full_name || "Member"}
         </h1>
+
         <div className="grid grid-cols-2 gap-6">
+          {/* Calendar */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-base font-semibold">
@@ -205,6 +233,7 @@ export default function Dashboard() {
                 </button>
               </div>
             </div>
+
             <div className="grid grid-cols-7 text-center text-xs mb-2">
               {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
                 <div key={d} className="font-medium">
@@ -212,15 +241,18 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
+
             <div className="grid grid-cols-7 text-xs">
               {getCalendarGrid().map((day, i) => {
-                const dateKey = formatDateKey(year, month, day);
                 const isToday =
                   day &&
                   today.getDate() === day &&
                   today.getMonth() === month &&
                   today.getFullYear() === year;
-                const hasEvent = events[dateKey]?.length;
+
+                const dateKey = day ? formatDateKey(year, month, day) : null;
+                const hasEvent = dateKey ? events[dateKey]?.length : 0;
+
                 return (
                   <div key={i} className="py-2 text-center">
                     {day && (
@@ -233,15 +265,16 @@ export default function Dashboard() {
                         }`}
                       >
                         {day}
-                        {hasEvent && (
+                        {hasEvent ? (
                           <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full" />
-                        )}
+                        ) : null}
                       </button>
                     )}
                   </div>
                 );
               })}
             </div>
+
             {selectedDate && events[selectedDate]?.length > 0 && (
               <div className="mt-4">
                 <h4 className="text-sm font-semibold mb-2 text-primary">
@@ -256,6 +289,7 @@ export default function Dashboard() {
                 </ul>
               </div>
             )}
+
             {selectedDate && !events[selectedDate] && (
               <p className="text-xs mt-4 text-gray-500">
                 No events scheduled for {selectedDate}.
@@ -263,6 +297,7 @@ export default function Dashboard() {
             )}
           </div>
 
+          {/* Check-in card */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
             <h3 className="text-base font-semibold mb-3">
               Check-In for Chapter
@@ -292,14 +327,17 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        {/* Three cards row */}
         <div className="grid grid-cols-3 gap-6 mt-6">
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm text-center font-semibold">
             Attendance Record
           </div>
 
+          {/* Strikes card */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
             <h4 className="text-sm font-semibold mb-2 text-center">Strikes</h4>
-            {strikeLogs.length > 0 ? (
+            {Array.isArray(strikeLogs) && strikeLogs.length > 0 ? (
               <ul className="text-xs text-left space-y-1">
                 {strikeLogs.map((log, i) => (
                   <li key={i} className="flex flex-col border-b pb-1">
@@ -321,6 +359,8 @@ export default function Dashboard() {
             Social Quota
           </div>
         </div>
+
+        {/* Upcoming events list */}
         <div className="mt-10 bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
           <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
           <ul className="text-sm space-y-2">
