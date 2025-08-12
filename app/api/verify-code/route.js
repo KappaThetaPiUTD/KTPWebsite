@@ -23,17 +23,19 @@ export async function POST(request) {
     const response = NextResponse.json({ success: true });
     
     if (type === "login") {
-      // For login access
-      response.headers.set(
-        "Set-Cookie",
-        `login_access_verified=true; Path=/; Max-Age=3600; SameSite=Lax`
-      );
+      response.cookies.set("login_access_verified", "true", {
+        path: "/",
+        maxAge: 3600,
+        sameSite: "lax",
+        httpOnly: false  // Make sure it's accessible to client
+      });
     } else {
-      // For signup access (default)
-      response.headers.set(
-        "Set-Cookie",
-        `access_verified=true; Path=/; Max-Age=3600; SameSite=Lax`
-      );
+      response.cookies.set("access_verified", "true", {
+        path: "/",
+        maxAge: 3600,
+        sameSite: "lax",
+        httpOnly: false
+      });
     }
     
     return response;

@@ -53,6 +53,11 @@ export default function ResetPassword() {
       return;
     }
 
+    if (newPassword.length < 6) {
+      setErrorMessage("Password must be at least 6 characters long.");
+      return;
+    }
+
     setLoading(true);
     setErrorMessage("");
 
@@ -62,11 +67,22 @@ export default function ResetPassword() {
       if (error) {
         setErrorMessage(error.message || "Password reset failed.");
       } else {
-        // ✅ Clear the cookie now that reset is done
+        // ✅ Clear the reset flow cookie
         document.cookie = "fromResetFlow=false; path=/; max-age=0;";
+        
+        // ✅ Sign out the user completely to clear the session
+        await supabase.auth.signOut();
+        
+        // ✅ Clear any other auth-related cookies
+        document.cookie.split(";").forEach(function(c) { 
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        });
 
         setSuccessMessage("Password reset successful! Redirecting to login...");
-        setTimeout(() => router.push("/login"), 2500);
+        setTimeout(() => {
+          // Force a full page reload to ensure clean state
+          window.location.href = "/login";
+        }, 2500);
       }
     } catch (err) {
       setErrorMessage("Something went wrong. Try again.");
@@ -103,6 +119,7 @@ export default function ResetPassword() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               required
+              minLength={6}
             />
           </div>
           <div>
@@ -116,12 +133,13 @@ export default function ResetPassword() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
+              minLength={6}
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition"
+            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition disabled:opacity-50"
             disabled={loading}
           >
             {loading ? "Resetting Password..." : "Reset Password"}
