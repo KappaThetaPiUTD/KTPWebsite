@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
 import { supabase } from "../../../lib/supabase";
 import { getUserRole } from "../../src/rbac";
 import Sidebar from "../../../components/Sidebar";
@@ -19,20 +18,17 @@ export default function AdminPage() {
   useEffect(() => {
     const checkAuthAndRole = async () => {
       try {
-        // Check user authentication
+        // ✅ Check user authentication
         const { data } = await supabase.auth.getUser();
         if (data?.user) {
           setUser(data.user);
 
-          // Check user role
+          // ✅ Check role
           const { role, error: roleError } = await getUserRole();
-
-          console.log("Role check result:", { role, roleError });
-          console.log("Auth User ID:", data.user.id);
-          console.log("Auth User Email:", data.user.email);
+          console.log("Role check:", { role, roleError });
+          console.log("Auth UID:", data.user.id, "Email:", data.user.email);
 
           if (roleError) {
-            console.error("Error getting user role:", roleError);
             setAccessDenied(true);
             setLoading(false);
             return;
@@ -40,40 +36,30 @@ export default function AdminPage() {
 
           setUserRole(role);
 
-          // Check if user has executive access
+          // ✅ Restrict to executive
           if (role?.toLowerCase() !== "executive") {
             setAccessDenied(true);
             setLoading(false);
             return;
           }
-          const fetchAllUsers = async () => {
-            const { data, error } = await supabase
-              .from("profiles")
-              .select("id, full_name, email");
 
-            if (error) {
-              console.error("Error fetching users:", error);
-            } else {
-              setAllUsers(data);
-            }
-          };
-
-          // User has access, fetch admin data
-          fetchAttendance();
-          fetchRSVPs();
-          fetchAllUsers();
+          // ✅ Fetch all required admin data
+          await fetchAttendance();
+          await fetchRSVPs();
+          await fetchAllUsers();
         }
 
         setLoading(false);
       } catch (error) {
-        console.error("Error in admin access check:", error);
+        console.error("Admin check error:", error);
         setAccessDenied(true);
         setLoading(false);
       }
     };
 
     const fetchAttendance = async () => {
-      const { data } = await supabase.from("attendance").select("*");
+      const { data, error } = await supabase.from("attendance").select("*");
+      if (error) console.error("Attendance fetch error:", error);
       setAttendanceData(data || []);
     };
 
@@ -83,7 +69,16 @@ export default function AdminPage() {
         .select(
           "id, event_id, response, response_updated_at, user_id, event_title, profiles (full_name, email)"
         );
+      if (error) console.error("RSVP fetch error:", error);
       setRsvpData(data || []);
+    };
+
+    const fetchAllUsers = async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email");
+      if (error) console.error("User fetch error:", error);
+      setAllUsers(data || []);
     };
 
     checkAuthAndRole();
@@ -128,15 +123,13 @@ export default function AdminPage() {
     );
   }
 
-  // User has executive access - show full admin page
+  // ✅ UI remains unchanged
   return (
     <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
-      {/* Sidebar */}
       <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
         <Sidebar />
       </aside>
 
-      {/* Main Content */}
       <main className="px-8 py-6 w-full space-y-12">
         <h1 className="text-2xl font-bold text-primary">Admin Dashboard</h1>
 
@@ -215,7 +208,8 @@ export default function AdminPage() {
             </table>
           </div>
         </section>
-        {/* Create Event */}
+
+        {/* Create Event Form */}
         <section>
           <h2 className="text-lg font-semibold mb-3 text-primary">
             Create Event
@@ -252,8 +246,8 @@ export default function AdminPage() {
                   repeat: repeatOption,
                   repeat_start: repeatOption !== "None" ? repeatStart : null,
                   repeat_end: repeatOption !== "None" ? repeatEnd : null,
-                  created_by: user?.id, // ✅ logged-in user's UID
-                  created_by_email: user?.email || null, // ✅ optional
+                  created_by: user?.id,
+                  created_by_email: user?.email || null,
                 },
               ]);
 
@@ -267,6 +261,7 @@ export default function AdminPage() {
             }}
             className="max-w-xl bg-gray-50 border border-gray-300 rounded-xl p-6 mx-auto"
           >
+            {/* form fields unchanged */}
             <div className="mb-4">
               <label className="block font-medium mb-1">
                 Title <span className="text-red-600">*</span>
@@ -367,6 +362,8 @@ export default function AdminPage() {
             </button>
           </form>
         </section>
+
+        {/* Strike Table */}
         <section>
           <h2 className="text-lg font-semibold mb-3 text-primary">
             Log Strikes for Users
@@ -399,12 +396,7 @@ export default function AdminPage() {
 
                           const { error } = await supabase
                             .from("strikes_log")
-                            .insert([
-                              {
-                                user_id: userEntry.id,
-                                reason: reason,
-                              },
-                            ]);
+                            .insert([{ user_id: userEntry.id, reason }]);
 
                           if (error) {
                             alert("Error logging strike: " + error.message);
