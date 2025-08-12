@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { FaThumbsUp } from 'react-icons/fa';
 import { createClient } from '@supabase/supabase-js';
+// LikeButton component not used here; we implement inline like logic
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -16,6 +17,21 @@ export default function BlogPostPage() {
   const [slug, setSlug] = useState(null);
   const [post, setPost] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
+  const [liking, setLiking] = useState(false);
+
+  // Load like status from localStorage when post loads
+  useEffect(() => {
+    if (!post?.id) return;
+    try {
+      const raw = localStorage.getItem('likedPostIds');
+      if (raw) {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr) && arr.includes(post.id)) {
+          setIsLiked(true);
+        }
+      }
+    } catch (_) {}
+  }, [post?.id]);
 
   useEffect(() => {
     if (params?.slug) {
@@ -33,22 +49,72 @@ export default function BlogPostPage() {
         .eq('slug', slug)
         .single();
 
-      if (!error && data) setPost(data);
+      if (!error && data) {
+        setPost(prev => {
+          if (!prev) return data;
+            // Preserve a higher like count already obtained locally
+          const mergedLikes = typeof prev.likes === 'number' && typeof data.likes === 'number'
+            ? Math.max(prev.likes, data.likes || 0)
+            : (data.likes || prev.likes || 0);
+          return { ...data, likes: mergedLikes };
+        });
+      }
     };
     fetchPost();
   }, [slug]);
 
-  const handleLike = () => {
-    if (!post) return;
-    setPost(prev => ({
-      ...prev,
-      likes: isLiked ? prev.likes - 1 : prev.likes + 1
-    }));
-    setIsLiked(prev => !prev);
+  const handleLike = async () => {
+    if (!post || liking || isLiked) return;
+    setLiking(true);
+    const prevLikes = post.likes || 0;
+    setPost(p => ({ ...p, likes: prevLikes + 1 }));
+    try {
+      const res = await fetch('/api/blog/likes', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postID: post.id, increment: 1 })
+      });
+      if (res.ok) {
+        let data; try { data = await res.json(); } catch { data = {}; }
+        if (typeof data.likes === 'number') {
+          setPost(p => ({ ...p, likes: Math.max(p.likes || 0, data.likes) }));
+          setIsLiked(true);
+          try {
+            const raw = localStorage.getItem('likedPostIds');
+            const parsed = raw ? JSON.parse(raw) : [];
+            const arr = Array.isArray(parsed) ? parsed : [];
+            if (!arr.includes(post.id)) {
+              arr.push(post.id);
+              localStorage.setItem('likedPostIds', JSON.stringify(arr));
+            }
+          } catch (_) {}
+          // Fire-and-forget verify (non-blocking)
+          (async () => {
+            try {
+              const verify = await fetch(`/api/blog/likes?postID=${post.id}`);
+              if (verify.ok) {
+                const v = await verify.json();
+                if (typeof v.likes === 'number') {
+                  setPost(p => ({ ...p, likes: Math.max(p.likes || 0, v.likes) }));
+                }
+              }
+            } catch {}
+          })();
+        } else {
+          setPost(p => ({ ...p, likes: prevLikes }));
+        }
+      } else {
+        setPost(p => ({ ...p, likes: prevLikes }));
+      }
+    } catch (e) {
+      console.error('Failed to like post', e);
+      setPost(p => ({ ...p, likes: prevLikes }));
+    } finally {
+      setLiking(false);
+    }
   };
 
-  if (!post) return <div className="p-10 text-red-600">Post not found</div>;
-
+    if (!post) return <div className="p-10 text-red-600">Post not found</div>;
   return (
     <div className="min-h-screen bg-white">
       {/* Navbar */}
@@ -99,10 +165,11 @@ export default function BlogPostPage() {
             <span className="text-sm text-primary font-medium">{post.readTime || '—'} </span>
             <button
               onClick={handleLike}
-              className="flex items-center gap-1 text-sm text-primary font-medium hover:text-primary-dark"
+              disabled={liking || isLiked}
+              className="flex items-center gap-1 text-sm text-primary font-medium hover:text-primary-dark disabled:opacity-60"
             >
               <FaThumbsUp className={isLiked ? 'text-blue-500' : 'text-primary'} size={14} />
-              <span>Liked by {post.likes || 0} people</span>
+              <span>{liking ? 'Liking...' : `Liked by ${post.likes || 0} people`}</span>
             </button>
           </div>
 
@@ -153,7 +220,12 @@ export default function BlogPostPage() {
               <h3 className="font-bold text-primary mb-4">Categories</h3>
               <ul className="space-y-3">
                 {(Array.isArray(post.tags) ? post.tags : post.tags?.split(',')).map((tag, i) => (
-                  <li key={i} className="text-primary hover:underline cursor-pointer">{tag.trim()}</li>
+                  <li
+                    key={i}
+                    className="text-primary select-none"
+                  >
+                    {tag.trim()}
+                  </li>
                 ))}
               </ul>
             </div>
