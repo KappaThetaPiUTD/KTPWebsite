@@ -1,4 +1,3 @@
-import emailjs from "@emailjs/browser";
 import ReactToast from "./react-toast";
 import { toast } from "react-toastify";
 import { useState } from "react";
@@ -29,48 +28,50 @@ const SubmitButton = ({ inputState, clearForm }) => {
       toast(<ReactToast title="❌ Please enter a message." />);
       return false;
     }
-
     return true;
   };
 
   const sendEmail = async () => {
     if (isSending) return;
-
     if (!validate()) return;
-
     setIsSending(true);
-
-    await emailjs
-      .send(
-        "service_2tk18sl",
-        "template_qtuflym",
-        {
-          full_name: `${firstName} ${lastName}`,
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName,
+          lastName,
           email,
-          phone_number: normalizePhoneNumber(phoneNumber),
+          phoneNumber: normalizePhoneNumber(phoneNumber),
           message,
-        },
-        "9YS481nKiT3lB8wNY"
-      )
-      .then(
-        (result) => {
-          toast(<ReactToast title="✅ Contacted Successfully!" />);
-        },
-        (error) => {
-          toast(<ReactToast title="❌ Error Sending Email :(" />);
-        }
-      );
-
-    clearForm();
-    setIsSending(false);
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.ok) {
+        toast(<ReactToast title="✅ Message Sent!" />);
+        clearForm();
+      } else {
+        toast(<ReactToast title="❌ Error Sending Email" />);
+        console.warn("Contact send failed", res.status, data);
+      }
+    } catch (err) {
+      toast(<ReactToast title="❌ Error Sending Email" />);
+      console.error("Contact send exception", err);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
     <button
-      className="bg-primary w-[120px] h-[40px] font-poppins text-[#FFFFFF] text-[16px] rounded-[8px] mt-[32px] md:w-[150px] md:h-[50px] md:text-[20px] md:mt-[40px]"
+      className={`bg-primary w-[120px] h-[40px] font-poppins text-[#FFFFFF] text-[16px] rounded-[8px] mt-[32px] md:w-[150px] md:h-[50px] md:text-[20px] md:mt-[40px] ${
+        isSending ? "opacity-60 cursor-not-allowed" : ""
+      }`}
       onClick={sendEmail}
+      disabled={isSending}
     >
-      Submit
+      {isSending ? "Sending..." : "Submit"}
     </button>
   );
 };

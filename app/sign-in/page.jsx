@@ -43,6 +43,18 @@ export default function SignUp() {
     } else {
       console.log("Sign up successful:", data);
       setSignUpSent(true);
+      // Fire and forget notification
+      try {
+        const res = await fetch('/api/notify/new-user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const j = await res.json().catch(()=>({}));
+        console.log('Notify new-user result', res.status, j);
+      } catch (notifyErr) {
+        console.warn('Notify new-user failed', notifyErr);
+      }
       // Note: User won't be logged in until they confirm their email
     }
   };
