@@ -69,20 +69,26 @@ export default function Dashboard() {
   // Fetch events for calendar/list
   useEffect(() => {
     const fetchEvents = async () => {
+      if (!user) return; // Wait for user to be loaded
+      
       try {
-        const res = await fetch("http://localhost:5001/api/events");
+        // Send user ID to backend for filtering
+        const res = await fetch(`http://localhost:5001/api/events?user_id=${user.id}`);
         const json = await res.json();
+        
         if (json.data) {
           const formatted = {};
           json.data.forEach((event) => {
             const key = new Date(event.event_date).toISOString().split("T")[0];
             if (!formatted[key]) formatted[key] = [];
             formatted[key].push({
+              id: event.id,
               title: event.event_name,
               time: new Date(event.event_date).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               }),
+              visibility: event.visibility
             });
           });
           setEvents(formatted);
@@ -92,9 +98,9 @@ export default function Dashboard() {
         console.error("Failed to fetch events:", err);
       }
     };
-
+  
     fetchEvents();
-  }, []);
+  }, [user]); // Add user as dependency
 
   // Fetch current user's RSVP status map
   useEffect(() => {

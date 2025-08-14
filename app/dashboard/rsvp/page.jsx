@@ -29,23 +29,75 @@ export default function RSVPPage() {
   // Fetch events + my RSVPs
   useEffect(() => {
     const fetchData = async () => {
-      const [{ data: eventsData }, { data: rsvpsData }] = await Promise.all([
-        supabase.from("events").select("id, event_name"),
-        supabase.from("rsvps").select("event_id, response").eq("user_id", user.id),
-      ]);
-
-      if (eventsData) setEvents(eventsData);
-
-      const statusMap = {};
-      eventsData?.forEach((e) => {
-        const myRSVP = rsvpsData?.find(r => r.event_id === e.id);
-        statusMap[e.id] = myRSVP ? myRSVP.response : "unanswered";
-      });
-
-      setRsvpStatus(statusMap);
+      if (!user) return;
+      
+      try {
+        // Get user role first
+        const { data: userData, error: userError } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        
+        const userRole = userData?.role;
+        
+        // Fetch all events with visibility
+        const { data: eventsData, error: eventsError } = await supabase
+          .from("events")
+          .select("id, event_name, visibility")
+          .order("event_date", { ascending: true });
+        
+        if (eventsError) {
+          console.error("Error fetching events:", eventsError);
+          return;
+        }
+        
+        // Filter events based on user role
+        const filteredEvents = eventsData?.filter(event => {
+          // Executive members can see everything
+          if (userRole?.toLowerCase() === 'executive') {
+            return true;
+          }
+          
+          // If event has no visibility set, show it (backward compatibility)
+          if (!event.visibility) {
+            return true;
+          }
+          
+          // Check visibility rules
+          switch (event.visibility) {
+            case 'brothers_only':
+              return userRole?.toLowerCase() === 'brother';
+            case 'pledges_only':
+              return userRole?.toLowerCase() === 'pledge';
+            case 'brothers_and_pledges':
+              return ['brother', 'pledge'].includes(userRole?.toLowerCase());
+            default:
+              return true;
+          }
+        }) || [];
+        
+        // Fetch RSVPs for filtered events
+        const { data: rsvpsData } = await supabase
+          .from("rsvps")
+          .select("event_id, response")
+          .eq("user_id", user.id);
+  
+        setEvents(filteredEvents);
+  
+        const statusMap = {};
+        filteredEvents.forEach((e) => {
+          const myRSVP = rsvpsData?.find(r => r.event_id === e.id);
+          statusMap[e.id] = myRSVP ? myRSVP.response : "unanswered";
+        });
+  
+        setRsvpStatus(statusMap);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
-
-    if (user) fetchData();
+  
+    fetchData();
   }, [user]);
 
   // Handle RSVP action
