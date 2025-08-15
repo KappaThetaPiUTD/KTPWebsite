@@ -8,6 +8,135 @@ const jwt = require("jsonwebtoken");
 const { supabase } = require("../lib/supabase");
 const router = express.Router();
 
+const sendRegistrationNotification = async (userData) => {
+  try {
+    const transporter = nodemailer.createTransporter({
+      service: "gmail",
+      auth: {
+        user: process.env.KTP_EMAIL,
+        pass: process.env.KTP_EMAIL_PASSWORD,
+      },
+    });
+
+    await transporter.sendMail({
+      from: process.env.KTP_EMAIL,
+      to: process.env.KTP_EMAIL, // Add this to your .env file
+      subject: "New User Registration - KTP Portal",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px;">
+          <h2 style="color: #2c3e50;">🎉 New User Registration</h2>
+          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 15px 0;">
+            <p><strong>Email:</strong> ${userData.email}</p>
+            <p><strong>Name:</strong> ${userData.name || 'Not provided'}</p>
+            <p><strong>Provider:</strong> ${userData.provider}</p>
+            <p><strong>Registration Time:</strong> ${new Date().toLocaleString()}</p>
+            <p><strong>User ID:</strong> ${userData.id}</p>
+          </div>
+          <p style="color: #666; font-size: 12px; margin-top: 20px;">
+            This is an automated notification from your KTP Portal registration system.
+          </p>
+        </div>
+      `,
+    });
+
+    console.log('Registration notification sent successfully');
+  } catch (error) {
+    console.error('Failed to send registration notification:', error);
+    // Don't throw error - we don't want email failures to break registration
+  }
+};
+
+// Google OAuth Success Handler
+router.get("/google/success", async (req, res) => {
+  try {
+    // Get user info from session or however you're storing it
+    const userInfo = req.session?.user || req.user; // Adjust based on your setup
+    
+    if (!userInfo) {
+      return res.status(401).json({ message: "No user information found" });
+    }
+
+    // Check if this is a new user by looking for recent registration
+    const { data: existingUser, error } = await supabase
+      .from("users")
+      .select("id, email, name, created_at")
+      .eq("email", userInfo.email)
+      .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+      console.error("Error checking user:", error);
+    }
+
+    // If user was just created (within last 5 minutes), send notification
+    const isNewUser = existingUser && 
+      new Date() - new Date(existingUser.created_at) < 5 * 60 * 1000;
+
+    if (isNewUser) {
+      // Send registration notification
+      await sendRegistrationNotification({
+        email: userInfo.email,
+        name: userInfo.name,
+        provider: 'Google OAuth',
+        id: existingUser.id
+      });
+    }
+
+    res.status(200).json({ 
+      message: "Google OAuth successful", 
+      user: userInfo 
+    });
+  } catch (error) {
+    console.error("Google OAuth success error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+// Discord OAuth Success Handler
+router.get("/discord/success", async (req, res) => {
+  try {
+    // Get user info from session or however you're storing it
+    const userInfo = req.session?.user || req.user;
+    
+    if (!userInfo) {
+      return res.status(401).json({ message: "No user information found" });
+    }
+
+    // Check if this is a new user
+    const { data: existingUser, error } = await supabase
+      .from("users")
+      .select("id, email, name, created_at")
+      .eq("email", userInfo.email)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error("Error checking user:", error);
+    }
+
+    // If user was just created (within last 5 minutes), send notification
+    const isNewUser = existingUser && 
+      new Date() - new Date(existingUser.created_at) < 5 * 60 * 1000;
+
+    if (isNewUser) {
+      // Send registration notification
+      await sendRegistrationNotification({
+        email: userInfo.email,
+        name: userInfo.name,
+        provider: 'Discord OAuth',
+        id: existingUser.id
+      });
+    }
+
+    res.status(200).json({ 
+      message: "Discord OAuth successful", 
+      user: userInfo 
+    });
+  } catch (error) {
+    console.error("Discord OAuth success error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+
 /*
 const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
 const JWT_EXPIRATION = "1h";
