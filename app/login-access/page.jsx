@@ -29,7 +29,7 @@ export default function LoginAccessPage() {
       console.log("📡 Making API request...");
       const requestStart = Date.now();
       
-      const response = await fetch("http://localhost:3000/api/verify-code", {
+  const response = await fetch("/api/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, type: "login" }),
