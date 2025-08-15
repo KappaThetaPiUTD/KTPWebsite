@@ -20,7 +20,7 @@ const sendRegistrationNotification = async (userData) => {
 
     await transporter.sendMail({
       from: process.env.KTP_EMAIL,
-      to: process.env.KTP_ORG_EMAIL, // Add this to your .env file
+      to: process.env.KTP_EMAIL, // Add this to your .env file
       subject: "New User Registration - KTP Portal",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px;">
