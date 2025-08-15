@@ -16,43 +16,45 @@ export default function AdminPage() {
   const [repeat, setRepeat] = useState("None");
   const [allUsers, setAllUsers] = useState([]);
 
-  // NEW: tab state
-  const [activeTab, setActiveTab] = useState("Attendance"); // "Attendance" | "RSVPs" | "Create Event" | "Strikes"
+  // Tabs: "Attendance" | "RSVPs" | "Create Event" | "Strikes"
+  const [activeTab, setActiveTab] = useState("Attendance");
 
   useEffect(() => {
     const checkAuthAndRole = async () => {
       try {
-        // ✅ Check user authentication
+        // Auth
         const { data } = await supabase.auth.getUser();
-        if (data?.user) {
-          setUser(data.user);
-
-          // ✅ Check role
-          const { role, error: roleError } = await getUserRole();
-          if (roleError) {
-            setAccessDenied(true);
-            setLoading(false);
-            return;
-          }
-
-          setUserRole(role);
-
-          // ✅ Restrict to executive
-          if (role?.toLowerCase() !== "executive") {
-            setAccessDenied(true);
-            setLoading(false);
-            return;
-          }
-
-          // ✅ Fetch all required admin data
-          await fetchAttendance();
-          await fetchRSVPs();
-          await fetchAllUsers();
+        if (!data?.user) {
+          setLoading(false);
+          setAccessDenied(true);
+          return;
         }
 
+        setUser(data.user);
+
+        // Role
+        const { role, error: roleError } = await getUserRole();
+        if (roleError) {
+          setAccessDenied(true);
+          setLoading(false);
+          return;
+        }
+
+        setUserRole(role);
+
+        // Only executives allowed
+        if (role?.toLowerCase() !== "executive") {
+          setAccessDenied(true);
+          setLoading(false);
+          return;
+        }
+
+        // Prefetch data for all tabs
+        await Promise.all([fetchAttendance(), fetchRSVPs(), fetchAllUsers()]);
+
         setLoading(false);
-      } catch (error) {
-        console.error("Admin check error:", error);
+      } catch (err) {
+        console.error("Admin check error:", err);
         setAccessDenied(true);
         setLoading(false);
       }
@@ -65,13 +67,63 @@ export default function AdminPage() {
     };
 
     const fetchRSVPs = async () => {
-      const { data, error } = await supabase
+      // 1) Pull RSVPs
+      const { data: rsvps, error: rsvpErr } = await supabase
         .from("rsvps")
         .select(
-          "id, event_id, response, response_updated_at, user_id, event_title, profiles (full_name, email)"
+          "id, user_id, event_id, event_title, response, response_updated_at"
         );
-      if (error) console.error("RSVP fetch error:", error);
-      setRsvpData(data || []);
+      if (rsvpErr) {
+        console.error("RSVP fetch error:", rsvpErr);
+        setRsvpData([]);
+        return;
+      }
+      if (!rsvps?.length) {
+        setRsvpData([]);
+        return;
+      }
+
+      // 2) Users for those RSVPs
+      const userIds = Array.from(
+        new Set(rsvps.map((r) => r.user_id).filter(Boolean))
+      );
+      const { data: users, error: usersErr } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", userIds);
+
+      if (usersErr) console.error("Profiles fetch error:", usersErr);
+      const usersById =
+        users?.reduce((acc, u) => {
+          acc[u.id] = u;
+          return acc;
+        }, {}) || {};
+
+      // 3) Resolve missing event titles
+      const missingTitles = rsvps
+        .filter((r) => !r.event_title && r.event_id)
+        .map((r) => r.event_id);
+      let eventsById = {};
+      if (missingTitles.length) {
+        const { data: events } = await supabase
+          .from("events")
+          .select("id, event_name")
+          .in("id", Array.from(new Set(missingTitles)));
+        eventsById =
+          events?.reduce((acc, e) => {
+            acc[e.id] = e;
+            return acc;
+          }, {}) || {};
+      }
+
+      // 4) Combine
+      const combined = rsvps.map((r) => ({
+        ...r,
+        profiles: usersById[r.user_id] || null,
+        event_title: r.event_title || eventsById[r.event_id]?.event_name || null,
+      }));
+
+      setRsvpData(combined);
     };
 
     const fetchAllUsers = async () => {
@@ -85,7 +137,7 @@ export default function AdminPage() {
     checkAuthAndRole();
   }, []);
 
-  // --- Small tab bar component (inside same file) ---
+  // --- Small tab bar component ---
   const TabBar = () => {
     const tabs = ["Attendance", "RSVPs", "Create Event", "Strikes"];
     return (
@@ -155,7 +207,6 @@ export default function AdminPage() {
     );
   }
 
-  // ✅ UI with tabs
   return (
     <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
       <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
@@ -189,12 +240,22 @@ export default function AdminPage() {
                       className="border-t bg-white hover:bg-gray-50 text-black"
                     >
                       <td className="px-4 py-2">{entry.name || "N/A"}</td>
-                      <td className="px-4 py-2">{entry.email}</td>
+                      <td className="px-4 py-2">{entry.email || "N/A"}</td>
                       <td className="px-4 py-2">
                         {entry.checked_in_time || "N/A"}
                       </td>
                     </tr>
                   ))}
+                  {!attendanceData.length && (
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className="px-4 py-6 text-center text-gray-500"
+                      >
+                        No attendance records yet.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -243,6 +304,16 @@ export default function AdminPage() {
                       </td>
                     </tr>
                   ))}
+                  {!rsvpData.length && (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="px-4 py-6 text-center text-gray-500"
+                      >
+                        No RSVPs yet.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -255,7 +326,6 @@ export default function AdminPage() {
             <h2 className="text-lg font-semibold mb-3 text-primary">
               Create Event
             </h2>
-
             <form
               onSubmit={async (e) => {
                 e.preventDefault();
@@ -292,7 +362,7 @@ export default function AdminPage() {
                   {
                     event_name: title,
                     description,
-                    event_date: eventDate,
+                    event_date: eventDate, // or eventDate.toISOString()
                     repeat: repeatOption,
                     repeat_start: repeatOption !== "None" ? repeatStart : null,
                     repeat_end: repeatOption !== "None" ? repeatEnd : null,
@@ -362,8 +432,7 @@ export default function AdminPage() {
               {/* Visibility */}
               <div className="mb-4">
                 <label className="block font-medium mb-1">
-                  Who can see this event?{" "}
-                  <span className="text-red-600">*</span>
+                  Who can see this event? <span className="text-red-600">*</span>
                 </label>
                 <select
                   name="visibility"
@@ -485,6 +554,16 @@ export default function AdminPage() {
                       </td>
                     </tr>
                   ))}
+                  {!allUsers.length && (
+                    <tr>
+                      <td
+                        colSpan={3}
+                        className="px-4 py-6 text-center text-gray-500"
+                      >
+                        No users found.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
