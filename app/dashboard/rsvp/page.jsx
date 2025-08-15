@@ -186,50 +186,62 @@ export default function RSVPPage() {
           <h2 className="text-lg font-semibold mb-4 text-primary">
             Update Your RSVP
           </h2>
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
-              <div key={event.id}>
-                <p className="font-medium text-sm mb-1">{event.event_name}</p>
-                <p className="text-s text-stone-400 mb-1">
-                  {new Intl.DateTimeFormat("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  }).format(new Date(event.event_date))}
-                </p>
-                {event.repeat !== "none" &&
-                  event.repeat_start &&
-                  event.repeat_end && (
-                    <div className="text-xs text-blue-500 mb-2">
-                      <p>
-                        Repeats:{" "}
-                        {event.repeat.charAt(0).toUpperCase() +
-                          event.repeat.slice(1)}
-                      </p>
-                      <p>
-                        From:{" "}
-                        {new Intl.DateTimeFormat("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }).format(new Date(event.repeat_start))}
-                      </p>
-                      <p>
-                        To:{" "}
-                        {new Intl.DateTimeFormat("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }).format(new Date(event.repeat_end))}
-                      </p>
-                    </div>
-                  )}
-                <div className="mt-2 flex flex-wrap gap-3">
+              <div
+                key={event.id}
+                className="border rounded-lg p-4 shadow-sm flex flex-col justify-between h-full"
+              >
+                {/* Top Section: Name and Date on the left, Repeating Info on the right */}
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="font-medium text-sm mb-1">
+                      {event.event_name}
+                    </p>
+                    <p className="text-s text-stone-400">
+                      {new Intl.DateTimeFormat("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }).format(new Date(event.event_date))}
+                    </p>
+                  </div>
+                  {event.repeat !== "none" &&
+                    event.repeat_start &&
+                    event.repeat_end && (
+                      <div className="text-xs text-blue-500 text-right">
+                        <p>
+                          Repeats:{" "}
+                          {event.repeat.charAt(0).toUpperCase() +
+                            event.repeat.slice(1)}
+                        </p>
+                        <p>
+                          From:{" "}
+                          {new Intl.DateTimeFormat("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }).format(new Date(event.repeat_start))}
+                        </p>
+                        <p>
+                          To:{" "}
+                          {new Intl.DateTimeFormat("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }).format(new Date(event.repeat_end))}
+                        </p>
+                      </div>
+                    )}
+                </div>
+
+                {/* Center Section: RSVP Buttons */}
+                <div className="flex justify-center items-center mt-auto">
                   {["going", "maybe", "not going"].map((status) => (
                     <button
                       key={status}
                       onClick={() => handleRSVP(event, status)}
-                      className={`px-4 py-1 text-white rounded-full text-xs font-semibold transition ${
+                      className={`px-4 py-1.5 text-white rounded-full text-xs font-semibold transition mx-1 ${
                         rsvpStatus[event.id] === status
                           ? "bg-primary/80"
                           : "bg-primary hover:bg-primary/90"

@@ -69,36 +69,40 @@ export default function Dashboard() {
   // Fetch events for calendar/list
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!user) return; // Wait for user to be loaded
-      
+      if (!user) return;
+
       try {
-        // Send user ID to backend for filtering
-        const res = await fetch(`http://localhost:5001/api/events?user_id=${user.id}`);
-        const json = await res.json();
-        
-        if (json.data) {
-          const formatted = {};
-          json.data.forEach((event) => {
-            const key = new Date(event.event_date).toISOString().split("T")[0];
-            if (!formatted[key]) formatted[key] = [];
-            formatted[key].push({
-              id: event.id,
-              title: event.event_name,
-              time: new Date(event.event_date).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-              visibility: event.visibility
-            });
-          });
-          setEvents(formatted);
-          setEventList(json.data);
+        const { data: eventsData, error } = await supabase
+          .from("events")
+          .select("id, event_name, event_date, visibility");
+
+        if (error) {
+          console.error("Error fetching events:", error);
+          return;
         }
+
+        const formatted = {};
+        eventsData.forEach((event) => {
+          const key = new Date(event.event_date).toISOString().split("T")[0];
+          if (!formatted[key]) formatted[key] = [];
+          formatted[key].push({
+            id: event.id,
+            title: event.event_name,
+            time: new Date(event.event_date).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            visibility: event.visibility,
+          });
+        });
+
+        setEvents(formatted);
+        setEventList(eventsData);
       } catch (err) {
         console.error("Failed to fetch events:", err);
       }
     };
-  
+
     fetchEvents();
   }, [user]); // Add user as dependency
 
@@ -366,78 +370,80 @@ export default function Dashboard() {
           </div>
         </div>
 
-{/* Upcoming events list */}
-<div className="mt-10 bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
-  <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
-  <ul className="text-sm space-y-2">
-    {eventList.length > 0 ? (
-      [...eventList]
-        .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
-        .slice(0, 5)
-        .map((event, idx) => {
-          const response = rsvpStatus[event.id]; // get user's RSVP for this event
-          return (
-            <li key={idx} className="flex items-center justify-between">
-              <span>
-                <span className="font-medium">
-                  {new Date(event.event_date).toLocaleString(undefined, {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>{" "}
-                — {event.event_name}
-              </span>
+        {/* Upcoming events list */}
+        <div className="mt-10 bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
+          <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
+          <ul className="text-sm space-y-2">
+            {eventList.length > 0 ? (
+              [...eventList]
+                .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
+                .slice(0, 5)
+                .map((event, idx) => {
+                  const response = rsvpStatus[event.id]; // get user's RSVP for this event
+                  return (
+                    <li key={idx} className="flex items-center justify-between">
+                      <span>
+                        <span className="font-medium">
+                          {new Date(event.event_date).toLocaleString(
+                            undefined,
+                            {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                        </span>{" "}
+                        — {event.event_name}
+                      </span>
 
-              {response ? (
-                // ✅ Show RSVP status text if exists
-                <span
-                  className={`px-3 py-1 text-xs rounded-full font-semibold capitalize ${
-                    response === "going"
-                      ? "bg-green-100 text-green-700"
-                      : response === "maybe"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : response === "not going" || response === "no"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {response}
-                </span>
-              ) : (
-                // ❌ No RSVP yet → show buttons
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => handleRSVP(event, "going")}
-                    className="bg-green-500 text-white px-2 py-1 text-xs rounded"
-                  >
-                    Going
-                  </button>
-                  <button
-                    onClick={() => handleRSVP(event, "maybe")}
-                    className="bg-yellow-500 text-white px-2 py-1 text-xs rounded"
-                  >
-                    Maybe
-                  </button>
-                  <button
-                    onClick={() => handleRSVP(event, "not going")}
-                    className="bg-red-500 text-white px-2 py-1 text-xs rounded"
-                  >
-                    No
-                  </button>
-                </div>
-              )}
-            </li>
-          );
-        })
-    ) : (
-      <p className="text-xs text-gray-500">No events available.</p>
-    )}
-  </ul>
-</div>
-
+                      {response ? (
+                        // ✅ Show RSVP status text if exists
+                        <span
+                          className={`px-3 py-1 text-xs rounded-full font-semibold capitalize ${
+                            response === "going"
+                              ? "bg-green-100 text-green-700"
+                              : response === "maybe"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : response === "not going" || response === "no"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {response}
+                        </span>
+                      ) : (
+                        // ❌ No RSVP yet → show buttons
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => handleRSVP(event, "going")}
+                            className="bg-green-500 text-white px-2 py-1 text-xs rounded"
+                          >
+                            Going
+                          </button>
+                          <button
+                            onClick={() => handleRSVP(event, "maybe")}
+                            className="bg-yellow-500 text-white px-2 py-1 text-xs rounded"
+                          >
+                            Maybe
+                          </button>
+                          <button
+                            onClick={() => handleRSVP(event, "not going")}
+                            className="bg-red-500 text-white px-2 py-1 text-xs rounded"
+                          >
+                            No
+                          </button>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })
+            ) : (
+              <p className="text-xs text-gray-500">No events available.</p>
+            )}
+          </ul>
+        </div>
       </main>
     </div>
   );
