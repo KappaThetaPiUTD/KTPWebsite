@@ -145,7 +145,7 @@ export default function SignUp() {
               {password && (
                 <button
                   type="button"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-black bg-gray-200 border border-gray-400 rounded px-2 py-1 cursor-pointer shadow"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-black bg-gray-200 "
                   onClick={() => setShowPassword((v) => !v)}
                   tabIndex={0}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
