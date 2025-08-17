@@ -288,13 +288,13 @@ export default function SignUp() {
               onClick={handleGoogleLogin}
               className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg text-black hover:bg-gray-100 transition"
             >
-              <FaGoogle className="mr-2 text-lg" /> Continue with Google
+              <FaGoogle className="mr-2 text-lg" /> Sign up with Google
             </button>
             <button
               onClick={handleDiscordLogin}
               className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg text-black hover:bg-gray-100 transition"
             >
-              <FaDiscord className="mr-2 text-lg text-[#5865F2]" /> Continue with Discord
+              <FaDiscord className="mr-2 text-lg text-[#5865F2]" /> Sign up with Discord
             </button>
           </div>
 
