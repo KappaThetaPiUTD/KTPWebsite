@@ -9,6 +9,7 @@ export default function Login() { // Changed from SignUp to Login
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [resetSent, setResetSent] = useState(false);
 
   // Changed from handleEmailSignUp to handleEmailLogin
@@ -34,7 +35,26 @@ export default function Login() { // Changed from SignUp to Login
         redirectTo: `${window.location.origin}/auth/callback`
       }
     });
-    if (error) console.error("Google login failed:", error.message);
+    if (error) {
+      console.error("Google login failed:", error.message);
+    } else {
+      // Try to get user email after OAuth
+      setTimeout(async () => {
+        const { data } = await supabase.auth.getUser();
+        const userEmail = data?.user?.email;
+        if (userEmail) {
+          try {
+            await fetch('/api/notify/new-user', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userEmail })
+            });
+          } catch (notifyErr) {
+            console.warn('Notify new-user failed', notifyErr);
+          }
+        }
+      }, 1000); // Wait for OAuth session
+    }
   };
 
   const handleDiscordLogin = async () => {
@@ -44,7 +64,26 @@ export default function Login() { // Changed from SignUp to Login
         redirectTo: `${window.location.origin}/auth/callback`
       }
     });
-    if (error) console.error("Discord login failed:", error.message);
+    if (error) {
+      console.error("Discord login failed:", error.message);
+    } else {
+      // Try to get user email after OAuth
+      setTimeout(async () => {
+        const { data } = await supabase.auth.getUser();
+        const userEmail = data?.user?.email;
+        if (userEmail) {
+          try {
+            await fetch('/api/notify/new-user', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userEmail })
+            });
+          } catch (notifyErr) {
+            console.warn('Notify new-user failed', notifyErr);
+          }
+        }
+      }, 1000); // Wait for OAuth session
+    }
   };
 
   const handleForgotPassword = async () => {
@@ -97,15 +136,29 @@ export default function Login() { // Changed from SignUp to Login
             <label htmlFor="password" className="block text-sm font-medium text-black">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700 pr-16"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{ color: 'black' }}
+              />
+              {password && (
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-black bg-gray-200 "
+                  onClick={() => setShowPassword((v) => !v)}
+                  tabIndex={0}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              )}
+            </div>
             <div className="text-right mt-1">
               <button
                 type="button"

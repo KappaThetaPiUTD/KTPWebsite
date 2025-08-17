@@ -10,6 +10,8 @@ export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signUpSent, setSignUpSent] = useState(false);
   const [error, setError] = useState("");
 
@@ -129,36 +131,63 @@ export default function SignUp() {
             <label htmlFor="password" className="block text-sm font-medium text-black">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              className="mt-1 w-full px-4 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                className="mt-1 w-full px-4 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700 pr-16"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                style={{ color: 'black' }}
+              />
+              {password && (
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-black bg-gray-200 border border-gray-400 rounded px-2 py-1 cursor-pointer shadow"
+                  onClick={() => setShowPassword((v) => !v)}
+                  tabIndex={0}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              )}
+            </div>
           </div>
-
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-black">
               Confirm Password
             </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700 pr-16"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                style={{ color: 'black' }}
+              />
+              {confirmPassword && (
+                <button
+                  type="button"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-black bg-gray-200 "
+                  onClick={() => setShowConfirmPassword((v) => !v)}
+                  tabIndex={0}
+                  aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPassword ? 'Hide' : 'Show'}
+                </button>
+              )}
+            </div>
           </div>
-
           {error && (
-            <p className="text-red-500 text-sm">{error}</p>
+            <p className="text-red-500 text-sm text-center">
+              {error}
+            </p>
           )}
-
           <button
             type="submit"
             className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition"
