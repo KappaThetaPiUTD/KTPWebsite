@@ -1,60 +1,108 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaGoogle, FaDiscord } from "react-icons/fa";
+import { FaGoogle, FaDiscord, FaEye, FaEyeSlash } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 
 export default function SignUp() {
   const router = useRouter();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [signUpSent, setSignUpSent] = useState(false);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleEmailSignUp = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     // Check if passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      setLoading(false);
       return;
     }
 
     // Check password length
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
+      setLoading(false);
       return;
     }
+
+    // Check if first and last name are provided
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("First name and last name are required");
+      setLoading(false);
+      return;
+    }
+
+    const displayName = `${firstName.trim()} ${lastName.trim()}`;
 
     const { data, error } = await supabase.auth.signUp({ 
       email, 
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`
+        emailRedirectTo: `${window.location.origin}/dashboard`,
+        data: {
+          display_name: displayName,
+          first_name: firstName.trim(),
+          last_name: lastName.trim()
+        }
       }
     });
 
     if (error) {
       console.error("Email sign up failed:", error.message);
       setError(error.message);
+      setLoading(false);
     } else {
       console.log("Sign up successful:", data);
+      
+      // Insert into custom users table
+      if (data.user) {
+        try {
+          const { error: insertError } = await supabase
+            .from('users')
+            .insert([
+              {
+                id: data.user.id,
+                email: data.user.email,
+                name: displayName
+              }
+            ]);
+          
+          if (insertError) {
+            console.error("Error inserting into users table:", insertError);
+          } else {
+            console.log("Successfully inserted into custom users table");
+          }
+        } catch (insertErr) {
+          console.error("Error with custom users table insert:", insertErr);
+        }
+      }
+      
       setSignUpSent(true);
       // Fire and forget notification
       try {
         const res = await fetch('/api/notify/new-user', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
+          body: JSON.stringify({ email, name: displayName })
         });
         const j = await res.json().catch(()=>({}));
         console.log('Notify new-user result', res.status, j);
       } catch (notifyErr) {
         console.warn('Notify new-user failed', notifyErr);
       }
+      setLoading(false);
       // Note: User won't be logged in until they confirm their email
     }
   };
@@ -110,6 +158,38 @@ export default function SignUp() {
 
         {/* Email/Password Form */}
         <form onSubmit={handleEmailSignUp} className="space-y-4 mt-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium text-black">
+                First Name
+              </label>
+              <input
+                type="text"
+                id="firstName"
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="John"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-black">
+                Last Name
+              </label>
+              <input
+                type="text"
+                id="lastName"
+                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="Doe"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+          
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-black">
               E-mail
@@ -129,30 +209,56 @@ export default function SignUp() {
             <label htmlFor="password" className="block text-sm font-medium text-black">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              className="mt-1 w-full px-4 py-2 border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                className="mt-1 w-full px-4 py-2 pr-10 border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <FaEyeSlash className="h-4 w-4 text-black hover:text-gray-700" />
+                ) : (
+                  <FaEye className="h-4 w-4 text-black hover:text-gray-700" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-black">
               Confirm Password
             </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                className="mt-1 w-full px-4 py-2 pr-10 border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? (
+                  <FaEyeSlash className="h-4 w-4 text-black hover:text-gray-700" />
+                ) : (
+                  <FaEye className="h-4 w-4 text-black hover:text-gray-700" />
+                )}
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -161,9 +267,10 @@ export default function SignUp() {
 
           <button
             type="submit"
-            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition"
+            disabled={loading}
+            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition disabled:opacity-50"
           >
-            Sign Up
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
 
