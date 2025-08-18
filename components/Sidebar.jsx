@@ -11,6 +11,7 @@ export default function Sidebar() {
     { label: "ATTENDANCE RECORDS", path: "/dashboard/attendance" },
     { label: "MERCH", path: "/dashboard/merch" },
     { label: "EVENTS AND RSVP", path: "/dashboard/rsvp" },
+    { label: "FAMILY TREE", path: "/dashboard/family-tree" },
     { label: "PROFILE", path: "/dashboard/profile" },
     { label: "ADMIN", path: "/dashboard/admin" },
   ];
