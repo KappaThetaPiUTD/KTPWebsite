@@ -23,21 +23,18 @@ export default function SignUp() {
     setError("");
     setLoading(true);
 
-    // Check if passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       setLoading(false);
       return;
     }
 
-    // Check password length
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
       setLoading(false);
       return;
     }
 
-    // Check if first and last name are provided
     if (!firstName.trim() || !lastName.trim()) {
       setError("First name and last name are required");
       setLoading(false);
@@ -46,17 +43,18 @@ export default function SignUp() {
 
     const displayName = `${firstName.trim()} ${lastName.trim()}`;
 
-    const { data, error } = await supabase.auth.signUp({ 
-      email, 
+    const { data, error } = await supabase.auth.signUp({
+      email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
         data: {
+          full_name: displayName, // ensures trigger uses correct value
           display_name: displayName,
           first_name: firstName.trim(),
-          last_name: lastName.trim()
-        }
-      }
+          last_name: lastName.trim(),
+        },
+      },
     });
 
     if (error) {
@@ -65,64 +63,35 @@ export default function SignUp() {
       setLoading(false);
     } else {
       console.log("Sign up successful:", data);
-      
-      // Insert into custom users table
-      if (data.user) {
-        try {
-          const { error: insertError } = await supabase
-            .from('users')
-            .insert([
-              {
-                id: data.user.id,
-                email: data.user.email,
-                name: displayName
-              }
-            ]);
-          
-          if (insertError) {
-            console.error("Error inserting into users table:", insertError);
-          } else {
-            console.log("Successfully inserted into custom users table");
-          }
-        } catch (insertErr) {
-          console.error("Error with custom users table insert:", insertErr);
-        }
-      }
-      
+
       setSignUpSent(true);
-      // Fire and forget notification
       try {
-        const res = await fetch('/api/notify/new-user', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, name: displayName })
+        const res = await fetch("/api/notify/new-user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, name: displayName }),
         });
-        const j = await res.json().catch(()=>({}));
-        console.log('Notify new-user result', res.status, j);
+        const j = await res.json().catch(() => ({}));
+        console.log("Notify new-user result", res.status, j);
       } catch (notifyErr) {
-        console.warn('Notify new-user failed', notifyErr);
+        console.warn("Notify new-user failed", notifyErr);
       }
       setLoading(false);
-      // Note: User won't be logged in until they confirm their email
     }
   };
 
   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ 
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`
-      }
+      options: { redirectTo: `${window.location.origin}/dashboard` },
     });
     if (error) console.error("Google login failed:", error.message);
   };
 
   const handleDiscordLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ 
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "discord",
-      options: {
-        redirectTo: `${window.location.origin}/dashboard`
-      }
+      options: { redirectTo: `${window.location.origin}/dashboard` },
     });
     if (error) console.error("Discord login failed:", error.message);
   };
@@ -139,9 +108,12 @@ export default function SignUp() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white px-4 py-8 pt-24">
         <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center">
-          <h2 className="text-2xl font-bold mb-6 text-[#1E3D2F]">Check Your Email!</h2>
+          <h2 className="text-2xl font-bold mb-6 text-[#1E3D2F]">
+            Check Your Email!
+          </h2>
           <p className="text-black mb-4 text-center">
-            We've sent you a confirmation email at <strong className="text-black">{email}</strong>
+            We've sent you a confirmation email at{" "}
+            <strong className="text-black">{email}</strong>
           </p>
           <p className="text-black text-center">
             Click the link in the email to complete your sign up.
@@ -155,13 +127,17 @@ export default function SignUp() {
     <div className="min-h-screen bg-white px-4 py-8 pt-24">
       <div className="flex items-center justify-center">
         <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-          <h2 className="text-3xl font-bold text-center mb-6 text-black">Sign Up</h2>
+          <h2 className="text-3xl font-bold text-center mb-6 text-black">
+            Sign Up
+          </h2>
 
-          {/* Email/Password Form */}
           <form onSubmit={handleEmailSignUp} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-black">
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-black"
+                >
                   First Name
                 </label>
                 <input
@@ -174,9 +150,11 @@ export default function SignUp() {
                   required
                 />
               </div>
-              
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-black">
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-black"
+                >
                   Last Name
                 </label>
                 <input
@@ -190,9 +168,12 @@ export default function SignUp() {
                 />
               </div>
             </div>
-            
+
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-black">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-black"
+              >
                 E-mail
               </label>
               <input
@@ -205,9 +186,12 @@ export default function SignUp() {
                 required
               />
             </div>
-            
+
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-black">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-black"
+              >
                 Password
               </label>
               <div className="relative">
@@ -235,7 +219,10 @@ export default function SignUp() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-black">
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-black"
+              >
                 Confirm Password
               </label>
               <div className="relative">
@@ -262,10 +249,7 @@ export default function SignUp() {
               </div>
             </div>
 
-
-            {error && (
-              <p className="text-red-500 text-sm">{error}</p>
-            )}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <button
               type="submit"
@@ -276,14 +260,12 @@ export default function SignUp() {
             </button>
           </form>
 
-          {/* Separator */}
           <div className="flex items-center my-6">
             <hr className="flex-grow border-gray-300" />
             <span className="mx-3 text-gray-500 text-sm">or</span>
             <hr className="flex-grow border-gray-300" />
           </div>
 
-          {/* OAuth Buttons */}
           <div className="space-y-3">
             <button
               onClick={handleGoogleLogin}
@@ -295,11 +277,11 @@ export default function SignUp() {
               onClick={handleDiscordLogin}
               className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg text-black hover:bg-gray-100 transition"
             >
-              <FaDiscord className="mr-2 text-lg text-[#5865F2]" /> Sign up with Discord
+              <FaDiscord className="mr-2 text-lg text-[#5865F2]" /> Sign up with
+              Discord
             </button>
           </div>
 
-          {/* Link to sign in */}
           <div className="text-center mt-6">
             <p className="text-sm text-black">
               Already have an account?{" "}
