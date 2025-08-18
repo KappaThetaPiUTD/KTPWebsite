@@ -69,35 +69,40 @@ export default function Dashboard() {
   // Fetch events for calendar/list
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!user) return; // Wait for user to be loaded
-      
+      if (!user) return;
+
       try {
-        // Send user ID to backend for filtering
-        const res = await fetch(`http://localhost:5001/api/events?user_id=${user.id}`);
-        const json = await res.json();
-        
-        if (json.data) {
-          const formatted = {};
-          json.data.forEach((event) => {
-            const key = new Date(event.event_date).toISOString().split("T")[0];
-            if (!formatted[key]) formatted[key] = [];
-            formatted[key].push({
-              id: event.id,
-              title: event.event_name,
-              time: new Date(event.event_date).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-              visibility: event.visibility
-            });
-          });
-          setEvents(formatted);
-          setEventList(json.data);
+        const { data: eventsData, error } = await supabase
+          .from("events")
+          .select("id, event_name, event_date, visibility");
+
+        if (error) {
+          console.error("Error fetching events:", error);
+          return;
         }
+
+        const formatted = {};
+        eventsData.forEach((event) => {
+          const key = new Date(event.event_date).toISOString().split("T")[0];
+          if (!formatted[key]) formatted[key] = [];
+          formatted[key].push({
+            id: event.id,
+            title: event.event_name,
+            time: new Date(event.event_date).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            visibility: event.visibility,
+          });
+        });
+
+        setEvents(formatted);
+        setEventList(eventsData);
       } catch (err) {
         console.error("Failed to fetch events:", err);
       }
     };
+
   
     fetchEvents();
   }, [user]); // Add user as dependency

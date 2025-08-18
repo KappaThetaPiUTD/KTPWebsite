@@ -13,6 +13,7 @@ export default function AdminPage() {
   const [gradYear, setGradYear] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("");
+  const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -32,8 +33,8 @@ export default function AdminPage() {
 
         const { data: profileRow, error: profileError } = await supabase
           .from("users")
-          .select("role, phone")
-          .eq("uuid", userId)
+          .select("name, graduation_date, role, phone")
+          .eq("id", userId)
           .single();
 
         if (profileError) {
@@ -42,9 +43,21 @@ export default function AdminPage() {
 
         if (!profileRow) {
           console.warn("No profile found for user ID:", userId);
+          // Auto-create blank profile row for this user
+          const { error: insertError } = await supabase
+            .from("users")
+            .insert({ id: userId, phone: "", role: "guest" });
+          if (insertError) {
+            console.error("Error inserting new profile row:", insertError);
+          } else {
+            setPhone("");
+            setRole("guest");
+          }
         } else {
           setPhone(profileRow.phone || "");
           setRole(profileRow.role || "");
+          setFullName(profileRow.name || "");
+          setGradYear(profileRow.graduation_date || "");
         }
       } catch (err) {
         console.error("Unexpected error in fetchUserData:", err);
@@ -57,33 +70,98 @@ export default function AdminPage() {
   }, []);
 
   const handleSave = async () => {
-    if (!user) return;
+    const userId = user?.id;
+    if (!user || !userId) {
+      console.error("No user or user id found, cannot update profile.");
+      setStatusMessage({ text: "Failed to update profile: missing user id.", type: "error" });
+      return;
+    }
 
     // Update auth metadata
     const { error: metaError } = await supabase.auth.updateUser({
       data: { full_name: fullName, grad_year: gradYear },
     });
 
-    // Update Supabase "users" table (uuid column is the key)
+    // Update Supabase "users" table (id column is the key)
     const { error: tableError } = await supabase
       .from("users")
-      .update({ phone, role })
-      .eq("uuid", user.id);
-
-    if (metaError || tableError) {
-      console.error("Metadata Error:", metaError);
+      .update({ phone, role, name: fullName, graduation_date: gradYear })
+      .eq("id", userId);
+    if (tableError) {
       console.error("Table Error:", tableError);
-      alert("Failed to update profile.");
-    } else {
-      alert("Profile updated successfully!");
+      setStatusMessage({ text: "Failed to update profile.", type: "error" });
+      return;
+    }
+    if (metaError) {
+      console.error("Metadata Error:", metaError);
+      setStatusMessage({ text: "Failed to update profile.", type: "error" });
+      return;
+    }
+
+    // Re-fetch user and profile data to update UI/chart
+    try {
+      setLoading(true);
+      const { data: authData } = await supabase.auth.getUser();
+      const refreshedUserId = authData?.user?.id;
+      if (!refreshedUserId) {
+        console.error("No user id found after update, cannot refresh profile.");
+        setLoading(false);
+        setIsEditing(false);
+        setStatusMessage({ text: "Profile updated, but could not refresh view.", type: "error" });
+        return;
+      }
+      setUser(authData.user);
+      setFullName(authData.user.user_metadata?.full_name || "");
+      setGradYear(authData.user.user_metadata?.grad_year || "");
+      const { data: profileRow, error: fetchError } = await supabase
+        .from("users")
+        .select("name, graduation_date, role, phone")
+        .eq("id", refreshedUserId)
+        .single();
+      if (fetchError) {
+        console.error("Error fetching profile row:", fetchError);
+      }
+      setPhone(profileRow?.phone || "");
+      setRole(profileRow?.role || "");
+      setFullName(profileRow?.name || "");
+      setGradYear(profileRow?.graduation_date || "");
+    } catch (err) {
+      console.error("Error refreshing profile after save", err);
+    } finally {
+      setLoading(false);
       setIsEditing(false);
+      setStatusMessage({ text: "Profile updated successfully!", type: "success" });
+      // Scroll to profile view for immediate feedback
+      setTimeout(() => {
+        const profileSection = document.querySelector('.bg-white.border.rounded-xl.shadow-sm.max-w-xl');
+        if (profileSection) profileSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex justify-center items-center text-gray-500">
-        Loading...
+      <div className="flex items-center justify-center min-h-screen">
+        <svg
+          className="animate-spin h-5 w-5 text-primary"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4.293 12.293a1 1 0 011.414 0L12 18.586l6.293-6.293a1 1 0 011.414 1.414l-7 7a1 1 0 01-1.414 0l-7-7a1 1 0 010-1.414z"
+          ></path>
+        </svg>
       </div>
     );
   }
@@ -120,6 +198,10 @@ export default function AdminPage() {
               alt="Profile"
               className="w-20 h-20 rounded-full border border-gray-300 mb-4"
             />
+
+            {statusMessage.text && (
+              <div className={`mb-2 text-sm ${statusMessage.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>{statusMessage.text}</div>
+            )}
 
             {isEditing ? (
               <>
