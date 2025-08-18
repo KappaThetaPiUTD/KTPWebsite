@@ -1,29 +1,36 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaGoogle, FaDiscord } from "react-icons/fa";
+import { FaGoogle, FaDiscord, FaEye, FaEyeSlash } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 
-export default function Login() { // Changed from SignUp to Login
+export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Changed from handleEmailSignUp to handleEmailLogin
   const handleEmailLogin = async (e) => {
     e.preventDefault();
-    // Changed from signUp to signInWithPassword
+    setError("");
+    setLoading(true);
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      alert("Login failed: " + error.message); // Changed message
+      console.error("Login failed:", error.message);
+      setError(error.message);
+      setLoading(false);
     } else {
+      console.log("Login successful:", data);
       router.push("/dashboard");
     }
   };
@@ -88,7 +95,7 @@ export default function Login() { // Changed from SignUp to Login
 
   const handleForgotPassword = async () => {
     if (!email) {
-      alert("Please enter your email to reset password.");
+      setError("Please enter your email to reset password.");
       return;
     }
 
@@ -97,9 +104,10 @@ export default function Login() { // Changed from SignUp to Login
     });
 
     if (error) {
-      alert("Failed to send reset email: " + error.message);
+      setError("Failed to send reset email: " + error.message);
     } else {
       setResetSent(true);
+      setError("");
     }
   };
 
@@ -116,22 +124,23 @@ export default function Login() { // Changed from SignUp to Login
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
         <h2 className="text-3xl font-bold text-center mb-4 text-black">Login</h2>
 
-        {/* ✅ Email/Password Form */}
+        {/* Email/Password Form */}
         <form onSubmit={handleEmailLogin} className="space-y-4 mt-4">
-        <div>
+          <div>
             <label htmlFor="email" className="block text-sm font-medium text-black">
               E-mail
             </label>
             <input
               type="email"
               id="email"
-              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
+              className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-green-700"
               placeholder="example@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
+          
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-black">
               Password
@@ -140,24 +149,24 @@ export default function Login() { // Changed from SignUp to Login
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
-                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700 pr-16"
+                className="mt-1 w-full px-4 py-2 pr-10 border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-green-700"
+
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={{ color: 'black' }}
               />
-              {password && (
-                <button
-                  type="button"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-black bg-gray-200 "
-                  onClick={() => setShowPassword((v) => !v)}
-                  tabIndex={0}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
-              )}
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <FaEyeSlash className="h-4 w-4 text-black hover:text-gray-700" />
+                ) : (
+                  <FaEye className="h-4 w-4 text-black hover:text-gray-700" />
+                )}
+              </button>
             </div>
             <div className="text-right mt-1">
               <button
@@ -173,10 +182,17 @@ export default function Login() { // Changed from SignUp to Login
             </div>
           </div>
 
-          <button type="submit" 
-          className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition">
-          Log In
-        </button>
+          {error && (
+            <p className="text-red-500 text-sm">{error}</p>
+          )}
+
+          <button 
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition disabled:opacity-50"
+          >
+            {loading ? "Logging in..." : "Log In"}
+          </button>
         </form>
 
         {/* Separator */}
@@ -200,6 +216,19 @@ export default function Login() { // Changed from SignUp to Login
           >
             <FaDiscord className="mr-2 text-lg text-[#5865F2]" /> Continue with Discord
           </button>
+        </div>
+
+        {/* Link to sign up */}
+        <div className="text-center mt-4">
+          <p className="text-sm text-black">
+            Don't have an account?{" "}
+            <button
+              onClick={() => router.push("/sign-in")}
+              className="text-blue-600 hover:underline"
+            >
+              Sign up
+            </button>
+          </p>
         </div>
       </div>
     </div>
