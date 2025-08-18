@@ -76,32 +76,42 @@ export default function AdminPage() {
       setStatusMessage({ text: "Failed to update profile: missing user id.", type: "error" });
       return;
     }
+    console.log("Updating user with id:", userId);
 
     // Update auth metadata
-    const { error: metaError } = await supabase.auth.updateUser({
+    const { data: metaData, error: metaError } = await supabase.auth.updateUser({
       data: { full_name: fullName, grad_year: gradYear },
     });
+    console.log("Auth metadata update result:", metaData, metaError);
 
-    // Update Supabase "users" table (id column is the key)
-    const { error: tableError } = await supabase
-      .from("users")
-      .update({ phone, role, name: fullName, graduation_date: gradYear })
-      .eq("id", userId);
-    if (tableError) {
-      console.error("Table Error:", tableError);
-      setStatusMessage({ text: "Failed to update profile.", type: "error" });
+    // Use server-side API to update users table (service role key)
+    const gradYearNum = gradYear ? Number(gradYear) : null;
+    try {
+      const resp = await fetch('/api/profile/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: userId, name: fullName, graduation_date: gradYearNum, phone, role }),
+      });
+      const json = await resp.json();
+      console.log('Server profile update response:', json);
+      if (!resp.ok) {
+        setStatusMessage({ text: `Failed to update profile: ${json.error || resp.statusText}`, type: 'error' });
+        return;
+      }
+    } catch (err) {
+      console.error('Network error calling profile update API:', err);
+      setStatusMessage({ text: 'Failed to update profile: network error', type: 'error' });
       return;
     }
     if (metaError) {
-      console.error("Metadata Error:", metaError);
-      setStatusMessage({ text: "Failed to update profile.", type: "error" });
+      setStatusMessage({ text: `Failed to update profile: ${metaError.message}`, type: "error" });
       return;
     }
 
     // Re-fetch user and profile data to update UI/chart
     try {
       setLoading(true);
-      const { data: authData } = await supabase.auth.getUser();
+      const { data: authData, error: authFetchError } = await supabase.auth.getUser();
       const refreshedUserId = authData?.user?.id;
       if (!refreshedUserId) {
         console.error("No user id found after update, cannot refresh profile.");
@@ -118,9 +128,7 @@ export default function AdminPage() {
         .select("name, graduation_date, role, phone")
         .eq("id", refreshedUserId)
         .single();
-      if (fetchError) {
-        console.error("Error fetching profile row:", fetchError);
-      }
+      console.log("Fetched profile after update:", profileRow, fetchError);
       setPhone(profileRow?.phone || "");
       setRole(profileRow?.role || "");
       setFullName(profileRow?.name || "");
@@ -226,17 +234,7 @@ export default function AdminPage() {
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Phone Number"
                 />
-                <select
-                  className="border rounded px-3 py-1 text-sm mb-2"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                >
-                  <option value="">Select Role</option>
-                  <option value="executive">Executive</option>
-                  <option value="brother">Brother</option>
-                  <option value="pledge">Pledge</option>
-                  <option value="guest">Guest</option>
-                </select>
+                {/* Role is not editable by users to prevent privilege escalation */}
                 <button
                   onClick={handleSave}
                   className="bg-primary text-white px-4 py-2 rounded text-sm mt-2 hover:bg-primary/90 transition"
