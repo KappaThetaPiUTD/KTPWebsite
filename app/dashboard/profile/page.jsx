@@ -78,19 +78,14 @@ export default function AdminPage() {
     }
     console.log("Updating user with id:", userId);
 
-    // Update auth metadata
-    const { data: metaData, error: metaError } = await supabase.auth.updateUser({
-      data: { full_name: fullName, grad_year: gradYear },
-    });
-    console.log("Auth metadata update result:", metaData, metaError);
-
     // Use server-side API to update users table (service role key)
+    // Note: We're not updating auth metadata to avoid triggering role reset
     const gradYearNum = gradYear ? Number(gradYear) : null;
     try {
       const resp = await fetch('/api/profile/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: userId, name: fullName, graduation_date: gradYearNum, phone, role }),
+        body: JSON.stringify({ id: userId, name: fullName, graduation_date: gradYearNum, phone }),
       });
       const json = await resp.json();
       console.log('Server profile update response:', json);
@@ -103,12 +98,8 @@ export default function AdminPage() {
       setStatusMessage({ text: 'Failed to update profile: network error', type: 'error' });
       return;
     }
-    if (metaError) {
-      setStatusMessage({ text: `Failed to update profile: ${metaError.message}`, type: "error" });
-      return;
-    }
 
-    // Re-fetch user and profile data to update UI/chart
+    // Re-fetch user and profile data to update UI
     try {
       setLoading(true);
       const { data: authData, error: authFetchError } = await supabase.auth.getUser();
@@ -121,14 +112,16 @@ export default function AdminPage() {
         return;
       }
       setUser(authData.user);
-      setFullName(authData.user.user_metadata?.full_name || "");
-      setGradYear(authData.user.user_metadata?.grad_year || "");
+      
+      // Get updated data from users table (this is the source of truth)
       const { data: profileRow, error: fetchError } = await supabase
         .from("users")
         .select("name, graduation_date, role, phone")
         .eq("id", refreshedUserId)
         .single();
       console.log("Fetched profile after update:", profileRow, fetchError);
+      
+      // Update state with database values
       setPhone(profileRow?.phone || "");
       setRole(profileRow?.role || "");
       setFullName(profileRow?.name || "");
