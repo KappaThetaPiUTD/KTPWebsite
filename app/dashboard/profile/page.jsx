@@ -192,67 +192,122 @@ export default function AdminPage() {
           </button>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm max-w-xl mx-auto p-6 text-center">
-          <div className="flex flex-col items-center">
-            <img
-              src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.email}`}
-              alt="Profile"
-              className="w-20 h-20 rounded-full border border-gray-300 mb-4"
-            />
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg max-w-2xl mx-auto overflow-hidden">
+          {/* Gradient Header */}
+          <div className="bg-gradient-to-r from-[#1E3D2F] via-[#2A5A42] to-[#1E3D2F] px-8 py-6 text-white">
+            <div className="flex items-center space-x-4">
+              <img
+                src="/pictures/placeholder.png"
+                alt="Profile"
+                className="w-16 h-16 rounded-full border-3 border-white shadow-lg object-cover"
+              />
+              <div className="text-left">
+                <h2 className="text-2xl font-bold">
+                  {fullName || "No Name Provided"}
+                </h2>
+                <p className="text-white/80 text-sm">
+                  {user?.email}
+                </p>
+                {role && (
+                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-2 ${
+                    role === 'admin' ? 'bg-red-500/20 text-red-100 border border-red-400/30' :
+                    role === 'member' ? 'bg-blue-500/20 text-blue-100 border border-blue-400/30' :
+                    role === 'pledge' ? 'bg-yellow-500/20 text-yellow-100 border border-yellow-400/30' :
+                    'bg-gray-500/20 text-gray-100 border border-gray-400/30'
+                  }`}>
+                    {role.charAt(0).toUpperCase() + role.slice(1)}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
 
+          {/* Content Section */}
+          <div className="px-8 py-6">
             {statusMessage.text && (
-              <div className={`mb-2 text-sm ${statusMessage.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>{statusMessage.text}</div>
+              <div className={`mb-6 p-4 rounded-lg border text-sm ${
+                statusMessage.type === 'error' 
+                  ? 'bg-red-50 border-red-200 text-red-700' 
+                  : 'bg-green-50 border-green-200 text-green-700'
+              }`}>
+                {statusMessage.text}
+              </div>
             )}
 
             {isEditing ? (
-              <>
-                <input
-                  type="text"
-                  className="border rounded px-3 py-1 text-sm mb-2"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Full Name"
-                />
-                <input
-                  type="text"
-                  className="border rounded px-3 py-1 text-sm mb-2"
-                  value={gradYear}
-                  onChange={(e) => setGradYear(e.target.value)}
-                  placeholder="Graduation Year"
-                />
-                <input
-                  type="text"
-                  className="border rounded px-3 py-1 text-sm mb-2"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Phone Number"
-                />
-                {/* Role is not editable by users to prevent privilege escalation */}
-                <button
-                  onClick={handleSave}
-                  className="bg-primary text-white px-4 py-2 rounded text-sm mt-2 hover:bg-primary/90 transition"
-                >
-                  Save Profile
-                </button>
-              </>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1E3D2F] focus:border-transparent transition"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Graduation Year</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1E3D2F] focus:border-transparent transition"
+                    value={gradYear}
+                    onChange={(e) => setGradYear(e.target.value)}
+                    placeholder="e.g., 2025"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1E3D2F] focus:border-transparent transition"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="Enter your phone number"
+                  />
+                </div>
+                <div className="pt-4">
+                  <button
+                    onClick={handleSave}
+                    className="w-full bg-[#1E3D2F] text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-[#2A5A42] transition-colors duration-200 shadow-md"
+                  >
+                    Save Profile Changes
+                  </button>
+                </div>
+              </div>
             ) : (
-              <>
-                <h2 className="text-lg font-semibold text-[#1E3D2F]">
-                  {fullName || "No Name Provided"}
-                </h2>
-                <p className="text-sm text-gray-700 mt-2">
-                  Email: {user?.email}
-                </p>
-                <p className="text-sm text-gray-700">
-                  Graduation Year: {gradYear || "Not set"}
-                </p>
-                <p className="text-sm text-gray-700">
-                  Phone: {phone || "Not set"}
-                </p>
-                <p className="text-sm text-gray-700">
-                  Role: {role || "Not set"}
-                </p>
-              </>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Personal Information</h3>
+                    <div className="mt-2 space-y-3">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="text-sm text-gray-600">Full Name</span>
+                        <span className="text-sm font-medium text-gray-900">{fullName || "Not provided"}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="text-sm text-gray-600">Email</span>
+                        <span className="text-sm font-medium text-gray-900">{user?.email}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Academic & Contact</h3>
+                    <div className="mt-2 space-y-3">
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="text-sm text-gray-600">Graduation Year</span>
+                        <span className="text-sm font-medium text-gray-900">{gradYear || "Not set"}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <span className="text-sm text-gray-600">Phone</span>
+                        <span className="text-sm font-medium text-gray-900">{phone || "Not provided"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>
