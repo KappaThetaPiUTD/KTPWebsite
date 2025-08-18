@@ -69,36 +69,50 @@ export default function Dashboard() {
   // Fetch events for calendar/list
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!user) return; // Wait for user to be loaded
-      
+      if (!user) return;
+
       try {
-        // Send user ID to backend for filtering
-        const res = await fetch(`http://localhost:5001/api/events?user_id=${user.id}`);
-        const json = await res.json();
-        
-        if (json.data) {
-          const formatted = {};
-          json.data.forEach((event) => {
-            const key = new Date(event.event_date).toISOString().split("T")[0];
-            if (!formatted[key]) formatted[key] = [];
-            formatted[key].push({
-              id: event.id,
-              title: event.event_name,
-              time: new Date(event.event_date).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-              visibility: event.visibility
-            });
-          });
-          setEvents(formatted);
-          setEventList(json.data);
+        const { data: eventsData, error } = await supabase
+          .from("events")
+          .select("id, event_name, event_date, visibility");
+
+        if (error) {
+          console.error("Error fetching events:", error);
+          return;
         }
+
+        const formatted = {};
+        eventsData.forEach((event) => {
+          const eventDate = new Date(event.event_date); // Parse UTC date
+          const key = eventDate
+            .toLocaleString("en-US", {
+              timeZone: "America/Chicago", // Convert to CST
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            })
+            .split(",")[0]; // Format as YYYY-MM-DD
+
+          if (!formatted[key]) formatted[key] = [];
+          formatted[key].push({
+            id: event.id,
+            title: event.event_name,
+            time: eventDate.toLocaleTimeString("en-US", {
+              timeZone: "America/Chicago", // Convert to CST
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            visibility: event.visibility,
+          });
+        });
+
+        setEvents(formatted);
+        setEventList(eventsData);
       } catch (err) {
         console.error("Failed to fetch events:", err);
       }
     };
-  
+
     fetchEvents();
   }, [user]); // Add user as dependency
 
@@ -190,14 +204,27 @@ export default function Dashboard() {
 
   const getCalendarGrid = () => {
     const grid = [];
-    const offset = (firstDay + 6) % 7; // make Monday first
-    for (let i = 0; i < offset; i++) grid.push(null);
-    for (let day = 1; day <= daysInMonth; day++) grid.push(day);
+    const offset = (firstDay + 6) % 7; // Make Monday the first day of the week
+    for (let i = 0; i < offset; i++) {
+      grid.push(null); // Empty cells for days before the first of the month
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      grid.push(day);
+    }
     return grid;
   };
 
-  const formatDateKey = (y, m, d) =>
-    `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  const formatDateKey = (y, m, d) => {
+    const date = new Date(y, m, d);
+    return date
+      .toLocaleString("en-US", {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .split(",")[0]; // Format as YYYY-MM-DD
+  };
 
   const handleDayClick = (day) => {
     const key = formatDateKey(year, month, day);
@@ -250,12 +277,6 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-7 text-xs">
               {getCalendarGrid().map((day, i) => {
-                const isToday =
-                  day &&
-                  today.getDate() === day &&
-                  today.getMonth() === month &&
-                  today.getFullYear() === year;
-
                 const dateKey = day ? formatDateKey(year, month, day) : null;
                 const hasEvent = dateKey ? events[dateKey]?.length : 0;
 
@@ -265,7 +286,9 @@ export default function Dashboard() {
                       <button
                         onClick={() => handleDayClick(day)}
                         className={`w-8 h-8 rounded-full mx-auto flex items-center justify-center relative transition ${
-                          isToday
+                          today.getDate() === day &&
+                          today.getMonth() === month &&
+                          today.getFullYear() === year
                             ? "bg-primary text-white"
                             : "hover:bg-gray-200 text-black"
                         }`}
@@ -366,78 +389,79 @@ export default function Dashboard() {
           </div>
         </div>
 
-{/* Upcoming events list */}
-<div className="mt-10 bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
-  <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
-  <ul className="text-sm space-y-2">
-    {eventList.length > 0 ? (
-      [...eventList]
-        .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
-        .slice(0, 5)
-        .map((event, idx) => {
-          const response = rsvpStatus[event.id]; // get user's RSVP for this event
-          return (
-            <li key={idx} className="flex items-center justify-between">
-              <span>
-                <span className="font-medium">
-                  {new Date(event.event_date).toLocaleString(undefined, {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>{" "}
-                — {event.event_name}
-              </span>
+        {/* Upcoming events list */}
+        <div className="mt-10 bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
+          <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
+          <ul className="text-sm space-y-2">
+            {eventList.length > 0 ? (
+              [...eventList]
+                .filter((event) => new Date(event.event_date) >= new Date()) // Exclude past events
+                .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
+                .slice(0, 5)
+                .map((event, idx) => {
+                  const response = rsvpStatus[event.id]; // get user's RSVP for this event
+                  return (
+                    <li key={idx} className="flex items-center justify-between">
+                      <span>
+                        <span className="font-medium">
+                          {new Date(event.event_date).toLocaleString("en-US", {
+                            timeZone: "America/Chicago",
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>{" "}
+                        — {event.event_name}
+                      </span>
 
-              {response ? (
-                // ✅ Show RSVP status text if exists
-                <span
-                  className={`px-3 py-1 text-xs rounded-full font-semibold capitalize ${
-                    response === "going"
-                      ? "bg-green-100 text-green-700"
-                      : response === "maybe"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : response === "not going" || response === "no"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {response}
-                </span>
-              ) : (
-                // ❌ No RSVP yet → show buttons
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => handleRSVP(event, "going")}
-                    className="bg-green-500 text-white px-2 py-1 text-xs rounded"
-                  >
-                    Going
-                  </button>
-                  <button
-                    onClick={() => handleRSVP(event, "maybe")}
-                    className="bg-yellow-500 text-white px-2 py-1 text-xs rounded"
-                  >
-                    Maybe
-                  </button>
-                  <button
-                    onClick={() => handleRSVP(event, "not going")}
-                    className="bg-red-500 text-white px-2 py-1 text-xs rounded"
-                  >
-                    No
-                  </button>
-                </div>
-              )}
-            </li>
-          );
-        })
-    ) : (
-      <p className="text-xs text-gray-500">No events available.</p>
-    )}
-  </ul>
-</div>
-
+                      {response ? (
+                        // ✅ Show RSVP status text if exists
+                        <span
+                          className={`px-3 py-1 text-xs rounded-full font-semibold capitalize ${
+                            response === "going"
+                              ? "bg-green-100 text-green-700"
+                              : response === "maybe"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : response === "not going" || response === "no"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {response}
+                        </span>
+                      ) : (
+                        // ❌ No RSVP yet → show buttons
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={() => handleRSVP(event, "going")}
+                            className="bg-green-500 text-white px-2 py-1 text-xs rounded"
+                          >
+                            Going
+                          </button>
+                          <button
+                            onClick={() => handleRSVP(event, "maybe")}
+                            className="bg-yellow-500 text-white px-2 py-1 text-xs rounded"
+                          >
+                            Maybe
+                          </button>
+                          <button
+                            onClick={() => handleRSVP(event, "not going")}
+                            className="bg-red-500 text-white px-2 py-1 text-xs rounded"
+                          >
+                            No
+                          </button>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })
+            ) : (
+              <p className="text-xs text-gray-500">No events available.</p>
+            )}
+          </ul>
+        </div>
       </main>
     </div>
   );

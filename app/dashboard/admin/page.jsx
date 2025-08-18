@@ -308,34 +308,118 @@ export default function AdminPage() {
                   return;
                 }
 
-                if (repeatOption !== "None" && (!repeatStart || !repeatEnd)) {
-                  alert("Please provide both repeat start and end dates.");
+                const eventDate = new Date(`${date}T${time}`);
+                if (repeatOption !== "None") {
+                  if (!repeatStart || !repeatEnd) {
+                    alert("Please provide both repeat start and end dates.");
+                    return;
+                  }
+
+                  const repeatStartDate = new Date(repeatStart);
+                  const repeatEndDate = new Date(repeatEnd);
+
+                  // Normalize dates to only compare the date portion
+                  const normalizeDate = (date) => {
+                    const normalized = new Date(date);
+                    normalized.setHours(0, 0, 0, 0);
+                    return normalized;
+                  };
+
+                  const normalizedEventDate = normalizeDate(eventDate);
+                  const normalizedRepeatStartDate =
+                    normalizeDate(repeatStartDate);
+                  const normalizedRepeatEndDate = normalizeDate(repeatEndDate);
+
+                  if (
+                    normalizedRepeatStartDate < normalizedEventDate ||
+                    normalizedRepeatEndDate < normalizedEventDate
+                  ) {
+                    alert(
+                      "Repeat start and end dates cannot be before the initial event date."
+                    );
+                    return;
+                  }
+                }
+
+                const { error: createError, data: createdEvent } =
+                  await supabase
+                    .from("events")
+                    .insert([
+                      {
+                        event_name: title,
+                        description,
+                        event_date: eventDate,
+                        repeat: repeatOption,
+                        repeat_start:
+                          repeatOption !== "None" ? repeatStart : null,
+                        repeat_end: repeatOption !== "None" ? repeatEnd : null,
+                        visibility,
+                        created_by: user?.id,
+                        created_by_email: user?.email || null,
+                      },
+                    ])
+                    .select();
+
+                if (createError) {
+                  alert("Error creating event: " + createError.message);
                   return;
                 }
 
-                const eventDate = new Date(`${date}T${time}`);
+                if (repeatOption !== "None") {
+                  const repeatStartDate = new Date(repeatStart);
+                  const repeatEndDate = new Date(repeatEnd);
+                  const clonedEvents = [];
+                  const repeatInterval =
+                    repeatOption === "Daily"
+                      ? 1
+                      : repeatOption === "Weekly"
+                      ? 7
+                      : 30; // Approximation for monthly
 
-                const { error } = await supabase.from("events").insert([
-                  {
-                    event_name: title,
-                    description,
-                    event_date: eventDate,
-                    repeat: repeatOption,
-                    repeat_start: repeatOption !== "None" ? repeatStart : null,
-                    repeat_end: repeatOption !== "None" ? repeatEnd : null,
-                    visibility,
-                    created_by: user?.id,
-                    created_by_email: user?.email || null,
-                  },
-                ]);
+                  let currentDate = new Date(repeatStartDate);
+                  while (currentDate <= repeatEndDate) {
+                    if (currentDate > eventDate) {
+                      const repeatDescription = `${description} (Repeats every ${
+                        repeatOption === "Daily"
+                          ? "day"
+                          : repeatOption === "Weekly"
+                          ? eventDate.toLocaleString("en-US", {
+                              weekday: "long",
+                            })
+                          : `${eventDate.getDate()}th of the month`
+                      } at ${eventDate.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })})`;
 
-                if (error) {
-                  alert("Error creating event: " + error.message);
-                } else {
-                  alert("Event created successfully!");
-                  e.target.reset();
-                  setRepeat("None");
+                      clonedEvents.push({
+                        event_name: title,
+                        description: repeatDescription,
+                        event_date: new Date(currentDate),
+                        repeat: "None", // Cloned events are not repeating themselves
+                        visibility,
+                        created_by: user?.id,
+                        created_by_email: user?.email || null,
+                      });
+                    }
+
+                    currentDate.setDate(currentDate.getDate() + repeatInterval);
+                  }
+
+                  const { error: cloneError } = await supabase
+                    .from("events")
+                    .insert(clonedEvents);
+                  if (cloneError) {
+                    alert(
+                      "Error creating repeating events: " + cloneError.message
+                    );
+                    return;
+                  }
                 }
+
+                alert("Event created successfully!");
+                e.target.reset();
+                setRepeat("None");
               }}
               className="max-w-xl bg-gray-50 border border-gray-300 rounded-xl p-6 mx-auto"
             >
@@ -485,9 +569,7 @@ export default function AdminPage() {
                       key={userEntry.id}
                       className="border-t bg-white hover:bg-gray-50 text-black"
                     >
-                      <td className="px-4 py-2">
-                        {userEntry.name || "N/A"}
-                      </td>
+                      <td className="px-4 py-2">{userEntry.name || "N/A"}</td>
                       <td className="px-4 py-2">{userEntry.email || "N/A"}</td>
                       <td className="px-4 py-2">
                         <button
