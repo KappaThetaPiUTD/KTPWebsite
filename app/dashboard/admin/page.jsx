@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
-import { getUserRole } from "../../src/rbac";
 import Sidebar from "../../../components/Sidebar";
 
 export default function AdminPage() {
@@ -20,41 +19,36 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState("Attendance");
 
   useEffect(() => {
-    const checkAuthAndRole = async () => {
+    const boot = async () => {
       try {
-        // Auth
-        const { data } = await supabase.auth.getUser();
-        if (!data?.user) {
-          setLoading(false);
-          setAccessDenied(true);
-          return;
-        }
-
-        setUser(data.user);
-
-        // Role
-        const { role, error: roleError } = await getUserRole();
-        if (roleError) {
+        // 1) auth
+        const { data: auth } = await supabase.auth.getUser();
+        if (!auth?.user) {
           setAccessDenied(true);
           setLoading(false);
           return;
         }
+        setUser(auth.user);
 
-        setUserRole(role);
+        // 2) exec gate (server-side check)
+        const { data: isExec, error: execErr } = await supabase.rpc(
+          "is_executive",
+          { uid: auth.user.id }
+        );
 
-        // Only executives allowed
-        if (role?.toLowerCase() !== "executive") {
+        if (execErr || !isExec) {
+          setUserRole(isExec ? "executive" : "member");
           setAccessDenied(true);
           setLoading(false);
           return;
         }
+        setUserRole("executive");
 
-        // Prefetch data for all tabs
+        // 3) preload data
         await Promise.all([fetchAttendance(), fetchRSVPs(), fetchAllUsers()]);
-
         setLoading(false);
-      } catch (err) {
-        console.error("Admin check error:", err);
+      } catch (e) {
+        console.error("Admin boot error:", e);
         setAccessDenied(true);
         setLoading(false);
       }
@@ -67,74 +61,34 @@ export default function AdminPage() {
     };
 
     const fetchRSVPs = async () => {
-      // 1) Pull RSVPs
-      const { data: rsvps, error: rsvpErr } = await supabase
-        .from("rsvps")
-        .select(
-          "id, user_id, event_id, event_title, response, response_updated_at"
-        );
-      if (rsvpErr) {
-        console.error("RSVP fetch error:", rsvpErr);
+      // server RPC returns: id, event_title, response, response_updated_at, user_name, user_email
+      const { data, error } = await supabase.rpc("rsvps_admin_list");
+      if (error) {
+        console.error("RSVP admin list error:", error);
         setRsvpData([]);
         return;
       }
-      if (!rsvps?.length) {
-        setRsvpData([]);
-        return;
-      }
-
-      // 2) Users for those RSVPs
-      const userIds = Array.from(
-        new Set(rsvps.map((r) => r.user_id).filter(Boolean))
+      setRsvpData(
+        (data || []).map((r) => ({
+          id: r.id,
+          event_title: r.event_title,
+          response: r.response,
+          response_updated_at: r.response_updated_at,
+          user_name: r.user_name,
+          user_email: r.user_email,
+        }))
       );
-      const { data: users, error: usersErr } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", userIds);
-
-      if (usersErr) console.error("Profiles fetch error:", usersErr);
-      const usersById =
-        users?.reduce((acc, u) => {
-          acc[u.id] = u;
-          return acc;
-        }, {}) || {};
-
-      // 3) Resolve missing event titles
-      const missingTitles = rsvps
-        .filter((r) => !r.event_title && r.event_id)
-        .map((r) => r.event_id);
-      let eventsById = {};
-      if (missingTitles.length) {
-        const { data: events } = await supabase
-          .from("events")
-          .select("id, event_name")
-          .in("id", Array.from(new Set(missingTitles)));
-        eventsById =
-          events?.reduce((acc, e) => {
-            acc[e.id] = e;
-            return acc;
-          }, {}) || {};
-      }
-
-      // 4) Combine
-      const combined = rsvps.map((r) => ({
-        ...r,
-        profiles: usersById[r.user_id] || null,
-        event_title: r.event_title || eventsById[r.event_id]?.event_name || null,
-      }));
-
-      setRsvpData(combined);
     };
 
     const fetchAllUsers = async () => {
       const { data, error } = await supabase
-        .from("profiles")
-        .select("id, full_name, email");
-      if (error) console.error("User fetch error:", error);
+        .from("users")
+        .select("id, name, email");
+      if (error) console.error("Users fetch error:", error);
       setAllUsers(data || []);
     };
 
-    checkAuthAndRole();
+    boot();
   }, []);
 
   // --- Small tab bar component ---
@@ -280,31 +234,34 @@ export default function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rsvpData.map((entry, index) => (
-                    <tr
-                      key={index}
-                      className="border-t bg-white hover:bg-gray-50 text-black"
-                    >
-                      <td className="px-4 py-2">
-                        {entry.profiles?.full_name || "N/A"}
-                      </td>
-                      <td className="px-4 py-2">
-                        {entry.profiles?.email || "N/A"}
-                      </td>
-                      <td className="px-4 py-2">
-                        {entry.event_title || "N/A"}
-                      </td>
-                      <td className="px-4 py-2 capitalize">
-                        {entry.response || "N/A"}
-                      </td>
-                      <td className="px-4 py-2">
-                        {entry.response_updated_at
-                          ? new Date(entry.response_updated_at).toLocaleString()
-                          : "N/A"}
-                      </td>
-                    </tr>
-                  ))}
-                  {!rsvpData.length && (
+                  {rsvpData.length ? (
+                    rsvpData.map((entry) => (
+                      <tr
+                        key={entry.id}
+                        className="border-t bg-white hover:bg-gray-50 text-black"
+                      >
+                        <td className="px-4 py-2">
+                          {entry.user_name || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {entry.user_email || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {entry.event_title || "N/A"}
+                        </td>
+                        <td className="px-4 py-2 capitalize">
+                          {entry.response || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {entry.response_updated_at
+                            ? new Date(
+                                entry.response_updated_at
+                              ).toLocaleString()
+                            : "N/A"}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
                     <tr>
                       <td
                         colSpan={5}
@@ -362,7 +319,7 @@ export default function AdminPage() {
                   {
                     event_name: title,
                     description,
-                    event_date: eventDate, // or eventDate.toISOString()
+                    event_date: eventDate,
                     repeat: repeatOption,
                     repeat_start: repeatOption !== "None" ? repeatStart : null,
                     repeat_end: repeatOption !== "None" ? repeatEnd : null,
@@ -432,7 +389,8 @@ export default function AdminPage() {
               {/* Visibility */}
               <div className="mb-4">
                 <label className="block font-medium mb-1">
-                  Who can see this event? <span className="text-red-600">*</span>
+                  Who can see this event?{" "}
+                  <span className="text-red-600">*</span>
                 </label>
                 <select
                   name="visibility"
@@ -528,7 +486,7 @@ export default function AdminPage() {
                       className="border-t bg-white hover:bg-gray-50 text-black"
                     >
                       <td className="px-4 py-2">
-                        {userEntry.full_name || "N/A"}
+                        {userEntry.name || "N/A"}
                       </td>
                       <td className="px-4 py-2">{userEntry.email || "N/A"}</td>
                       <td className="px-4 py-2">

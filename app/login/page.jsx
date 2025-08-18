@@ -9,6 +9,7 @@ export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -41,7 +42,26 @@ export default function Login() {
         redirectTo: `${window.location.origin}/auth/callback`
       }
     });
-    if (error) console.error("Google login failed:", error.message);
+    if (error) {
+      console.error("Google login failed:", error.message);
+    } else {
+      // Try to get user email after OAuth
+      setTimeout(async () => {
+        const { data } = await supabase.auth.getUser();
+        const userEmail = data?.user?.email;
+        if (userEmail) {
+          try {
+            await fetch('/api/notify/new-user', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userEmail })
+            });
+          } catch (notifyErr) {
+            console.warn('Notify new-user failed', notifyErr);
+          }
+        }
+      }, 1000); // Wait for OAuth session
+    }
   };
 
   const handleDiscordLogin = async () => {
@@ -51,7 +71,26 @@ export default function Login() {
         redirectTo: `${window.location.origin}/auth/callback`
       }
     });
-    if (error) console.error("Discord login failed:", error.message);
+    if (error) {
+      console.error("Discord login failed:", error.message);
+    } else {
+      // Try to get user email after OAuth
+      setTimeout(async () => {
+        const { data } = await supabase.auth.getUser();
+        const userEmail = data?.user?.email;
+        if (userEmail) {
+          try {
+            await fetch('/api/notify/new-user', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userEmail })
+            });
+          } catch (notifyErr) {
+            console.warn('Notify new-user failed', notifyErr);
+          }
+        }
+      }, 1000); // Wait for OAuth session
+    }
   };
 
   const handleForgotPassword = async () => {
@@ -111,6 +150,7 @@ export default function Login() {
                 type={showPassword ? "text" : "password"}
                 id="password"
                 className="mt-1 w-full px-4 py-2 pr-10 border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-green-700"
+
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
