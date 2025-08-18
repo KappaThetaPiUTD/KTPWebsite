@@ -5,6 +5,10 @@ import { supabase } from "../../../lib/supabase";
 import Sidebar from "../../../components/Sidebar";
 
 export default function AdminPage() {
+  useEffect(() => {
+    document.title = "Admin Panel - KTP UTD Dashboard";
+  }, []);
+
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);

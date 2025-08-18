@@ -7,6 +7,10 @@ import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import Sidebar from "../../components/Sidebar";
 
 export default function Dashboard() {
+  useEffect(() => {
+    document.title = "Calendar - KTP UTD Dashboard";
+  }, []);
+
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);

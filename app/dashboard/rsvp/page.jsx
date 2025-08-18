@@ -6,6 +6,10 @@ import Sidebar from "../../../components/Sidebar";
 import { useRouter } from "next/navigation";
 
 export default function RSVPPage() {
+  useEffect(() => {
+    document.title = "RSVP Events - KTP UTD Dashboard";
+  }, []);
+
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);

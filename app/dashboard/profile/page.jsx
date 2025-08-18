@@ -5,7 +5,11 @@ import { supabase } from "../../../lib/supabase";
 import Sidebar from "../../../components/Sidebar";
 import { FiEdit2, FiSave } from "react-icons/fi";
 
+// Set document title when component mounts
 export default function AdminPage() {
+  useEffect(() => {
+    document.title = "Profile - KTP UTD Dashboard";
+  }, []);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);

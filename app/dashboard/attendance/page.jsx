@@ -5,6 +5,10 @@ import { supabase } from "../../../lib/supabase";
 import Sidebar from "../../../components/Sidebar";
 
 export default function AttendancePage() {
+  useEffect(() => {
+    document.title = "Attendance - KTP UTD Dashboard";
+  }, []);
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [records, setRecords] = useState([]);
