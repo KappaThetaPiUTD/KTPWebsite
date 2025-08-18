@@ -277,7 +277,7 @@ export default function Dashboard() {
                       >
                         {day}
                         {hasEvent ? (
-                          <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full" />
+                          <span className="absolute left-1/2 bottom-0 w-1.5 h-1.5 bg-red-500 rounded-full transform -translate-x-1/2" />
                         ) : null}
                       </button>
                     )}
