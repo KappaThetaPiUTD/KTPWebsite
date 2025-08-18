@@ -176,8 +176,23 @@ export default function AdminPage() {
       <main className="px-8 py-6 w-full">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-bold text-[#1E3D2F]">Profile</h1>
+        </div>
+
+        {/* Status Message Banner - Outside of profile card */}
+        {statusMessage.text && (
+          <div className={`mb-6 p-4 rounded-lg border text-sm max-w-2xl mx-auto ${
+            statusMessage.type === 'error' 
+              ? 'bg-red-50 border-red-200 text-red-700' 
+              : 'bg-green-50 border-green-200 text-green-700'
+          }`}>
+            {statusMessage.text}
+          </div>
+        )}
+
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg max-w-2xl mx-auto overflow-hidden relative">
+          {/* Edit Button - Floating in top right of card */}
           <button
-            className="p-2 rounded-full hover:bg-gray-100 transition"
+            className="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow border border-gray-200"
             title={isEditing ? "Save Profile" : "Edit Profile"}
             onClick={() => {
               if (isEditing) handleSave();
@@ -185,14 +200,12 @@ export default function AdminPage() {
             }}
           >
             {isEditing ? (
-              <FiSave className="text-xl text-[#1E3D2F]" />
+              <FiSave className="text-lg text-[#1E3D2F]" />
             ) : (
-              <FiEdit2 className="text-xl text-[#1E3D2F]" />
+              <FiEdit2 className="text-lg text-[#1E3D2F]" />
             )}
           </button>
-        </div>
 
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg max-w-2xl mx-auto overflow-hidden">
           {/* Gradient Header */}
           <div className="bg-gradient-to-r from-[#1E3D2F] via-[#2A5A42] to-[#1E3D2F] px-8 py-6 text-white">
             <div className="flex items-center space-x-4">
@@ -224,16 +237,6 @@ export default function AdminPage() {
 
           {/* Content Section */}
           <div className="px-8 py-6">
-            {statusMessage.text && (
-              <div className={`mb-6 p-4 rounded-lg border text-sm ${
-                statusMessage.type === 'error' 
-                  ? 'bg-red-50 border-red-200 text-red-700' 
-                  : 'bg-green-50 border-green-200 text-green-700'
-              }`}>
-                {statusMessage.text}
-              </div>
-            )}
-
             {isEditing ? (
               <div className="space-y-4">
                 <div>
