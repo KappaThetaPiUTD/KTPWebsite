@@ -19,6 +19,7 @@ export default function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Status
+
   const [signUpSent, setSignUpSent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
