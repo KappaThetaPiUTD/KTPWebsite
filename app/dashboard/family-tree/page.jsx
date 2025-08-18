@@ -1,796 +1,360 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
-import ReactFlow, {
-  Node,
-  Edge,
-  addEdge,
-  ConnectionLineType,
-  useNodesState,
-  useEdgesState,
-  MarkerType,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
-
-// Custom node component for family members
-const FamilyMemberNode = ({ data }) => {
-  // Color coding based on role/status
-  const getCardColor = (role) => {
-    if (role.includes('Alumni') || role.includes('Dropped')) return 'bg-gray-400 text-white';
-    if (role.includes('President') || role.includes('VP')) return 'bg-purple-600 text-white';
-    if (role === 'Sister') return 'bg-orange-400 text-white';
-    return 'bg-blue-400 text-white'; // Brothers and others
-  };
-  
-  return (
-    <div className={`px-3 py-2 shadow-md rounded-lg ${getCardColor(data.role)} min-w-[160px] max-w-[180px]`}>
-      <div className="text-center">
-        <div className="text-xs font-semibold leading-tight">{data.name}</div>
-        <div className="text-xs opacity-90 mt-1">{data.year}</div>
-        <div className="text-xs opacity-80 mt-1 italic">{data.role}</div>
-      </div>
-    </div>
-  );
-};
-
-// Define custom node types
-const nodeTypes = {
-  familyMember: FamilyMemberNode,
-};
+import React, { useEffect, useRef, useState } from "react";
+import * as d3 from 'd3';
+import Sidebar from "../../../components/Sidebar";
 
 export default function FamilyTreePage() {
   const [loading, setLoading] = useState(true);
+  const svgRef = useRef();
 
-  // Family tree data converted to React Flow format with proper spacing
-  const initialNodes = [
-    // Alpha Class (Spring 2023) - Top row, spaced evenly
-    {
-      id: 'sanjana-shangle',
-      type: 'familyMember',
-      position: { x: 100, y: 50 },
-      data: { 
-        name: 'Sanjana Shangle', 
-        year: 'S23', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'manasa-parachuri',
-      type: 'familyMember',
-      position: { x: 300, y: 50 },
-      data: { 
-        name: 'Manasa Parachuri', 
-        year: 'S23', 
-        role: 'Alumni - F24',
-      }
-    },
-    {
-      id: 'kairavi-pandya',
-      type: 'familyMember',
-      position: { x: 500, y: 50 },
-      data: { 
-        name: 'Kairavi Pandya', 
-        year: 'S23', 
-        role: 'Alumni - S25'
-      }
-    },
-    {
-      id: 'aashna-pattni',
-      type: 'familyMember',
-      position: { x: 700, y: 50 },
-      data: { 
-        name: 'Aashna Pathi', 
-        year: 'S23', 
-        role: 'Alumni - S25',
-      }
-    },
-    {
-      id: 'yeshas-nath',
-      type: 'familyMember',
-      position: { x: 900, y: 50 },
-      data: { 
-        name: 'Yeshas Nath', 
-        year: 'S23', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'ethan-lobo',
-      type: 'familyMember',
-      position: { x: 1100, y: 50 },
-      data: { 
-        name: 'Ethan Lobo', 
-        year: 'S23', 
-        role: 'VP - Int. Affairs',
-      }
-    },
-    {
-      id: 'saloni-janorkar',
-      type: 'familyMember',
-      position: { x: 1300, y: 50 },
-      data: { 
-        name: 'Saloni Janorkar', 
-        year: 'S23', 
-        role: 'Dropped - ???'
-      }
-    },
-    {
-      id: 'akshaya-kummetha',
-      type: 'familyMember',
-      position: { x: 1500, y: 50 },
-      data: { 
-        name: 'Akshaya Kummetha', 
-        year: 'S23', 
-        role: 'Dropped - ???'
-      }
-    },
-    {
-      id: 'renjit-joseph',
-      type: 'familyMember',
-      position: { x: 1700, y: 50 },
-      data: { 
-        name: 'Renjit Joseph', 
-        year: 'S23', 
-        role: 'Dropped - F24'
-      }
-    },
-    {
-      id: 'sriram-sendhil',
-      type: 'familyMember',
-      position: { x: 1900, y: 50 },
-      data: { 
-        name: 'Sriram Sendhil', 
-        year: 'S23', 
-        role: 'Dropped - ???'
-      }
-    },
-    {
-      id: 'tanvi-surname',
-      type: 'familyMember',
-      position: { x: 2100, y: 50 },
-      data: { 
-        name: 'Tanvi', 
-        year: 'S23', 
-        role: 'Dropped - ???'
-      }
-    },
-    {
-      id: 'ayush-bhavsar',
-      type: 'familyMember',
-      position: { x: 2300, y: 50 },
-      data: { 
-        name: 'Ayush Bhavsar', 
-        year: 'S23', 
-        role: 'Dropped - ???'
-      }
-    },
+  // Family tree data with VERY spacious positioning for maximum readability
+  const familyData = [
+    // Alpha Class (Spring 2023) - Top row with extra generous 600px spacing for better arrow readability
+    { id: 'sanjana-shangle', name: 'Sanjana Shangle', year: 'Alpha', role: 'Brother', x: 50, y: 50 },
+    { id: 'manasa-parachuri', name: 'Manasa Parachuri', year: 'Alpha', role: 'Alumni - F24', x: 650, y: 50 },
+    { id: 'kairavi-pandya', name: 'Kairavi Pandya', year: 'Alpha', role: 'Alumni - S25', x: 1250, y: 50 },
+    { id: 'aashna-pattni', name: 'Aashna Pathi', year: 'Alpha', role: 'Alumni - S25', x: 1850, y: 50 },
+    { id: 'yeshas-nath', name: 'Yeshas Nath', year: 'Alpha', role: 'Brother', x: 2450, y: 50 },
+    { id: 'ethan-lobo', name: 'Ethan Lobo', year: 'Alpha', role: 'VP - Int. Affairs', x: 3050, y: 50 },
+    { id: 'saloni-janorkar', name: 'Saloni Janorkar', year: 'Alpha', role: 'Dropped - ???', x: 3650, y: 50 },
+    { id: 'akshaya-kummetha', name: 'Akshaya Kummetha', year: 'Alpha', role: 'Dropped - ???', x: 4250, y: 50 },
+    { id: 'renjit-joseph', name: 'Renjit Joseph', year: 'Alpha', role: 'Dropped - F24', x: 4850, y: 50 },
+    { id: 'sriram-sendhil', name: 'Sriram Sendhil', year: 'Alpha', role: 'Dropped - ???', x: 5450, y: 50 },
+    { id: 'tanvi-surname', name: 'Tanvi', year: 'Alpha', role: 'Dropped - ???', x: 6050, y: 50 },
+    { id: 'ayush-bhavsar', name: 'Ayush Bhavsar', year: 'Alpha', role: 'Dropped - ???', x: 6650, y: 50 },
 
-    // Beta Class (Fall 2023) - Second row
-    {
-      id: 'sumi-suseendrababu',
-      type: 'familyMember',
-      position: { x: 300, y: 200 },
-      data: { 
-        name: 'Sumi Suseendrababu', 
-        year: 'F23', 
-        role: 'Alumni - S25'
-      }
-    },
-    {
-      id: 'sanna-neelee',
-      type: 'familyMember',
-      position: { x: 450, y: 200 },
-      data: { 
-        name: 'Sanna Neelee', 
-        year: 'F23', 
-        role: 'Dropped - S25'
-      }
-    },
-    {
-      id: 'laiba-piracha',
-      type: 'familyMember',
-      position: { x: 600, y: 200 },
-      data: { 
-        name: 'Laiba Piracha', 
-        year: 'F23', 
-        role: 'Alumni - S25'
-      }
-    },
-    {
-      id: 'arya-thombare',
-      type: 'familyMember',
-      position: { x: 750, y: 200 },
-      data: { 
-        name: 'Arya Thombare', 
-        year: 'F23', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'hima-nagi-reddy',
-      type: 'familyMember',
-      position: { x: 900, y: 200 },
-      data: { 
-        name: 'Hima Nagi Reddy', 
-        year: 'F23', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'ethan-varghese',
-      type: 'familyMember',
-      position: { x: 1050, y: 200 },
-      data: { 
-        name: 'Ethan Varghese', 
-        year: 'F23', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'krisha-amravathi',
-      type: 'familyMember',
-      position: { x: 1200, y: 200 },
-      data: { 
-        name: 'Krisha Amravathi', 
-        year: 'F23', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'mansi-cherukupally',
-      type: 'familyMember',
-      position: { x: 1350, y: 200 },
-      data: { 
-        name: 'Mansi Cherukupally', 
-        year: 'F23', 
-        role: 'VP - Finance'
-      }
-    },
-    {
-      id: 'afsar-arif',
-      type: 'familyMember',
-      position: { x: 1500, y: 200 },
-      data: { 
-        name: 'Afsar Arif', 
-        year: 'F23', 
-        role: 'President'
-      }
-    },
-    {
-      id: 'wildan-susanto',
-      type: 'familyMember',
-      position: { x: 1650, y: 200 },
-      data: { 
-        name: 'Wildan Susanto', 
-        year: 'F23', 
-        role: 'Alumni - S25'
-      }
-    },
-    {
-      id: 'avani-mehrotra',
-      type: 'familyMember',
-      position: { x: 1800, y: 200 },
-      data: { 
-        name: 'Avani Mehrotra', 
-        year: 'F23', 
-        role: 'Alumni - S25'
-      }
-    },
-    {
-      id: 'rushil-patel',
-      type: 'familyMember',
-      position: { x: 1950, y: 200 },
-      data: { 
-        name: 'Rushil Patel', 
-        year: 'F23', 
-        role: 'Brother'
-      }
-    },
+    // Beta Class (Fall 2023) - Second row with very generous 400px spacing
+    { id: 'sumi-suseendrababu', name: 'Sumi Suseendrababu', year: 'Beta', role: 'Alumni - S25', x: 450, y: 350 },
+    { id: 'sanna-neelee', name: 'Sanna Neelee', year: 'Beta', role: 'Dropped - S25', x: 850, y: 350 },
+    { id: 'laiba-piracha', name: 'Laiba Piracha', year: 'Beta', role: 'Alumni - S25', x: 1250, y: 350 },
+    { id: 'arya-thombare', name: 'Arya Thombare', year: 'Beta', role: 'Brother', x: 1650, y: 350 },
+    { id: 'hima-nagi-reddy', name: 'Hima Nagi Reddy', year: 'Beta', role: 'Brother', x: 2050, y: 350 },
+    { id: 'ethan-varghese', name: 'Ethan Varghese', year: 'Beta', role: 'Brother', x: 2450, y: 350 },
+    { id: 'krisha-amravathi', name: 'Krisha Amravathi', year: 'Beta', role: 'Brother', x: 2850, y: 350 },
+    { id: 'mansi-cherukupally', name: 'Mansi Cherukupally', year: 'Beta', role: 'VP - Finance', x: 3250, y: 350 },
+    { id: 'afsar-arif', name: 'Afsar Arif', year: 'Beta', role: 'President', x: 3650, y: 350 },
+    { id: 'wildan-susanto', name: 'Wildan Susanto', year: 'Beta', role: 'Alumni - S25', x: 4050, y: 350 },
+    { id: 'avani-mehrotra', name: 'Avani Mehrotra', year: 'Beta', role: 'Alumni - S25', x: 4450, y: 350 },
+    { id: 'rushil-patel', name: 'Rushil Patel', year: 'Beta', role: 'Brother', x: 4850, y: 350 },
 
-    // Gamma Class (Fall 2024) - Third row
-    {
-      id: 'bhavya-rayankula',
-      type: 'familyMember',
-      position: { x: 450, y: 350 },
-      data: { 
-        name: 'Bhavya Rayankula', 
-        year: 'F24', 
-        role: 'Dropped - S25'
-      }
-    },
-    {
-      id: 'meghana-pula',
-      type: 'familyMember',
-      position: { x: 500, y: 350 },
-      data: { 
-        name: 'Meghana Pula', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'faddil-khan',
-      type: 'familyMember',
-      position: { x: 550, y: 350 },
-      data: { 
-        name: 'Faddil Khan', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'ayushi-deshmukh',
-      type: 'familyMember',
-      position: { x: 650, y: 350 },
-      data: { 
-        name: 'Ayushi Deshmukh', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'aashay-vishwakarma',
-      type: 'familyMember',
-      position: { x: 700, y: 350 },
-      data: { 
-        name: 'Aashay Vishwakarma', 
-        year: 'F24', 
-        role: 'VP - Prof Dev'
-      }
-    },
-    {
-      id: 'mekha-mathew',
-      type: 'familyMember',
-      position: { x: 800, y: 350 },
-      data: { 
-        name: 'Mekha Mathew', 
-        year: 'F24', 
-        role: 'VP - Social Eng'
-      }
-    },
-    {
-      id: 'vadhanaa-venkat',
-      type: 'familyMember',
-      position: { x: 900, y: 350 },
-      data: { 
-        name: 'Vadhanaa (Vee) Venkat', 
-        year: 'F24', 
-        role: 'VP - Marketing'
-      }
-    },
-    {
-      id: 'noel-emmanuel',
-      type: 'familyMember',
-      position: { x: 950, y: 350 },
-      data: { 
-        name: 'Noel Emmanuel', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'aman-balam',
-      type: 'familyMember',
-      position: { x: 1000, y: 350 },
-      data: { 
-        name: 'Aman Balam', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'ishaan-dhandapani',
-      type: 'familyMember',
-      position: { x: 1100, y: 350 },
-      data: { 
-        name: 'Ishaan Dhandapani', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'shreyas-ankolekar',
-      type: 'familyMember',
-      position: { x: 1150, y: 350 },
-      data: { 
-        name: 'Shreyas Ankolekar', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'aadhav-manimurugan',
-      type: 'familyMember',
-      position: { x: 1300, y: 350 },
-      data: { 
-        name: 'Aadhav Manimurugan', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'ajay-kumaran',
-      type: 'familyMember',
-      position: { x: 1450, y: 350 },
-      data: { 
-        name: 'Ajay Kumaran', 
-        year: 'F24', 
-        role: 'VP - Ext. Affairs'
-      }
-    },
-    {
-      id: 'kavin-senthil',
-      type: 'familyMember',
-      position: { x: 1500, y: 350 },
-      data: { 
-        name: 'Kavin Senthil', 
-        year: 'F24', 
-        role: 'VP - Membership'
-      }
-    },
-    {
-      id: 'vignesh-selvam',
-      type: 'familyMember',
-      position: { x: 1600, y: 350 },
-      data: { 
-        name: 'Vignesh Selvam', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'venkat-sagi',
-      type: 'familyMember',
-      position: { x: 1750, y: 350 },
-      data: { 
-        name: 'Venkat Sagi', 
-        year: 'F24', 
-        role: 'VP - Technology'
-      }
-    },
-    {
-      id: 'itbaan-alam',
-      type: 'familyMember',
-      position: { x: 1850, y: 350 },
-      data: { 
-        name: 'Itbaan Alam', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'aamir-mohammed',
-      type: 'familyMember',
-      position: { x: 2000, y: 350 },
-      data: { 
-        name: 'Aamir Mohammed', 
-        year: 'F24', 
-        role: 'Brother'
-      }
-    },
+    // Gamma Class (Fall 2024) - Third row with very generous 400px spacing
+    { id: 'bhavya-rayankula', name: 'Bhavya Rayankula', year: 'Gamma', role: 'Dropped - S25', x: 850, y: 650 },
+    { id: 'meghana-pula', name: 'Meghana Pula', year: 'Gamma', role: 'Brother', x: 1050, y: 650 },
+    { id: 'faddil-khan', name: 'Faddil Khan', year: 'Gamma', role: 'Brother', x: 1450, y: 650 },
+    { id: 'ayushi-deshmukh', name: 'Ayushi Deshmukh', year: 'Gamma', role: 'Brother', x: 1650, y: 650 },
+    { id: 'aashay-vishwakarma', name: 'Aashay Vishwakarma', year: 'Gamma', role: 'VP - Prof Dev', x: 2050, y: 650 },
+    { id: 'mekha-mathew', name: 'Mekha Mathew', year: 'Gamma', role: 'VP - Social Eng', x: 2450, y: 650 },
+    { id: 'vadhanaa-venkat', name: 'Vadhanaa (Vee) Venkat', year: 'Gamma', role: 'VP - Marketing', x: 2850, y: 650 },
+    { id: 'noel-emmanuel', name: 'Noel Emmanuel', year: 'Gamma', role: 'Brother', x: 3250, y: 650 },
+    { id: 'aman-balam', name: 'Aman Balam', year: 'Gamma', role: 'Brother', x: 3450, y: 650 },
+    { id: 'ishaan-dhandapani', name: 'Ishaan Dhandapani', year: 'Gamma', role: 'Brother', x: 3850, y: 650 },
+    { id: 'shreyas-ankolekar', name: 'Shreyas Ankolekar', year: 'Gamma', role: 'Brother', x: 4050, y: 650 },
+    { id: 'aadhav-manimurugan', name: 'Aadhav Manimurugan', year: 'Gamma', role: 'Brother', x: 4450, y: 650 },
+    { id: 'ajay-kumaran', name: 'Ajay Kumaran', year: 'Gamma', role: 'VP - Ext. Affairs', x: 4850, y: 650 },
+    { id: 'kavin-senthil', name: 'Kavin Senthil', year: 'Gamma', role: 'VP - Membership', x: 5250, y: 650 },
+    { id: 'vignesh-selvam', name: 'Vignesh Selvam', year: 'Gamma', role: 'Brother', x: 5650, y: 650 },
+    { id: 'venkat-sagi', name: 'Venkat Sagi', year: 'Gamma', role: 'VP - Technology', x: 6050, y: 650 },
+    { id: 'itbaan-alam', name: 'Itbaan Alam', year: 'Gamma', role: 'Brother', x: 6450, y: 650 },
+    { id: 'aamir-mohammed', name: 'Aamir Mohammed', year: 'Gamma', role: 'Brother', x: 6850, y: 650 },
 
-    // Delta Class (Spring 2025) - Fourth row
-    {
-      id: 'ariha-kothari',
-      type: 'familyMember',
-      position: { x: 100, y: 500 },
-      data: { 
-        name: 'Ariha Kothari', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'joel-philipose',
-      type: 'familyMember',
-      position: { x: 750, y: 500 },
-      data: { 
-        name: 'Joel Philipose', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'abhinav-atluri',
-      type: 'familyMember',
-      position: { x: 650, y: 500 },
-      data: { 
-        name: 'Abhinav Atluri', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'krish-patel',
-      type: 'familyMember',
-      position: { x: 720, y: 500 },
-      data: { 
-        name: 'Krish Patel', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'anvi-siddabhatuni',
-      type: 'familyMember',
-      position: { x: 800, y: 500 },
-      data: { 
-        name: 'Anvi Siddabhatuni', 
-        year: 'S25', 
-        role: 'Sister'
-      }
-    },
-    {
-      id: 'ruthvik-penmatsa',
-      type: 'familyMember',
-      position: { x: 950, y: 500 },
-      data: { 
-        name: 'Ruthvik Penmatsa', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'aditya-dixit',
-      type: 'familyMember',
-      position: { x: 900, y: 500 },
-      data: { 
-        name: 'Aditya Dixit', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'ayaan-khan',
-      type: 'familyMember',
-      position: { x: 1000, y: 500 },
-      data: { 
-        name: 'Ayaan Khan', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'nihita-soma',
-      type: 'familyMember',
-      position: { x: 1050, y: 500 },
-      data: { 
-        name: 'Nihita Soma', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'rishi-ramesh',
-      type: 'familyMember',
-      position: { x: 1100, y: 500 },
-      data: { 
-        name: 'Rishi Ramesh', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'jeevika-balaji',
-      type: 'familyMember',
-      position: { x: 1200, y: 500 },
-      data: { 
-        name: 'Jeevika Balaji', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'abdul-qazaffi',
-      type: 'familyMember',
-      position: { x: 1250, y: 500 },
-      data: { 
-        name: 'Abdul Qazaffi', 
-        year: 'S25', 
-        role: 'Dropped - S25'
-      }
-    },
-    {
-      id: 'praneel-sreepada',
-      type: 'familyMember',
-      position: { x: 1350, y: 500 },
-      data: { 
-        name: 'Praneel Sreepada', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'ayush-velhal',
-      type: 'familyMember',
-      position: { x: 1450, y: 500 },
-      data: { 
-        name: 'Ayush Velhal', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'simon-beyene',
-      type: 'familyMember',
-      position: { x: 1500, y: 500 },
-      data: { 
-        name: 'Simon Beyene', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'rahil-islam',
-      type: 'familyMember',
-      position: { x: 1550, y: 500 },
-      data: { 
-        name: 'Rahil Islam', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'arnav-jain',
-      type: 'familyMember',
-      position: { x: 1600, y: 500 },
-      data: { 
-        name: 'Arnav Jain', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'aaron-gheevargheese',
-      type: 'familyMember',
-      position: { x: 1750, y: 500 },
-      data: { 
-        name: 'Aaron Gheevargheese', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'sahaj-dahal',
-      type: 'familyMember',
-      position: { x: 2000, y: 500 },
-      data: { 
-        name: 'Sahaj Dahal', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
-    {
-      id: 'sachin-selvakumar',
-      type: 'familyMember',
-      position: { x: 2100, y: 500 },
-      data: { 
-        name: 'Sachin Selvakumar', 
-        year: 'S25', 
-        role: 'Brother'
-      }
-    },
+    // Delta Class (Spring 2025) - Fourth row with very generous 400px spacing
+    { id: 'ariha-kothari', name: 'Ariha Kothari', year: 'Delta', role: 'Brother', x: 50, y: 950 },
+    { id: 'abhinav-atluri', name: 'Abhinav Atluri', year: 'Delta', role: 'Brother', x: 2050, y: 950 },
+    { id: 'krish-patel', name: 'Krish Patel', year: 'Delta', role: 'Brother', x: 2250, y: 950 },
+    { id: 'joel-philipose', name: 'Joel Philipose', year: 'Delta', role: 'Brother', x: 2650, y: 950 },
+    { id: 'anvi-siddabhatuni', name: 'Anvi Siddabhatuni', year: 'Delta', role: 'Brother', x: 3050, y: 950 },
+    { id: 'aditya-dixit', name: 'Aditya Dixit', year: 'Delta', role: 'Brother', x: 3450, y: 950 },
+    { id: 'ruthvik-penmatsa', name: 'Ruthvik Penmatsa', year: 'Delta', role: 'Brother', x: 3650, y: 950 },
+    { id: 'ayaan-khan', name: 'Ayaan Khan', year: 'Delta', role: 'Brother', x: 4050, y: 950 },
+    { id: 'nihita-soma', name: 'Nihita Soma', year: 'Delta', role: 'Brother', x: 4250, y: 950 },
+    { id: 'rishi-ramesh', name: 'Rishi Ramesh', year: 'Delta', role: 'Brother', x: 4650, y: 950 },
+    { id: 'jeevika-balaji', name: 'Jeevika Balaji', year: 'Delta', role: 'Brother', x: 5050, y: 950 },
+    { id: 'abdul-qazaffi', name: 'Abdul Qazaffi', year: 'Delta', role: 'Dropped - S25', x: 5450, y: 950 },
+    { id: 'praneel-sreepada', name: 'Praneel Sreepada', year: 'Delta', role: 'Brother', x: 5850, y: 950 },
+    { id: 'ayush-velhal', name: 'Ayush Velhal', year: 'Delta', role: 'Brother', x: 6250, y: 950 },
+    { id: 'simon-beyene', name: 'Simon Beyene', year: 'Delta', role: 'Brother', x: 6650, y: 950 },
+    { id: 'rahil-islam', name: 'Rahil Islam', year: 'Delta', role: 'Brother', x: 7050, y: 950 },
+    { id: 'arnav-jain', name: 'Arnav Jain', year: 'Delta', role: 'Brother', x: 7450, y: 950 },
+    { id: 'aaron-gheevargheese', name: 'Aaron Gheevargheese', year: 'Delta', role: 'Brother', x: 7850, y: 950 },
+    { id: 'sahaj-dahal', name: 'Sahaj Dahal', year: 'Delta', role: 'Brother', x: 8250, y: 950 },
+    { id: 'sachin-selvakumar', name: 'Sachin Selvakumar', year: 'Delta', role: 'Brother', x: 8650, y: 950 }
   ];
 
-  const initialEdges = [
+  // Edge data - all connections from ReactFlow
+  const edgeData = [
     // Alpha's littles
-    { id: 'e1', source: 'sanjana-shangle', target: 'ariha-kothari', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e2', source: 'manasa-parachuri', target: 'sumi-suseendrababu', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e3', source: 'kairavi-pandya', target: 'sanna-neelee', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e4', source: 'kairavi-pandya', target: 'laiba-piracha', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e5', source: 'kairavi-pandya', target: 'meghana-pula', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e6', source: 'aashna-pattni', target: 'arya-thombare', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e7', source: 'aashna-pattni', target: 'hima-nagi-reddy', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e8', source: 'yeshas-nath', target: 'noel-emmanuel', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e9', source: 'yeshas-nath', target: 'aditya-dixit', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e10', source: 'ethan-lobo', target: 'ethan-varghese', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e11', source: 'ethan-lobo', target: 'aman-balam', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e12', source: 'ethan-lobo', target: 'ishaan-dhandapani', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e13', source: 'ethan-lobo', target: 'shreyas-ankolekar', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e14', source: 'ethan-lobo', target: 'ayaan-khan', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e15', source: 'ethan-lobo', target: 'nihita-soma', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e17', source: 'saloni-janorkar', target: 'krisha-amravathi', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e18', source: 'akshaya-kummetha', target: 'mansi-cherukupally', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e19', source: 'renjit-joseph', target: 'afsar-arif', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e20', source: 'sriram-sendhil', target: 'wildan-susanto', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e21', source: 'tanvi-surname', target: 'avani-mehrotra', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e22', source: 'ayush-bhavsar', target: 'rushil-patel', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
+    { source: 'sanjana-shangle', target: 'ariha-kothari' },
+    { source: 'manasa-parachuri', target: 'sumi-suseendrababu' },
+    { source: 'kairavi-pandya', target: 'sanna-neelee' },
+    { source: 'kairavi-pandya', target: 'laiba-piracha' },
+    { source: 'kairavi-pandya', target: 'meghana-pula' },
+    { source: 'aashna-pattni', target: 'arya-thombare' },
+    { source: 'aashna-pattni', target: 'hima-nagi-reddy' },
+    { source: 'yeshas-nath', target: 'noel-emmanuel' },
+    { source: 'yeshas-nath', target: 'aditya-dixit' },
+    { source: 'ethan-lobo', target: 'ethan-varghese' },
+    { source: 'ethan-lobo', target: 'aman-balam' },
+    { source: 'ethan-lobo', target: 'ishaan-dhandapani' },
+    { source: 'ethan-lobo', target: 'shreyas-ankolekar' },
+    { source: 'ethan-lobo', target: 'ayaan-khan' },
+    { source: 'ethan-lobo', target: 'nihita-soma' },
+    { source: 'saloni-janorkar', target: 'krisha-amravathi' },
+    { source: 'akshaya-kummetha', target: 'mansi-cherukupally' },
+    { source: 'renjit-joseph', target: 'afsar-arif' },
+    { source: 'sriram-sendhil', target: 'wildan-susanto' },
+    { source: 'tanvi-surname', target: 'avani-mehrotra' },
+    { source: 'ayush-bhavsar', target: 'rushil-patel' },
 
     // Beta's littles
-    { id: 'e23', source: 'sanna-neelee', target: 'bhavya-rayankula', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e24', source: 'laiba-piracha', target: 'faddil-khan', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e25', source: 'laiba-piracha', target: 'ayushi-deshmukh', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e26', source: 'arya-thombare', target: 'aashay-vishwakarma', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e27', source: 'arya-thombare', target: 'mekha-mathew', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e28', source: 'arya-thombare', target: 'joel-philipose', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e29', source: 'hima-nagi-reddy', target: 'vadhanaa-venkat', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e30', source: 'krisha-amravathi', target: 'jeevika-balaji', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e31', source: 'mansi-cherukupally', target: 'aadhav-manimurugan', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e32', source: 'afsar-arif', target: 'ajay-kumaran', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e33', source: 'afsar-arif', target: 'kavin-senthil', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e34', source: 'afsar-arif', target: 'arnav-jain', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e35', source: 'wildan-susanto', target: 'vignesh-selvam', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e36', source: 'avani-mehrotra', target: 'venkat-sagi', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e37', source: 'rushil-patel', target: 'itbaan-alam', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e38', source: 'rushil-patel', target: 'aamir-mohammed', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e39', source: 'rushil-patel', target: 'sachin-selvakumar', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
+    { source: 'sanna-neelee', target: 'bhavya-rayankula' },
+    { source: 'laiba-piracha', target: 'faddil-khan' },
+    { source: 'laiba-piracha', target: 'ayushi-deshmukh' },
+    { source: 'arya-thombare', target: 'aashay-vishwakarma' },
+    { source: 'arya-thombare', target: 'mekha-mathew' },
+    { source: 'arya-thombare', target: 'joel-philipose' },
+    { source: 'hima-nagi-reddy', target: 'vadhanaa-venkat' },
+    { source: 'krisha-amravathi', target: 'jeevika-balaji' },
+    { source: 'mansi-cherukupally', target: 'aadhav-manimurugan' },
+    { source: 'afsar-arif', target: 'ajay-kumaran' },
+    { source: 'afsar-arif', target: 'kavin-senthil' },
+    { source: 'afsar-arif', target: 'arnav-jain' },
+    { source: 'wildan-susanto', target: 'vignesh-selvam' },
+    { source: 'avani-mehrotra', target: 'venkat-sagi' },
+    { source: 'rushil-patel', target: 'itbaan-alam' },
+    { source: 'rushil-patel', target: 'aamir-mohammed' },
+    { source: 'rushil-patel', target: 'sachin-selvakumar' },
 
     // Gamma's littles
-    { id: 'e40', source: 'aashay-vishwakarma', target: 'abhinav-atluri', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e41', source: 'aashay-vishwakarma', target: 'krish-patel', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e42', source: 'mekha-mathew', target: 'anvi-siddabhatuni', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e43', source: 'noel-emmanuel', target: 'ruthvik-penmatsa', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e44', source: 'ishaan-dhandapani', target: 'rishi-ramesh', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e45', source: 'aadhav-manimurugan', target: 'abdul-qazaffi', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e46', source: 'aadhav-manimurugan', target: 'praneel-sreepada', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e47', source: 'ajay-kumaran', target: 'ayush-velhal', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e48', source: 'kavin-senthil', target: 'simon-beyene', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e49', source: 'kavin-senthil', target: 'rahil-islam', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e50', source: 'venkat-sagi', target: 'aaron-gheevargheese', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } },
-    { id: 'e51', source: 'aamir-mohammed', target: 'sahaj-dahal', type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } }
+    { source: 'aashay-vishwakarma', target: 'abhinav-atluri' },
+    { source: 'aashay-vishwakarma', target: 'krish-patel' },
+    { source: 'mekha-mathew', target: 'anvi-siddabhatuni' },
+    { source: 'noel-emmanuel', target: 'ruthvik-penmatsa' },
+    { source: 'ishaan-dhandapani', target: 'rishi-ramesh' },
+    { source: 'aadhav-manimurugan', target: 'abdul-qazaffi' },
+    { source: 'aadhav-manimurugan', target: 'praneel-sreepada' },
+    { source: 'ajay-kumaran', target: 'ayush-velhal' },
+    { source: 'kavin-senthil', target: 'simon-beyene' },
+    { source: 'kavin-senthil', target: 'rahil-islam' },
+    { source: 'venkat-sagi', target: 'aaron-gheevargheese' },
+    { source: 'aamir-mohammed', target: 'sahaj-dahal' }
   ];
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  // Color coding function
+  const getCardColor = (role) => {
+    if (role.includes('Alumni')) return '#d97706'; // amber-600 (prestigious gold)
+    if (role.includes('Dropped')) return '#d1d5db'; // gray-300
+    if (role.includes('President') || role.includes('VP')) return '#7c3aed'; // purple-600
+    if (role === 'Sister') return '#fb923c'; // orange-400
+    return '#60a5fa'; // blue-400 (Brothers and others)
+  };
 
-  const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
-  );
+  const getTextColor = (role) => {
+    if (role.includes('Dropped')) return '#000000';
+    return '#ffffff';
+  };
 
   useEffect(() => {
     setLoading(false);
+    // Add a small delay to ensure the SVG ref is ready
+    const timer = setTimeout(() => {
+      drawTree();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
+
+  const drawTree = () => {
+    console.log("Drawing tree...", svgRef.current); // Debug log
+    
+    if (!svgRef.current) {
+      console.log("SVG ref not ready");
+      return;
+    }
+    
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove(); // Clear previous content
+    
+    const width = 4000; // Much wider to accommodate extra spacious Alpha class layout
+    const height = 1200; // Much taller for better vertical spacing
+    const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+
+    svg
+      .attr("width", width)
+      .attr("height", height)
+      .style("background", "#f9fafb");
+
+    const g = svg.append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Create a map for quick node lookup
+    const nodeMap = new Map();
+    familyData.forEach(node => {
+      nodeMap.set(node.id, node);
+    });
+
+    // Add arrowheads first
+    svg.append("defs").append("marker")
+      .attr("id", "arrowhead")
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 8)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("d", "M0,-5L10,0L0,5")
+      .style("fill", "#374151");
+
+    // Draw edges first (so they appear behind nodes) - using curved paths
+    const lines = g.selectAll(".edge")
+      .data(edgeData)
+      .enter().append("path")
+      .attr("class", "edge")
+      .attr("d", d => {
+        const sourceX = nodeMap.get(d.source).x + 100; // Center of source node
+        const sourceY = nodeMap.get(d.source).y + 80; // Bottom of source node
+        const targetX = nodeMap.get(d.target).x + 100; // Center of target node
+        const targetY = nodeMap.get(d.target).y; // Top of target node
+        
+        // Create curved path with control points
+        const midY = sourceY + (targetY - sourceY) / 2;
+        
+        return `M ${sourceX} ${sourceY} 
+                C ${sourceX} ${midY}, ${targetX} ${midY}, ${targetX} ${targetY}`;
+      })
+      .style("stroke", "#374151")
+      .style("stroke-width", "2px")
+      .style("fill", "none")
+      .style("opacity", 0.7)
+      .attr("marker-end", "url(#arrowhead)");
+
+    // Draw nodes - use direct positioning without scaling
+    const nodes = g.selectAll(".node")
+      .data(familyData)
+      .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", d => `translate(${d.x},${d.y})`);
+
+    // Add node rectangles - larger for better readability
+    nodes.append("rect")
+      .attr("width", 200) // Wider cards
+      .attr("height", 80) // Taller cards
+      .attr("rx", 10)
+      .attr("ry", 10)
+      .style("fill", d => getCardColor(d.role))
+      .style("stroke", "#6b7280")
+      .style("stroke-width", "1px")
+      .style("filter", "drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))");
+
+    // Add names - centered in wider cards
+    nodes.append("text")
+      .attr("x", 100) // Center of 200px wide card
+      .attr("y", 22)
+      .style("text-anchor", "middle")
+      .style("font-size", "14px") // Larger font
+      .style("font-weight", "600")
+      .style("fill", d => getTextColor(d.role))
+      .style("font-family", "Public Sans, sans-serif")
+      .text(d => d.name);
+
+    // Add years
+    nodes.append("text")
+      .attr("x", 100)
+      .attr("y", 40)
+      .style("text-anchor", "middle")
+      .style("font-size", "12px") // Larger font
+      .style("fill", d => getTextColor(d.role))
+      .style("opacity", 0.9)
+      .style("font-family", "Public Sans, sans-serif")
+      .text(d => d.year);
+
+    // Add roles
+    nodes.append("text")
+      .attr("x", 100)
+      .attr("y", 58)
+      .style("text-anchor", "middle")
+      .style("font-size", "11px") // Larger font
+      .style("fill", d => getTextColor(d.role))
+      .style("opacity", 0.8)
+      .style("font-style", "italic")
+      .style("font-family", "Public Sans, sans-serif")
+      .text(d => d.role);
+
+    // Add zoom and pan functionality
+    const zoom = d3.zoom()
+      .scaleExtent([0.2, 2]) // Better zoom range for larger layout
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
+      });
+
+    svg.call(zoom);
+
+    // Set initial zoom to fit the content better
+    const initialScale = 0.3; // Start zoomed out to see the spacious layout
+    svg.call(zoom.transform, d3.zoomIdentity.scale(initialScale));
+    
+    console.log("Tree drawn successfully"); // Debug log
+  };
 
   if (loading) {
     return <div className="min-h-screen flex justify-center items-center text-gray-500">Loading...</div>;
   }
 
   // Count statistics
-  const totalMembers = initialNodes.length;
-  const alphaMembers = initialNodes.filter(node => node.data.year === 'S23').length;
-  const currentActiveMembers = initialNodes.filter(node => 
-    !node.data.role.includes('Alumni') && 
-    !node.data.role.includes('Dropped')
+  const alphaMembers = familyData.filter(node => node.year === 'Alpha').length;
+  const betaMembers = familyData.filter(node => node.year === 'Beta').length;
+  const gammaMembers = familyData.filter(node => node.year === 'Gamma').length;
+  const deltaMembers = familyData.filter(node => node.year === 'Delta').length;
+  const alumniMembers = familyData.filter(node => 
+    node.role.includes('Alumni')
+  ).length;
+  const currentActiveMembers = familyData.filter(node => 
+    !node.role.includes('Alumni') && 
+    !node.role.includes('Dropped')
   ).length;
 
   return (
-    <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans']">
+    <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
+
+      {/* Sidebar */}
+      <aside className="bg-white px-6 py-10 font-['Inter'] border-r border-black shadow-sm space-y-6">
+        <Sidebar />
+      </aside>
+
+      {/* Main Content */}
       <main className="px-8 py-6 w-full">
         <div className="mb-6">
           <h1 className="text-xl font-bold text-[#1E3D2F]">Family Tree</h1>
           <p className="text-gray-600 text-sm mt-2">Explore the lineage and connections within our fraternity</p>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 h-[700px]">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            nodeTypes={nodeTypes}
-            connectionLineType={ConnectionLineType.Straight}
-            fitView
-            className="bg-gray-50"
-          >
-          </ReactFlow>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 h-[800px] overflow-hidden">
+          <svg ref={svgRef} className="w-full h-full"></svg>
         </div>
 
         <div className="mt-8 bg-white border border-gray-200 rounded-xl shadow-sm p-6">
           <h2 className="text-lg font-semibold text-[#1E3D2F] mb-4">Family Tree Statistics</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-[#1E3D2F]">4</div>
-              <div className="text-sm text-gray-600">Classes</div>
-            </div>
-            <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <div className="text-2xl font-bold text-[#1E3D2F]">{totalMembers}</div>
-              <div className="text-sm text-gray-600">Total Members</div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold text-[#1E3D2F]">{alphaMembers}</div>
               <div className="text-sm text-gray-600">Alpha Class</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-[#1E3D2F]">{betaMembers}</div>
+              <div className="text-sm text-gray-600">Beta Class</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-[#1E3D2F]">{gammaMembers}</div>
+              <div className="text-sm text-gray-600">Gamma Class</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-[#1E3D2F]">{deltaMembers}</div>
+              <div className="text-sm text-gray-600">Delta Class</div>
+            </div>
+            <div className="text-center p-4 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-[#1E3D2F]">{alumniMembers}</div>
+              <div className="text-sm text-gray-600">Alumni</div>
             </div>
             <div className="text-center p-4 bg-gray-50 rounded-lg">
               <div className="text-2xl font-bold text-[#1E3D2F]">{currentActiveMembers}</div>
@@ -804,21 +368,27 @@ export default function FamilyTreePage() {
           <div className="flex flex-wrap gap-4">
             <div className="flex items-center">
               <div className="w-4 h-4 bg-purple-600 rounded mr-2"></div>
-              <span className="text-sm">Executive Board / President</span>
+              <span className="text-sm">Executive Board</span>
             </div>
             <div className="flex items-center">
               <div className="w-4 h-4 bg-blue-400 rounded mr-2"></div>
               <span className="text-sm">Active Brothers</span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-orange-400 rounded mr-2"></div>
-              <span className="text-sm">Sisters</span>
+              <div className="w-4 h-4 bg-amber-600 rounded mr-2"></div>
+              <span className="text-sm">Alumni</span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-gray-400 rounded mr-2"></div>
-              <span className="text-sm">Alumni / Dropped</span>
+              <div className="w-4 h-4 bg-gray-300 border border-gray-400 rounded mr-2"></div>
+              <span className="text-sm">Dropped</span>
             </div>
           </div>
+        </div>
+
+        <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl shadow-sm p-4">
+          <p className="text-sm text-blue-800">
+            <strong>Navigation:</strong> Use mouse wheel to zoom in/out and click & drag to pan around the family tree.
+          </p>
         </div>
       </main>
     </div>
