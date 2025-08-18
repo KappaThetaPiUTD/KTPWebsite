@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 import Sidebar from "../../components/Sidebar";
+import HoverCard from "../../components/HoverCard"; // Import the HoverCard component
 
 export default function Dashboard() {
   const router = useRouter();
@@ -18,6 +19,9 @@ export default function Dashboard() {
   const [eventList, setEventList] = useState([]);
   const [strikeLogs, setStrikeLogs] = useState([]);
   const [rsvpStatus, setRsvpStatus] = useState({}); // ← you used this later
+  const [hoveredEvent, setHoveredEvent] = useState(null); // State for hovered event
+  const [calendarHoveredEvent, setCalendarHoveredEvent] = useState(null);
+  const [upcomingHoveredEvent, setUpcomingHoveredEvent] = useState(null);
 
   // Auth check
   useEffect(() => {
@@ -72,9 +76,13 @@ export default function Dashboard() {
       if (!user) return;
 
       try {
+        // Fetch events with the creator's name
         const { data: eventsData, error } = await supabase
           .from("events")
-          .select("id, event_name, event_date, visibility");
+          .select(
+            "id, event_name, event_date, visibility, description, created_by, users(name)"
+          )
+          .order("event_date", { ascending: true });
 
         if (error) {
           console.error("Error fetching events:", error);
@@ -82,7 +90,7 @@ export default function Dashboard() {
         }
 
         const formatted = {};
-        eventsData.forEach((event) => {
+        const formattedEventList = eventsData.map((event) => {
           const eventDate = new Date(event.event_date); // Parse UTC date
           const key = eventDate
             .toLocaleString("en-US", {
@@ -103,11 +111,20 @@ export default function Dashboard() {
               minute: "2-digit",
             }),
             visibility: event.visibility,
+            description: event.description,
+            created_by: event.created_by,
+            creator_name: event.users?.name || "Unknown", // Include creator's name
           });
+
+          // Return the event with creator_name for the eventList
+          return {
+            ...event,
+            creator_name: event.users?.name || "Unknown", // Include creator's name
+          };
         });
 
         setEvents(formatted);
-        setEventList(eventsData);
+        setEventList(formattedEventList); // Use the updated event list
       } catch (err) {
         console.error("Failed to fetch events:", err);
       }
@@ -309,10 +326,22 @@ export default function Dashboard() {
                 <h4 className="text-sm font-semibold mb-2 text-primary">
                   Events on {selectedDate}:
                 </h4>
+                {/* Calendar events list */}
                 <ul className="list-disc list-inside text-xs space-y-1">
-                  {events[selectedDate].map((evt, idx) => (
-                    <li key={idx}>
+                  {events[selectedDate]?.map((evt, idx) => (
+                    <li
+                      key={idx}
+                      className="relative"
+                      onMouseEnter={() => setCalendarHoveredEvent(evt)}
+                      onMouseLeave={() => setCalendarHoveredEvent(null)}
+                    >
                       {evt.time} - <strong>{evt.title}</strong>
+                      {calendarHoveredEvent?.id === evt.id && (
+                        <HoverCard
+                          description={calendarHoveredEvent.description}
+                          createdBy={calendarHoveredEvent.creator_name} // Pass creator_name
+                        />
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -399,9 +428,14 @@ export default function Dashboard() {
                 .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
                 .slice(0, 5)
                 .map((event, idx) => {
-                  const response = rsvpStatus[event.id]; // get user's RSVP for this event
+                  const response = rsvpStatus[event.id]; // Get user's RSVP for this event
                   return (
-                    <li key={idx} className="flex items-center justify-between">
+                    <li
+                      key={idx}
+                      className="relative flex items-center justify-between"
+                      onMouseEnter={() => setUpcomingHoveredEvent(event)}
+                      onMouseLeave={() => setUpcomingHoveredEvent(null)}
+                    >
                       <span>
                         <span className="font-medium">
                           {new Date(event.event_date).toLocaleString("en-US", {
@@ -415,44 +449,11 @@ export default function Dashboard() {
                         </span>{" "}
                         — {event.event_name}
                       </span>
-
-                      {response ? (
-                        // ✅ Show RSVP status text if exists
-                        <span
-                          className={`px-3 py-1 text-xs rounded-full font-semibold capitalize ${
-                            response === "going"
-                              ? "bg-green-100 text-green-700"
-                              : response === "maybe"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : response === "not going" || response === "no"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-gray-100 text-gray-700"
-                          }`}
-                        >
-                          {response}
-                        </span>
-                      ) : (
-                        // ❌ No RSVP yet → show buttons
-                        <div className="flex gap-2 mt-2">
-                          <button
-                            onClick={() => handleRSVP(event, "going")}
-                            className="bg-green-500 text-white px-2 py-1 text-xs rounded"
-                          >
-                            Going
-                          </button>
-                          <button
-                            onClick={() => handleRSVP(event, "maybe")}
-                            className="bg-yellow-500 text-white px-2 py-1 text-xs rounded"
-                          >
-                            Maybe
-                          </button>
-                          <button
-                            onClick={() => handleRSVP(event, "not going")}
-                            className="bg-red-500 text-white px-2 py-1 text-xs rounded"
-                          >
-                            No
-                          </button>
-                        </div>
+                      {upcomingHoveredEvent?.id === event.id && (
+                        <HoverCard
+                          description={upcomingHoveredEvent.description}
+                          createdBy={upcomingHoveredEvent.creator_name} // Pass creator_name
+                        />
                       )}
                     </li>
                   );

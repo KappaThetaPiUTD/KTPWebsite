@@ -318,7 +318,6 @@ export default function AdminPage() {
                   const repeatStartDate = new Date(repeatStart);
                   const repeatEndDate = new Date(repeatEnd);
 
-                  // Normalize dates to only compare the date portion
                   const normalizeDate = (date) => {
                     const normalized = new Date(date);
                     normalized.setHours(0, 0, 0, 0);
@@ -365,6 +364,24 @@ export default function AdminPage() {
                   return;
                 }
 
+                // Automatically RSVP the creator for the main event
+                const { error: rsvpError } = await supabase
+                  .from("rsvps")
+                  .insert([
+                    {
+                      event_id: createdEvent[0].id,
+                      user_id: user?.id,
+                      response: "going",
+                    },
+                  ]);
+
+                if (rsvpError) {
+                  alert(
+                    "Error RSVPing for the main event: " + rsvpError.message
+                  );
+                  return;
+                }
+
                 if (repeatOption !== "None") {
                   const repeatStartDate = new Date(repeatStart);
                   const repeatEndDate = new Date(repeatEnd);
@@ -396,7 +413,10 @@ export default function AdminPage() {
                         event_name: title,
                         description: repeatDescription,
                         event_date: new Date(currentDate),
-                        repeat: "None", // Cloned events are not repeating themselves
+                        repeat: repeatOption,
+                        repeat_start:
+                          repeatOption !== "None" ? repeatStart : null,
+                        repeat_end: repeatOption !== "None" ? repeatEnd : null,
                         visibility,
                         created_by: user?.id,
                         created_by_email: user?.email || null,
@@ -406,12 +426,31 @@ export default function AdminPage() {
                     currentDate.setDate(currentDate.getDate() + repeatInterval);
                   }
 
-                  const { error: cloneError } = await supabase
-                    .from("events")
-                    .insert(clonedEvents);
+                  const { error: cloneError, data: clonedEventData } =
+                    await supabase.from("events").insert(clonedEvents).select();
+
                   if (cloneError) {
                     alert(
                       "Error creating repeating events: " + cloneError.message
+                    );
+                    return;
+                  }
+
+                  // Automatically RSVP the creator for all repeating events
+                  const rsvpEntries = clonedEventData.map((event) => ({
+                    event_id: event.id,
+                    user_id: user?.id,
+                    response: "going",
+                  }));
+
+                  const { error: rsvpRepeatsError } = await supabase
+                    .from("rsvps")
+                    .insert(rsvpEntries);
+
+                  if (rsvpRepeatsError) {
+                    alert(
+                      "Error RSVPing for repeating events: " +
+                        rsvpRepeatsError.message
                     );
                     return;
                   }

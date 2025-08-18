@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { supabase } from "../../../lib/supabase";
 import Sidebar from "../../../components/Sidebar";
 import { useRouter } from "next/navigation";
+import HoverCard from "../../../components/HoverCard"; // Adjust the import based on your file structure
 
 export default function RSVPPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function RSVPPage() {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
   const [rsvpStatus, setRsvpStatus] = useState({});
+  const [hoveredEvent, setHoveredEvent] = useState(null); // State to manage hovered event
 
   // Auth check
   useEffect(() => {
@@ -41,16 +43,16 @@ export default function RSVPPage() {
 
         const userRole = userData?.role;
 
-        // Fetch all events with visibility
-        const { data: eventsData, error: eventsError } = await supabase
+        // Fetch all events with visibility and creator's name
+        const { data: eventsData, error } = await supabase
           .from("events")
           .select(
-            "id, event_name, event_date, visibility, repeat, repeat_start, repeat_end"
-          ) // Include repeat_start and repeat_end
+            "id, event_name, event_date, visibility, description, created_by, users(name)"
+          )
           .order("event_date", { ascending: true });
 
-        if (eventsError) {
-          console.error("Error fetching events:", eventsError);
+        if (error) {
+          console.error("Error fetching events:", error);
           return;
         }
 
@@ -86,10 +88,16 @@ export default function RSVPPage() {
           .select("event_id, response")
           .eq("user_id", user.id);
 
-        setEvents(filteredEvents);
+        // Add creator's name to each event
+        const eventsWithCreatorName = filteredEvents.map((event) => ({
+          ...event,
+          creator_name: event.users?.name || "Unknown", // Include creator's name
+        }));
+
+        setEvents(eventsWithCreatorName);
 
         const statusMap = {};
-        filteredEvents.forEach((e) => {
+        eventsWithCreatorName.forEach((e) => {
           const myRSVP = rsvpsData?.find((r) => r.event_id === e.id);
           statusMap[e.id] = myRSVP ? myRSVP.response : "unanswered";
         });
@@ -106,6 +114,12 @@ export default function RSVPPage() {
   // Handle RSVP action
   const handleRSVP = async (event, response) => {
     if (!user) return alert("Please log in first.");
+
+    console.log("RSVP Attempt:", {
+      userId: user.id,
+      eventId: event.id,
+      response,
+    });
 
     const { error } = await supabase.from("rsvps").upsert(
       [
@@ -186,50 +200,75 @@ export default function RSVPPage() {
           <h2 className="text-lg font-semibold mb-4 text-primary">
             Update Your RSVP
           </h2>
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {events.map((event) => (
-              <div key={event.id}>
-                <p className="font-medium text-sm mb-1">{event.event_name}</p>
-                <p className="text-s text-stone-400 mb-1">
-                  {new Intl.DateTimeFormat("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  }).format(new Date(event.event_date))}
-                </p>
-                {event.repeat !== "none" &&
-                  event.repeat_start &&
-                  event.repeat_end && (
-                    <div className="text-xs text-blue-500 mb-2">
-                      <p>
-                        Repeats:{" "}
-                        {event.repeat.charAt(0).toUpperCase() +
-                          event.repeat.slice(1)}
-                      </p>
-                      <p>
-                        From:{" "}
-                        {new Intl.DateTimeFormat("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }).format(new Date(event.repeat_start))}
-                      </p>
-                      <p>
-                        To:{" "}
-                        {new Intl.DateTimeFormat("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        }).format(new Date(event.repeat_end))}
-                      </p>
-                    </div>
-                  )}
-                <div className="mt-2 flex flex-wrap gap-3">
+              <div
+                key={event.id}
+                className="relative border rounded-lg p-4 shadow-sm flex flex-col justify-between h-full"
+                onMouseEnter={() => setHoveredEvent(event)}
+                onMouseLeave={() => setHoveredEvent(null)}
+              >
+                {/* Top Section: Name and Date on the left, Repeating Info on the right */}
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="font-medium text-sm mb-1">
+                      {event.event_name}
+                    </p>
+                    <p className="text-s text-stone-400">
+                      {new Intl.DateTimeFormat("en-US", {
+                        timeZone: "America/Chicago",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      }).format(new Date(event.event_date))}
+                    </p>
+                    <p className="text-xs text-stone-400">
+                      {new Intl.DateTimeFormat("en-US", {
+                        timeZone: "America/Chicago",
+                        hour: "numeric",
+                        minute: "numeric",
+                        hour12: true,
+                      }).format(new Date(event.event_date))}
+                    </p>
+                  </div>
+                  {event.repeat !== "none" &&
+                    event.repeat_start &&
+                    event.repeat_end && (
+                      <div className="text-xs text-blue-500 text-right">
+                        <p>
+                          Repeats:{" "}
+                          {event.repeat.charAt(0).toUpperCase() +
+                            event.repeat.slice(1)}
+                        </p>
+                        <p>
+                          From:{" "}
+                          {new Intl.DateTimeFormat("en-US", {
+                            timeZone: "America/Chicago",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }).format(new Date(event.repeat_start))}
+                        </p>
+                        <p>
+                          To:{" "}
+                          {new Intl.DateTimeFormat("en-US", {
+                            timeZone: "America/Chicago",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }).format(new Date(event.repeat_end))}
+                        </p>
+                      </div>
+                    )}
+                </div>
+
+                {/* Center Section: RSVP Buttons */}
+                <div className="flex justify-center items-center mt-auto">
                   {["going", "maybe", "not going"].map((status) => (
                     <button
                       key={status}
                       onClick={() => handleRSVP(event, status)}
-                      className={`px-4 py-1 text-white rounded-full text-xs font-semibold transition ${
+                      className={`px-4 py-1.5 text-white rounded-full text-xs font-semibold transition mx-1 ${
                         rsvpStatus[event.id] === status
                           ? "bg-primary/80"
                           : "bg-primary hover:bg-primary/90"
@@ -239,6 +278,14 @@ export default function RSVPPage() {
                     </button>
                   ))}
                 </div>
+
+                {/* Hover Card for Description and Creator Info */}
+                {hoveredEvent?.id === event.id && (
+                  <HoverCard
+                    description={event.description}
+                    createdBy={event.creator_name} // Use the creator_name field
+                  />
+                )}
               </div>
             ))}
           </div>
