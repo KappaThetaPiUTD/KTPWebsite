@@ -354,7 +354,7 @@ export default function Dashboard() {
                       >
                         {day}
                         {hasEvent ? (
-                          <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full" />
+                          <span className="absolute left-1/2 bottom-0 w-1.5 h-1.5 bg-red-500 rounded-full transform -translate-x-1/2" />
                         ) : null}
                       </button>
                     )}
@@ -388,7 +388,7 @@ export default function Dashboard() {
           {/* Check-in card */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
             <h3 className="text-base font-semibold mb-3">
-              Check-In for Chapter
+              Check-In for Chapter -- Work in Progress
             </h3>
             <div className="flex justify-between items-center bg-white p-4 border rounded-lg mb-4">
               <div className="rounded-full bg-primary text-white px-4 py-2 text-xs font-semibold truncate max-w-[10rem] text-center">

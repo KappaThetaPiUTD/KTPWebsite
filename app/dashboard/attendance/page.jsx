@@ -44,7 +44,7 @@ export default function AttendancePage() {
 
       {/* Main Content */}
       <main className="px-8 py-6 w-full">
-        <h1 className="text-xl font-bold mb-6 text-[#1E3D2F]">Attendance Records</h1>
+        <h1 className="text-xl font-bold mb-6 text-[#1E3D2F]">Attendance Records -- Work in Progress</h1>
 
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-200 rounded-xl shadow-sm">
@@ -56,23 +56,7 @@ export default function AttendancePage() {
               </tr>
             </thead>
             <tbody>
-              {records.map((record, i) => (
-                <tr key={i} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4 border-b">{record.date}</td>
-                  <td className="px-6 py-4 border-b">{record.event}</td>
-                  <td className="px-6 py-4 border-b font-medium">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                        record.status === "Present"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {record.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {/* Table is intentionally left empty */}
             </tbody>
           </table>
         </div>
