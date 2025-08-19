@@ -122,9 +122,27 @@ export default function Login() {
     <div className="min-h-screen flex">
       {/* Left side - Solid green panel */}
       <div className="w-2/3 bg-[#1E3D2F] flex items-center justify-start px-16">
-        <h1 className="text-white text-6xl font-bold" style={{fontFamily: 'Poppins, sans-serif'}}>
+        <h1 className="text-white text-5xl font-bold typing-animation" style={{fontFamily: 'Poppins, sans-serif'}}>
           Welcome back!
         </h1>
+        <style jsx>{`
+          .typing-animation {
+            overflow: hidden;
+            border-right: 3px solid white;
+            white-space: nowrap;
+            animation: typing 3s steps(13, end), blink-cursor 0.75s step-end infinite;
+          }
+          
+          @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+          }
+          
+          @keyframes blink-cursor {
+            from, to { border-color: transparent; }
+            50% { border-color: white; }
+          }
+        `}</style>
       </div>
       
       {/* Right side - Login form */}
