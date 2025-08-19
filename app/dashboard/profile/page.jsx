@@ -18,6 +18,7 @@ export default function AdminPage() {
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("");
   const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -94,9 +95,17 @@ export default function AdminPage() {
       const json = await resp.json();
       console.log('Server profile update response:', json);
       if (!resp.ok) {
-        setStatusMessage({ text: `Failed to update profile: ${json.error || resp.statusText}`, type: 'error' });
+        if (json.errors) {
+          // Handle multiple validation errors
+          setFieldErrors(json.errors);
+          setStatusMessage({ text: 'Please correct the errors below', type: 'error' });
+        } else {
+          setStatusMessage({ text: `Failed to update profile: ${json.error || resp.statusText}`, type: 'error' });
+        }
         return;
       }
+      // Clear any existing field errors on successful save
+      setFieldErrors({});
     } catch (err) {
       console.error('Network error calling profile update API:', err);
       setStatusMessage({ text: 'Failed to update profile: network error', type: 'error' });
@@ -247,31 +256,46 @@ export default function AdminPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                   <input
                     type="text"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1E3D2F] focus:border-transparent transition"
+                    className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1E3D2F] focus:border-transparent transition ${
+                      fieldErrors.name ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    }`}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Enter your full name"
                   />
+                  {fieldErrors.name && (
+                    <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Graduation Year</label>
                   <input
                     type="text"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1E3D2F] focus:border-transparent transition"
+                    className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1E3D2F] focus:border-transparent transition ${
+                      fieldErrors.graduation_date ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    }`}
                     value={gradYear}
                     onChange={(e) => setGradYear(e.target.value)}
                     placeholder="e.g., 2025"
                   />
+                  {fieldErrors.graduation_date && (
+                    <p className="mt-1 text-sm text-red-600">{fieldErrors.graduation_date}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                   <input
                     type="text"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1E3D2F] focus:border-transparent transition"
+                    className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-[#1E3D2F] focus:border-transparent transition ${
+                      fieldErrors.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    }`}
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="Enter your phone number"
                   />
+                  {fieldErrors.phone && (
+                    <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>
+                  )}
                 </div>
                 <div className="pt-4">
                   <button
