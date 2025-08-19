@@ -26,6 +26,7 @@ export default function AdminCreateEventPage() {
       <form
         onSubmit={async (e) => {
           e.preventDefault();
+
           const title = e.target.title.value.trim();
           const description = e.target.description.value.trim();
           const date = e.target.date.value;
@@ -46,36 +47,161 @@ export default function AdminCreateEventPage() {
             alert("Please fill out all fields.");
             return;
           }
-          if (repeatOption !== "None" && (!repeatStart || !repeatEnd)) {
-            alert("Please provide both repeat start and end dates.");
+
+          const eventDate = new Date(`${date}T${time}`);
+          if (repeatOption !== "None") {
+            if (!repeatStart || !repeatEnd) {
+              alert("Please provide both repeat start and end dates.");
+              return;
+            }
+
+            const repeatStartDate = new Date(repeatStart);
+            const repeatEndDate = new Date(repeatEnd);
+
+            const normalizeDate = (date) => {
+              const normalized = new Date(date);
+              normalized.setHours(0, 0, 0, 0);
+              return normalized;
+            };
+
+            const normalizedEventDate = normalizeDate(eventDate);
+            const normalizedRepeatStartDate = normalizeDate(repeatStartDate);
+            const normalizedRepeatEndDate = normalizeDate(repeatEndDate);
+
+            if (
+              normalizedRepeatStartDate < normalizedEventDate ||
+              normalizedRepeatEndDate < normalizedEventDate
+            ) {
+              alert(
+                "Repeat start and end dates cannot be before the initial event date."
+              );
+              return;
+            }
+          }
+
+          const { error: createError, data: createdEvent } = await supabase
+            .from("events")
+            .insert([
+              {
+                event_name: title,
+                description,
+                event_date: eventDate,
+                repeat: repeatOption,
+                repeat_start: repeatOption !== "None" ? repeatStart : null,
+                repeat_end: repeatOption !== "None" ? repeatEnd : null,
+                visibility,
+                created_by: user?.id,
+                created_by_email: user?.email || null,
+              },
+            ])
+            .select();
+
+          if (createError) {
+            alert("Error creating event: " + createError.message);
             return;
           }
 
-          const eventDate = new Date(`${date}T${time}`);
-          const { error } = await supabase.from("events").insert([
-            {
-              event_name: title,
-              description,
-              event_date: eventDate,
-              repeat: repeatOption,
-              repeat_start: repeatOption !== "None" ? repeatStart : null,
-              repeat_end: repeatOption !== "None" ? repeatEnd : null,
-              visibility,
-              created_by: user?.id,
-              created_by_email: user?.email || null,
-            },
-          ]);
-          if (error) alert("Error creating event: " + error.message);
-          else {
-            alert("Event created successfully!");
-            e.target.reset();
-            setRepeat("None");
-            const { data: refetch } = await supabase
-              .from("events")
-              .select("id, event_name")
-              .order("event_name");
-            setEvents(refetch || []);
+          // Automatically RSVP the creator for the main event
+          const { data: existingRSVP, error: fetchRSVPError } = await supabase
+            .from("rsvps")
+            .select("*")
+            .eq("event_id", createdEvent[0].id)
+            .eq("user_id", user?.id)
+            .single();
+
+          if (fetchRSVPError && fetchRSVPError.code !== "PGRST116") {
+            // Handle unexpected errors (PGRST116 means no rows found, which is fine)
+            alert("Error checking existing RSVP: " + fetchRSVPError.message);
+            return;
           }
+
+          if (!existingRSVP) {
+            const { error: rsvpError } = await supabase.from("rsvps").insert([
+              {
+                event_id: createdEvent[0].id,
+                user_id: user?.id,
+                response: "going",
+              },
+            ]);
+
+            if (rsvpError) {
+              alert("Error RSVPing for the main event: " + rsvpError.message);
+              return;
+            }
+          }
+
+          if (repeatOption !== "None") {
+            const repeatStartDate = new Date(repeatStart);
+            const repeatEndDate = new Date(repeatEnd);
+            const clonedEvents = [];
+            const repeatInterval =
+              repeatOption === "Daily" ? 1 : repeatOption === "Weekly" ? 7 : 30; // Approximation for monthly
+
+            let currentDate = new Date(repeatStartDate);
+            while (currentDate <= repeatEndDate) {
+              if (currentDate > eventDate) {
+                const repeatDescription = `${description} (Repeats every ${
+                  repeatOption === "Daily"
+                    ? "day"
+                    : repeatOption === "Weekly"
+                    ? eventDate.toLocaleString("en-US", {
+                        weekday: "long",
+                      })
+                    : `${eventDate.getDate()}th of the month`
+                } at ${eventDate.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })})`;
+
+                clonedEvents.push({
+                  event_name: title,
+                  description: repeatDescription,
+                  event_date: new Date(currentDate),
+                  repeat: repeatOption,
+                  repeat_start: repeatOption !== "None" ? repeatStart : null,
+                  repeat_end: repeatOption !== "None" ? repeatEnd : null,
+                  visibility,
+                  created_by: user?.id,
+                  created_by_email: user?.email || null,
+                });
+              }
+
+              currentDate.setDate(currentDate.getDate() + repeatInterval);
+            }
+
+            const { error: cloneError, data: clonedEventData } = await supabase
+              .from("events")
+              .insert(clonedEvents)
+              .select();
+
+            if (cloneError) {
+              alert("Error creating repeating events: " + cloneError.message);
+              return;
+            }
+
+            // Automatically RSVP the creator for all repeating events
+            const rsvpEntries = clonedEventData.map((event) => ({
+              event_id: event.id,
+              user_id: user?.id,
+              response: "going",
+            }));
+
+            const { error: rsvpRepeatsError } = await supabase
+              .from("rsvps")
+              .insert(rsvpEntries);
+
+            if (rsvpRepeatsError) {
+              alert(
+                "Error RSVPing for repeating events: " +
+                  rsvpRepeatsError.message
+              );
+              return;
+            }
+          }
+
+          alert("Event created successfully!");
+          e.target.reset();
+          setRepeat("None");
         }}
         className="max-w-xl bg-gray-50 border border-gray-300 rounded-xl p-6 mx-auto"
       >
@@ -126,6 +252,7 @@ export default function AdminCreateEventPage() {
           />
         </div>
 
+        {/* Visibility */}
         <div className="mb-4">
           <label className="block font-medium mb-1">
             Who can see this event? <span className="text-red-600">*</span>
