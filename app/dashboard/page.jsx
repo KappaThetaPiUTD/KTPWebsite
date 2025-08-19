@@ -4,14 +4,10 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
-import { FaExclamationTriangle } from "react-icons/fa";
 import Sidebar from "../../components/Sidebar";
+import HoverCard from "../../components/HoverCard"; // Import the HoverCard component
 
 export default function Dashboard() {
-  useEffect(() => {
-    document.title = "Calendar - KTP UTD Dashboard";
-  }, []);
-
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -23,10 +19,9 @@ export default function Dashboard() {
   const [eventList, setEventList] = useState([]);
   const [strikeLogs, setStrikeLogs] = useState([]);
   const [rsvpStatus, setRsvpStatus] = useState({}); // ← you used this later
-  
-  // Profile completeness notification state
-  const [missingFields, setMissingFields] = useState([]);
-  const [showNotification, setShowNotification] = useState(false);
+  const [hoveredEvent, setHoveredEvent] = useState(null); // State for hovered event
+  const [calendarHoveredEvent, setCalendarHoveredEvent] = useState(null);
+  const [upcomingHoveredEvent, setUpcomingHoveredEvent] = useState(null);
 
   // Auth check
   useEffect(() => {
@@ -81,9 +76,13 @@ export default function Dashboard() {
       if (!user) return;
 
       try {
+        // Fetch events with the creator's name
         const { data: eventsData, error } = await supabase
           .from("events")
-          .select("id, event_name, event_date, visibility");
+          .select(
+            "id, event_name, event_date, visibility, description, created_by, users(name)"
+          )
+          .order("event_date", { ascending: true });
 
         if (error) {
           console.error("Error fetching events:", error);
@@ -91,63 +90,48 @@ export default function Dashboard() {
         }
 
         const formatted = {};
-        eventsData.forEach((event) => {
-          const key = new Date(event.event_date).toISOString().split("T")[0];
+        const formattedEventList = eventsData.map((event) => {
+          const eventDate = new Date(event.event_date); // Parse UTC date
+          const key = eventDate
+            .toLocaleString("en-US", {
+              timeZone: "America/Chicago", // Convert to CST
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            })
+            .split(",")[0]; // Format as YYYY-MM-DD
+
           if (!formatted[key]) formatted[key] = [];
           formatted[key].push({
             id: event.id,
             title: event.event_name,
-            time: new Date(event.event_date).toLocaleTimeString([], {
+            time: eventDate.toLocaleTimeString("en-US", {
+              timeZone: "America/Chicago", // Convert to CST
               hour: "2-digit",
               minute: "2-digit",
             }),
             visibility: event.visibility,
+            description: event.description,
+            created_by: event.created_by,
+            creator_name: event.users?.name || "Unknown", // Include creator's name
           });
+
+          // Return the event with creator_name for the eventList
+          return {
+            ...event,
+            creator_name: event.users?.name || "Unknown", // Include creator's name
+          };
         });
 
         setEvents(formatted);
-        setEventList(eventsData);
+        setEventList(formattedEventList); // Use the updated event list
       } catch (err) {
         console.error("Failed to fetch events:", err);
       }
     };
 
-  
     fetchEvents();
-  }, []);
-
-  // Check profile completeness
-  useEffect(() => {
-    const checkProfileCompleteness = async () => {
-      if (!user?.id) return;
-
-      try {
-        const { data: profileRow } = await supabase
-          .from("users")
-          .select("name, graduation_date, phone")
-          .eq("id", user.id)
-          .single();
-
-        if (profileRow) {
-          const missing = [];
-          if (!profileRow.name) missing.push("Full Name");
-          if (!profileRow.graduation_date) missing.push("Graduation Year");
-          if (!profileRow.phone) missing.push("Phone Number");
-          
-          setMissingFields(missing);
-          setShowNotification(missing.length > 0);
-        }
-      } catch (error) {
-        console.error("Error checking profile completeness:", error);
-      }
-    };
-
-    checkProfileCompleteness();
-  }, [user]);
-
-  const handleCompleteProfile = () => {
-    router.push("/dashboard/profile");
-  }; // Add user as dependency
+  }, [user]); // Add user as dependency
 
   // Fetch current user's RSVP status map
   useEffect(() => {
@@ -237,14 +221,27 @@ export default function Dashboard() {
 
   const getCalendarGrid = () => {
     const grid = [];
-    const offset = (firstDay + 6) % 7; // make Monday first
-    for (let i = 0; i < offset; i++) grid.push(null);
-    for (let day = 1; day <= daysInMonth; day++) grid.push(day);
+    const offset = (firstDay + 6) % 7; // Make Monday the first day of the week
+    for (let i = 0; i < offset; i++) {
+      grid.push(null); // Empty cells for days before the first of the month
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      grid.push(day);
+    }
     return grid;
   };
 
-  const formatDateKey = (y, m, d) =>
-    `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+  const formatDateKey = (y, m, d) => {
+    const date = new Date(y, m, d);
+    return date
+      .toLocaleString("en-US", {
+        timeZone: "America/Chicago",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .split(",")[0]; // Format as YYYY-MM-DD
+  };
 
   const handleDayClick = (day) => {
     const key = formatDateKey(year, month, day);
@@ -266,41 +263,6 @@ export default function Dashboard() {
       </aside>
 
       <main className="px-8 py-6 w-full">
-        {/* Profile Incomplete Notification */}
-        {user && showNotification && missingFields.length > 0 && (
-          <div className="mb-6 max-w-4xl mx-auto space-y-3">
-            {missingFields.map((field, index) => (
-              <div key={index} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 shadow-sm">
-                <div className="flex items-start space-x-3">
-                  <FaExclamationTriangle className="text-yellow-600 text-lg mt-0.5 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-yellow-800 mb-1">
-                      Please fill in your {field}
-                    </h3>
-                    <p className="text-sm text-yellow-700 mb-3">
-                      Your {field.toLowerCase()} is required to complete your profile and access all features.
-                    </p>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={handleCompleteProfile}
-                        className="bg-yellow-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-yellow-700 transition"
-                      >
-                        Complete Profile
-                      </button>
-                      <button
-                        onClick={() => setShowNotification(false)}
-                        className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs font-medium hover:bg-gray-300 transition"
-                      >
-                        Dismiss All
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
         <h1 className="text-xl font-bold mb-6">
           Welcome, {user?.user_metadata?.full_name || "Member"}
         </h1>
@@ -332,12 +294,6 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-7 text-xs">
               {getCalendarGrid().map((day, i) => {
-                const isToday =
-                  day &&
-                  today.getDate() === day &&
-                  today.getMonth() === month &&
-                  today.getFullYear() === year;
-
                 const dateKey = day ? formatDateKey(year, month, day) : null;
                 const hasEvent = dateKey ? events[dateKey]?.length : 0;
 
@@ -347,14 +303,16 @@ export default function Dashboard() {
                       <button
                         onClick={() => handleDayClick(day)}
                         className={`w-8 h-8 rounded-full mx-auto flex items-center justify-center relative transition ${
-                          isToday
+                          today.getDate() === day &&
+                          today.getMonth() === month &&
+                          today.getFullYear() === year
                             ? "bg-primary text-white"
                             : "hover:bg-gray-200 text-black"
                         }`}
                       >
                         {day}
                         {hasEvent ? (
-                          <span className="absolute left-1/2 bottom-0 w-1.5 h-1.5 bg-red-500 rounded-full transform -translate-x-1/2" />
+                          <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full" />
                         ) : null}
                       </button>
                     )}
@@ -368,10 +326,33 @@ export default function Dashboard() {
                 <h4 className="text-sm font-semibold mb-2 text-primary">
                   Events on {selectedDate}:
                 </h4>
+                {/* Calendar events list */}
                 <ul className="list-disc list-inside text-xs space-y-1">
-                  {events[selectedDate].map((evt, idx) => (
-                    <li key={idx}>
+                  {events[selectedDate]?.map((evt, idx) => (
+                    <li
+                      key={idx}
+                      className="relative"
+                      onMouseEnter={() => setCalendarHoveredEvent(evt)}
+                      onMouseLeave={() => setCalendarHoveredEvent(null)}
+                    >
                       {evt.time} - <strong>{evt.title}</strong>
+                      {calendarHoveredEvent?.id === evt.id && (
+                        <div
+                          className="absolute z-10 p-2 text-xs"
+                          style={{
+                            top: "100%", // Position below the card
+                            left: "25%",
+                            transform: "translateX(-50%)", // Center horizontally
+                            whiteSpace: "normal", // Prevent text cutoff
+                            maxWidth: "300px", // Limit width
+                          }}
+                        >
+                          <HoverCard
+                            description={calendarHoveredEvent.description}
+                            createdBy={calendarHoveredEvent.creator_name} // Use the creator_name field
+                          />
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -388,7 +369,7 @@ export default function Dashboard() {
           {/* Check-in card */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
             <h3 className="text-base font-semibold mb-3">
-              Check-In for Chapter -- Work in Progress
+              Check-In for Chapter
             </h3>
             <div className="flex justify-between items-center bg-white p-4 border rounded-lg mb-4">
               <div className="rounded-full bg-primary text-white px-4 py-2 text-xs font-semibold truncate max-w-[10rem] text-center">
@@ -448,78 +429,62 @@ export default function Dashboard() {
           </div>
         </div>
 
-{/* Upcoming events list */}
-<div className="mt-10 bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
-  <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
-  <ul className="text-sm space-y-2">
-    {eventList.length > 0 ? (
-      [...eventList]
-        .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
-        .slice(0, 5)
-        .map((event, idx) => {
-          const response = rsvpStatus[event.id]; // get user's RSVP for this event
-          return (
-            <li key={idx} className="flex items-center justify-between">
-              <span>
-                <span className="font-medium">
-                  {new Date(event.event_date).toLocaleString(undefined, {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>{" "}
-                — {event.event_name}
-              </span>
-
-              {response ? (
-                // ✅ Show RSVP status text if exists
-                <span
-                  className={`px-3 py-1 text-xs rounded-full font-semibold capitalize ${
-                    response === "going"
-                      ? "bg-green-100 text-green-700"
-                      : response === "maybe"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : response === "not going" || response === "no"
-                      ? "bg-red-100 text-red-700"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  {response}
-                </span>
-              ) : (
-                // ❌ No RSVP yet → show buttons
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => handleRSVP(event, "going")}
-                    className="bg-green-500 text-white px-2 py-1 text-xs rounded"
-                  >
-                    Going
-                  </button>
-                  <button
-                    onClick={() => handleRSVP(event, "maybe")}
-                    className="bg-yellow-500 text-white px-2 py-1 text-xs rounded"
-                  >
-                    Maybe
-                  </button>
-                  <button
-                    onClick={() => handleRSVP(event, "not going")}
-                    className="bg-red-500 text-white px-2 py-1 text-xs rounded"
-                  >
-                    No
-                  </button>
-                </div>
-              )}
-            </li>
-          );
-        })
-    ) : (
-      <p className="text-xs text-gray-500">No events available.</p>
-    )}
-  </ul>
-</div>
-
+        {/* Upcoming events list */}
+        <div className="mt-10 bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
+          <h3 className="text-base font-semibold mb-4">Upcoming Events</h3>
+          <ul className="text-sm space-y-2">
+            {eventList.length > 0 ? (
+              [...eventList]
+                .filter((event) => new Date(event.event_date) >= new Date()) // Exclude past events
+                .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))
+                .slice(0, 5)
+                .map((event, idx) => {
+                  const response = rsvpStatus[event.id]; // Get user's RSVP for this event
+                  return (
+                    <li
+                      key={idx}
+                      className="relative flex items-center justify-between"
+                      onMouseEnter={() => setUpcomingHoveredEvent(event)}
+                      onMouseLeave={() => setUpcomingHoveredEvent(null)}
+                    >
+                      <span>
+                        <span className="font-medium">
+                          {new Date(event.event_date).toLocaleString("en-US", {
+                            timeZone: "America/Chicago",
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>{" "}
+                        — {event.event_name}
+                      </span>
+                      {upcomingHoveredEvent?.id === event.id && (
+                        <div
+                          className="absolute z-10 p-2 text-xs"
+                          style={{
+                            top: "30%", // Position below the card
+                            left: "25%",
+                            transform: "translateX(-50%)", // Center horizontally
+                            whiteSpace: "normal", // Prevent text cutoff
+                            maxWidth: "300px", // Limit width
+                          }}
+                        >
+                          <HoverCard
+                            description={upcomingHoveredEvent.description}
+                            createdBy={upcomingHoveredEvent.creator_name} // Use the creator_name field
+                          />
+                        </div>
+                      )}
+                    </li>
+                  );
+                })
+            ) : (
+              <p className="text-xs text-gray-500">No events available.</p>
+            )}
+          </ul>
+        </div>
       </main>
     </div>
   );
