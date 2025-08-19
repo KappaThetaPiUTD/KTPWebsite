@@ -29,7 +29,7 @@ export default function LoginAccessPage() {
       console.log("📡 Making API request...");
       const requestStart = Date.now();
       
-      const response = await fetch("http://localhost:3000/api/verify-code", {
+  const response = await fetch("/api/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code, type: "login" }),
@@ -67,7 +67,7 @@ export default function LoginAccessPage() {
   };
   
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#1E3D2F] px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
         <h2 className="text-3xl font-bold text-center mb-4 text-black">
           Enter Access Code

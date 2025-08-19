@@ -5,6 +5,10 @@ import { supabase } from "../../../lib/supabase";
 import Sidebar from "../../../components/Sidebar";
 
 export default function MerchPage() {
+  useEffect(() => {
+    document.title = "Merch Store - KTP UTD Dashboard";
+  }, []);
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");

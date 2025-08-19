@@ -4,9 +4,14 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
+import { FaExclamationTriangle } from "react-icons/fa";
 import Sidebar from "../../components/Sidebar";
 
 export default function Dashboard() {
+  useEffect(() => {
+    document.title = "Calendar - KTP UTD Dashboard";
+  }, []);
+
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,6 +23,10 @@ export default function Dashboard() {
   const [eventList, setEventList] = useState([]);
   const [strikeLogs, setStrikeLogs] = useState([]);
   const [rsvpStatus, setRsvpStatus] = useState({}); // ← you used this later
+  
+  // Profile completeness notification state
+  const [missingFields, setMissingFields] = useState([]);
+  const [showNotification, setShowNotification] = useState(false);
 
   // Auth check
   useEffect(() => {
@@ -69,38 +78,76 @@ export default function Dashboard() {
   // Fetch events for calendar/list
   useEffect(() => {
     const fetchEvents = async () => {
-      if (!user) return; // Wait for user to be loaded
-      
+      if (!user) return;
+
       try {
-        // Send user ID to backend for filtering
-        const res = await fetch(`http://localhost:5001/api/events?user_id=${user.id}`);
-        const json = await res.json();
-        
-        if (json.data) {
-          const formatted = {};
-          json.data.forEach((event) => {
-            const key = new Date(event.event_date).toISOString().split("T")[0];
-            if (!formatted[key]) formatted[key] = [];
-            formatted[key].push({
-              id: event.id,
-              title: event.event_name,
-              time: new Date(event.event_date).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              }),
-              visibility: event.visibility
-            });
-          });
-          setEvents(formatted);
-          setEventList(json.data);
+        const { data: eventsData, error } = await supabase
+          .from("events")
+          .select("id, event_name, event_date, visibility");
+
+        if (error) {
+          console.error("Error fetching events:", error);
+          return;
         }
+
+        const formatted = {};
+        eventsData.forEach((event) => {
+          const key = new Date(event.event_date).toISOString().split("T")[0];
+          if (!formatted[key]) formatted[key] = [];
+          formatted[key].push({
+            id: event.id,
+            title: event.event_name,
+            time: new Date(event.event_date).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            visibility: event.visibility,
+          });
+        });
+
+        setEvents(formatted);
+        setEventList(eventsData);
       } catch (err) {
         console.error("Failed to fetch events:", err);
       }
     };
+
   
     fetchEvents();
-  }, [user]); // Add user as dependency
+  }, []);
+
+  // Check profile completeness
+  useEffect(() => {
+    const checkProfileCompleteness = async () => {
+      if (!user?.id) return;
+
+      try {
+        const { data: profileRow } = await supabase
+          .from("users")
+          .select("name, graduation_date, phone")
+          .eq("id", user.id)
+          .single();
+
+        if (profileRow) {
+          const missing = [];
+          if (!profileRow.name) missing.push("Full Name");
+          if (!profileRow.graduation_date) missing.push("Graduation Year");
+          if (!profileRow.phone) missing.push("Phone Number");
+          
+          setMissingFields(missing);
+          setShowNotification(missing.length > 0);
+        }
+      } catch (error) {
+        console.error("Error checking profile completeness:", error);
+      }
+    };
+
+    checkProfileCompleteness();
+  }, [user]);
+
+  const handleCompleteProfile = () => {
+    router.push("/dashboard/profile");
+  }; // Add user as dependency
 
   // Fetch current user's RSVP status map
   useEffect(() => {
@@ -219,6 +266,41 @@ export default function Dashboard() {
       </aside>
 
       <main className="px-8 py-6 w-full">
+        {/* Profile Incomplete Notification */}
+        {user && showNotification && missingFields.length > 0 && (
+          <div className="mb-6 max-w-4xl mx-auto space-y-3">
+            {missingFields.map((field, index) => (
+              <div key={index} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 shadow-sm">
+                <div className="flex items-start space-x-3">
+                  <FaExclamationTriangle className="text-yellow-600 text-lg mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium text-yellow-800 mb-1">
+                      Please fill in your {field}
+                    </h3>
+                    <p className="text-sm text-yellow-700 mb-3">
+                      Your {field.toLowerCase()} is required to complete your profile and access all features.
+                    </p>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handleCompleteProfile}
+                        className="bg-yellow-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-yellow-700 transition"
+                      >
+                        Complete Profile
+                      </button>
+                      <button
+                        onClick={() => setShowNotification(false)}
+                        className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs font-medium hover:bg-gray-300 transition"
+                      >
+                        Dismiss All
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <h1 className="text-xl font-bold mb-6">
           Welcome, {user?.user_metadata?.full_name || "Member"}
         </h1>
@@ -272,7 +354,7 @@ export default function Dashboard() {
                       >
                         {day}
                         {hasEvent ? (
-                          <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-red-500 rounded-full" />
+                          <span className="absolute left-1/2 bottom-0 w-1.5 h-1.5 bg-red-500 rounded-full transform -translate-x-1/2" />
                         ) : null}
                       </button>
                     )}
@@ -306,7 +388,7 @@ export default function Dashboard() {
           {/* Check-in card */}
           <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
             <h3 className="text-base font-semibold mb-3">
-              Check-In for Chapter
+              Check-In for Chapter -- Work in Progress
             </h3>
             <div className="flex justify-between items-center bg-white p-4 border rounded-lg mb-4">
               <div className="rounded-full bg-primary text-white px-4 py-2 text-xs font-semibold truncate max-w-[10rem] text-center">

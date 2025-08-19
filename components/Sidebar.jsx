@@ -2,17 +2,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Sidebar() {
   const router = useRouter();
+  const [openAdmin, setOpenAdmin] = useState(false);
 
   const navItems = [
     { label: "HOMEPAGE", path: "/dashboard" },
     { label: "ATTENDANCE RECORDS", path: "/dashboard/attendance" },
     { label: "MERCH", path: "/dashboard/merch" },
     { label: "EVENTS AND RSVP", path: "/dashboard/rsvp" },
+    { label: "FAMILY TREE", path: "/dashboard/family-tree" },
     { label: "PROFILE", path: "/dashboard/profile" },
-    { label: "ADMIN", path: "/dashboard/admin" },
   ];
 
   return (
@@ -27,6 +29,48 @@ export default function Sidebar() {
             {item.label}
           </button>
         ))}
+
+        {/* ADMIN parent */}
+        <div className="space-y-2">
+          <button
+            onClick={() => {
+              setOpenAdmin((v) => !v);
+              router.push("/dashboard/admin");
+            }}
+            className="block text-left text-base font-medium hover:text-primary hover:underline transition w-full"
+          >
+            ADMIN
+          </button>
+
+          {openAdmin && (
+            <div className="ml-3 space-y-2">
+              <button
+                onClick={() => router.push("/dashboard/admin/attendance")}
+                className="block text-left text-sm hover:text-primary transition"
+              >
+                • Attendance
+              </button>
+              <button
+                onClick={() => router.push("/dashboard/admin/rsvps")}
+                className="block text-left text-sm hover:text-primary transition"
+              >
+                • RSVPs
+              </button>
+              <button
+                onClick={() => router.push("/dashboard/admin/create-event")}
+                className="block text-left text-sm hover:text-primary transition"
+              >
+                • Create Event
+              </button>
+              <button
+                onClick={() => router.push("/dashboard/admin/strikes")}
+                className="block text-left text-sm hover:text-primary transition"
+              >
+                • Strikes
+              </button>
+            </div>
+          )}
+        </div>
       </nav>
     </aside>
   );
