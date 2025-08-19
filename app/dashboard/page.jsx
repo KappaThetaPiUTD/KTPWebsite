@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../lib/supabase";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
+import { FaExclamationTriangle } from "react-icons/fa";
 import Sidebar from "../../components/Sidebar";
 
 export default function Dashboard() {
@@ -22,6 +23,10 @@ export default function Dashboard() {
   const [eventList, setEventList] = useState([]);
   const [strikeLogs, setStrikeLogs] = useState([]);
   const [rsvpStatus, setRsvpStatus] = useState({}); // ← you used this later
+  
+  // Profile completeness notification state
+  const [missingFields, setMissingFields] = useState([]);
+  const [showNotification, setShowNotification] = useState(false);
 
   // Auth check
   useEffect(() => {
@@ -109,7 +114,40 @@ export default function Dashboard() {
 
   
     fetchEvents();
-  }, [user]); // Add user as dependency
+  }, []);
+
+  // Check profile completeness
+  useEffect(() => {
+    const checkProfileCompleteness = async () => {
+      if (!user?.id) return;
+
+      try {
+        const { data: profileRow } = await supabase
+          .from("users")
+          .select("name, graduation_date, phone")
+          .eq("id", user.id)
+          .single();
+
+        if (profileRow) {
+          const missing = [];
+          if (!profileRow.name) missing.push("Full Name");
+          if (!profileRow.graduation_date) missing.push("Graduation Year");
+          if (!profileRow.phone) missing.push("Phone Number");
+          
+          setMissingFields(missing);
+          setShowNotification(missing.length > 0);
+        }
+      } catch (error) {
+        console.error("Error checking profile completeness:", error);
+      }
+    };
+
+    checkProfileCompleteness();
+  }, [user]);
+
+  const handleCompleteProfile = () => {
+    router.push("/dashboard/profile");
+  }; // Add user as dependency
 
   // Fetch current user's RSVP status map
   useEffect(() => {
@@ -228,6 +266,41 @@ export default function Dashboard() {
       </aside>
 
       <main className="px-8 py-6 w-full">
+        {/* Profile Incomplete Notification */}
+        {user && showNotification && missingFields.length > 0 && (
+          <div className="mb-6 max-w-4xl mx-auto space-y-3">
+            {missingFields.map((field, index) => (
+              <div key={index} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 shadow-sm">
+                <div className="flex items-start space-x-3">
+                  <FaExclamationTriangle className="text-yellow-600 text-lg mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium text-yellow-800 mb-1">
+                      Please fill in your {field}
+                    </h3>
+                    <p className="text-sm text-yellow-700 mb-3">
+                      Your {field.toLowerCase()} is required to complete your profile and access all features.
+                    </p>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handleCompleteProfile}
+                        className="bg-yellow-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-yellow-700 transition"
+                      >
+                        Complete Profile
+                      </button>
+                      <button
+                        onClick={() => setShowNotification(false)}
+                        className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs font-medium hover:bg-gray-300 transition"
+                      >
+                        Dismiss All
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         <h1 className="text-xl font-bold mb-6">
           Welcome, {user?.user_metadata?.full_name || "Member"}
         </h1>
