@@ -112,26 +112,44 @@ export default function SignUp() {
 
   if (signUpSent) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white px-4 py-8 pt-24">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center">
-          <h2 className="text-2xl font-bold mb-6 text-[#1E3D2F]">
-            Check Your Email!
-          </h2>
-          <p className="text-black mb-4 text-center">
-            We've sent you a confirmation email at{" "}
-            <strong className="text-black">{email}</strong>
-          </p>
-          <p className="text-black text-center">
-            Click the link in the email to complete your sign up.
-          </p>
+      <div className="min-h-screen flex">
+        {/* Left side - Solid green panel */}
+        <div className="w-2/3 bg-[#1E3D2F] flex items-center justify-start px-16">
+        <h1 className="text-white text-5xl font-bold -mt-20" style={{fontFamily: 'Poppins, sans-serif'}}>
+            Welcome to the KTP Portal!
+          </h1>
+        </div>
+        
+        {/* Right side - Check email message */}
+        <div className="w-1/3 flex items-center justify-center bg-white px-8">
+          <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center">
+            <h2 className="text-2xl font-bold mb-6 text-[#1E3D2F]">
+              Check Your Email!
+            </h2>
+            <p className="text-black mb-4 text-center">
+              We've sent you a confirmation email at{" "}
+              <strong className="text-black">{email}</strong>
+            </p>
+            <p className="text-black text-center">
+              Click the link in the email to complete your sign up.
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white px-4 py-8 pt-24">
-      <div className="flex items-center justify-center">
+    <div className="min-h-screen flex">
+      {/* Left side - Solid green panel */}
+      <div className="w-2/3 bg-[#1E3D2F] flex items-center justify-start px-16">
+      <h1 className="text-white text-5xl font-bold -mt-20" style={{fontFamily: 'Poppins, sans-serif'}}>
+          Welcome to the KTP Portal!
+        </h1>
+      </div>
+      
+      {/* Right side - Sign up form */}
+      <div className="w-1/3 flex justify-center bg-white px-8 pt-32 pb-16">
         <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
           <h2 className="text-3xl font-bold text-center mb-6 text-black">
             Sign Up
