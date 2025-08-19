@@ -3,43 +3,66 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function AccessCodePage() {
+export default function SignupAccessPage() {
   const router = useRouter();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCodeSubmit = async () => {
+    if (isLoading) {
+      console.log("⏸️ Already processing, ignoring click");
+      return;
+    }
+
+    console.log("🚀 Submit clicked at:", new Date().toISOString());
+    setIsLoading(true);
     setError("");
   
     if (!code.trim()) {
       setError("Please enter the access code.");
+      setIsLoading(false);
       return;
     }
   
     try {
-      const response = await fetch("http://localhost:3000/api/verify-code", {
+      console.log("📡 Making API request...");
+      const requestStart = Date.now();
+      
+  const response = await fetch("/api/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, type: "signup" }),
       });
+
+      const requestTime = Date.now() - requestStart;
+      console.log(`⏱️ API request took: ${requestTime}ms`);
+      console.log("📊 Response status:", response.status);
+      console.log("📊 Response headers:", Object.fromEntries(response.headers.entries()));
   
       const result = await response.json();
+      console.log("📋 API result:", result);
   
       if (result.success) {
-        // Set cookie so middleware allows /sign-in
-        router.replace("/sign-in");
+        console.log("✅ API success, redirecting...");
+        
+        // Use window.location for more reliable navigation
+        window.location.href = "/sign-in"; // Signup redirects to sign-in page
+        
       } else {
+        console.log("❌ API failed:", result.message);
         setError(result.message || "Invalid code");
+        setIsLoading(false);
       }
     } catch (err) {
-      console.error("Error submitting code:", err);
+      console.error("💥 Error submitting code:", err);
       setError("Something went wrong. Please try again later.");
+      setIsLoading(false);
     }
   };
   
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#1E3D2F] px-4">
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
         <h2 className="text-3xl font-bold text-center mb-4 text-black">
           Enter Access Code
@@ -51,15 +74,22 @@ export default function AccessCodePage() {
           placeholder="Enter 8-digit code"
           value={code}
           onChange={(e) => setCode(e.target.value)}
+          disabled={isLoading}
+          onKeyDown={(e) => e.key === "Enter" && handleCodeSubmit()}
         />
 
         {error && <p className="text-red-500 mt-2">{error}</p>}
 
         <button
-          className="w-full bg-[#1E3D2F] text-white py-2 mt-4 rounded-lg hover:bg-[#162E24] transition"
+          className={`w-full py-2 mt-4 rounded-lg transition ${
+            isLoading 
+              ? "bg-gray-400 cursor-not-allowed" 
+              : "bg-[#1E3D2F] hover:bg-[#162E24] text-white"
+          }`}
           onClick={handleCodeSubmit}
+          disabled={isLoading}
         >
-          Submit
+          {isLoading ? "Processing..." : "Submit"}
         </button>
       </div>
     </div>

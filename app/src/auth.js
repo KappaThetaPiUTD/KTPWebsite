@@ -61,58 +61,59 @@ router.post("/login", async (req, res) => {
 router.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ message: "Email is required" });
-  
+
     try {
       const { data: user, error: userError } = await supabase
         .from("users")
         .select("id")
         .eq("email", email)
         .single();
-  
+
       if (userError || !user) {
         return res.status(404).json({ message: "User not found." });
       }
-  
+
       const resetToken = crypto.randomBytes(32).toString("hex");
       const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex");
-  
+
       console.log("Reset Token:", resetToken);
       console.log("Reset Token Hash:", resetTokenHash);
-  
+
       // Save the token hash in the password_resets table
       const { error: insertError } = await supabase.from("password_resets").upsert({
         user_id: user.id,
         reset_token: resetTokenHash,
         expires_at: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
       });
-  
+
       if (insertError) {
         console.error("Error inserting reset token:", insertError);
         return res.status(500).json({ message: "Failed to save reset token." });
       }
-  
+
       const resetLink = `https://ktputd.org/reset-password?token=${resetToken}&user_id=${user.id}`;
-  
+
       // Send email with reset link
-      const transporter = nodemailer.createTransport({
+      const transporter = nodemailer.createTransporter({
         service: "gmail",
         auth: {
           user: process.env.KTP_EMAIL,
           pass: process.env.KTP_EMAIL_PASSWORD,
         },
       });
-  
+
       await transporter.sendMail({
         from: process.env.KTP_EMAIL,
         to: email,
         subject: "Password Reset for KTP Portal",
         html: `<p>Click <a href="${resetLink}">here</a> to reset your password. This link is valid for 15 minutes.</p>`,
       });
-  
+
       res.status(200).json({ message: "Password reset email sent." });
     } catch (error) {
       console.error("Error during forgot-password:", error);
       res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
   });
-  
+
+module.exports = router;

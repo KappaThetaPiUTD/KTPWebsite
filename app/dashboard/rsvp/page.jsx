@@ -6,13 +6,17 @@ import Sidebar from "../../../components/Sidebar";
 import { useRouter } from "next/navigation";
 
 export default function RSVPPage() {
+  useEffect(() => {
+    document.title = "RSVP Events - KTP UTD Dashboard";
+  }, []);
+
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
   const [rsvpStatus, setRsvpStatus] = useState({});
 
-  // Check for user authentication
+  // Auth check
   useEffect(() => {
     const getUser = async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -26,50 +30,100 @@ export default function RSVPPage() {
     getUser();
   }, [router]);
 
+  // Fetch events + my RSVPs
   useEffect(() => {
     const fetchData = async () => {
-      const [{ data: events }, { data: rsvps }] = await Promise.all([
-        supabase.from("events").select("id, event_name"),
-        supabase.from("rsvps").select("event_id, response").eq("user_id", user.id),
-      ]);
-  
-      if (events) setEvents(events);
-  
-      const eventMap = {};
-      events?.forEach((e) => {
-        eventMap[e.id] = e.event_name;
-      });
-  
-      const statusMap = {};
-      events.forEach(({ id, event_name }) => {
-        const rsvp = rsvps?.find(r => r.event_id === id);
-        statusMap[event_name] = rsvp ? rsvp.response : "unanswered";
-      });
-      
-  
-      setRsvpStatus(statusMap);
+      if (!user) return;
+
+      try {
+        // Get user role first
+        const { data: userData, error: userError } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+
+        const userRole = userData?.role;
+
+        // Fetch all events with visibility
+        const { data: eventsData, error: eventsError } = await supabase
+          .from("events")
+          .select(
+            "id, event_name, event_date, visibility, repeat, repeat_start, repeat_end"
+          ) // Include repeat_start and repeat_end
+          .order("event_date", { ascending: true });
+
+        if (eventsError) {
+          console.error("Error fetching events:", eventsError);
+          return;
+        }
+
+        // Filter events based on user role
+        const filteredEvents =
+          eventsData?.filter((event) => {
+            // Executive members can see everything
+            if (userRole?.toLowerCase() === "executive") {
+              return true;
+            }
+
+            // If event has no visibility set, show it (backward compatibility)
+            if (!event.visibility) {
+              return true;
+            }
+
+            // Check visibility rules
+            switch (event.visibility) {
+              case "brothers_only":
+                return userRole?.toLowerCase() === "brother";
+              case "pledges_only":
+                return userRole?.toLowerCase() === "pledge";
+              case "brothers_and_pledges":
+                return ["brother", "pledge"].includes(userRole?.toLowerCase());
+              default:
+                return true;
+            }
+          }) || [];
+
+        // Fetch RSVPs for filtered events
+        const { data: rsvpsData } = await supabase
+          .from("rsvps")
+          .select("event_id, response")
+          .eq("user_id", user.id);
+
+        setEvents(filteredEvents);
+
+        const statusMap = {};
+        filteredEvents.forEach((e) => {
+          const myRSVP = rsvpsData?.find((r) => r.event_id === e.id);
+          statusMap[e.id] = myRSVP ? myRSVP.response : "unanswered";
+        });
+
+        setRsvpStatus(statusMap);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
-  
-    if (user) fetchData();
+
+    fetchData();
   }, [user]);
-  
 
-
-
+  // Handle RSVP action
   const handleRSVP = async (event, response) => {
     if (!user) return alert("Please log in first.");
-  
+
     const { error } = await supabase.from("rsvps").upsert(
-      [{
-        event_id: event.id,
-        event_title: event.event_name,
-        user_id: user.id,
-        response,
-      }],
+      [
+        {
+          event_id: event.id,
+          event_title: event.event_name,
+          user_id: user.id,
+          response,
+          response_updated_at: new Date().toISOString(),
+        },
+      ],
       { onConflict: ["event_id", "user_id"] }
     );
-    
-  
+
     if (error) {
       console.error("RSVP failed:", error.message);
       alert("RSVP failed.");
@@ -78,9 +132,11 @@ export default function RSVPPage() {
       alert(`RSVPed as "${response}" to ${event.event_name}!`);
     }
   };
-  
 
-  if (loading) return <div className="text-center mt-20 text-sm text-gray-500">Loading...</div>;
+  if (loading)
+    return (
+      <div className="text-center mt-20 text-sm text-gray-500">Loading...</div>
+    );
 
   return (
     <div className="min-h-screen bg-white pt-24 text-sm text-black font-['Public_Sans'] grid grid-cols-[220px_1fr]">
@@ -91,8 +147,10 @@ export default function RSVPPage() {
 
       {/* Main Content */}
       <main className="px-8 py-6 w-full">
-      <h1 className="text-2xl font-bold text-primary">EVENTS AND RSVP</h1>
-        <h2 className="text-lg font-semibold mb-6 text-primary">RSVP Summary</h2>
+        <h1 className="text-2xl font-bold text-primary">EVENTS AND RSVP</h1>
+        <h2 className="text-lg font-semibold mb-6 text-primary">
+          RSVP Summary
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {["going", "maybe", "not going", "unanswered"].map((category) => {
@@ -103,7 +161,7 @@ export default function RSVPPage() {
               unanswered: "Haven't Responded",
             };
             const filtered = Object.entries(rsvpStatus).filter(
-              ([_, status]) => (status || "unanswered") === category
+              ([, status]) => (status || "unanswered") === category
             );
 
             return (
@@ -111,10 +169,14 @@ export default function RSVPPage() {
                 <h3 className="text-sm font-bold mb-2">{labelMap[category]}</h3>
                 {filtered.length > 0 ? (
                   <ul className="text-xs space-y-1">
-                  {filtered.map(([eventId]) => {
-                    const event = events.find((e) => e.id === parseInt(eventId));
-                    return <li key={eventId}>{event?.event_name || eventId}</li>;
-                  })}
+                    {filtered.map(([eventId]) => {
+                      const event = events.find(
+                        (e) => e.id === parseInt(eventId)
+                      );
+                      return (
+                        <li key={eventId}>{event?.event_name || eventId}</li>
+                      );
+                    })}
                   </ul>
                 ) : (
                   <p className="text-xs text-gray-500">No events</p>
@@ -125,24 +187,61 @@ export default function RSVPPage() {
         </div>
 
         <div className="mt-10 bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-          <h2 className="text-lg font-semibold mb-4 text-primary">Update Your RSVP</h2>
+          <h2 className="text-lg font-semibold mb-4 text-primary">
+            Update Your RSVP
+          </h2>
           <div className="space-y-6">
-            {events.map((event, idx) => (
-              <div key={idx}>
-                <p className="font-medium text-sm mb-2">{event.event_name}</p>
-                <div className="flex flex-wrap gap-3">
-                {["going", "maybe", "not going"].map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => handleRSVP(event, status)}
-                    className={`px-4 py-1 text-white rounded-full text-xs font-semibold transition ${
-                      rsvpStatus[event.id] === status ? "bg-primary/80" : "bg-primary hover:bg-primary/90"
-                    }`}
-                  >
-                    {status}
-                  </button>
-                ))}
-
+            {events.map((event) => (
+              <div key={event.id}>
+                <p className="font-medium text-sm mb-1">{event.event_name}</p>
+                <p className="text-s text-stone-400 mb-1">
+                  {new Intl.DateTimeFormat("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  }).format(new Date(event.event_date))}
+                </p>
+                {event.repeat !== "none" &&
+                  event.repeat_start &&
+                  event.repeat_end && (
+                    <div className="text-xs text-blue-500 mb-2">
+                      <p>
+                        Repeats:{" "}
+                        {event.repeat.charAt(0).toUpperCase() +
+                          event.repeat.slice(1)}
+                      </p>
+                      <p>
+                        From:{" "}
+                        {new Intl.DateTimeFormat("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }).format(new Date(event.repeat_start))}
+                      </p>
+                      <p>
+                        To:{" "}
+                        {new Intl.DateTimeFormat("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }).format(new Date(event.repeat_end))}
+                      </p>
+                    </div>
+                  )}
+                <div className="mt-2 flex flex-wrap gap-3">
+                  {["going", "maybe", "not going"].map((status) => (
+                    <button
+                      key={status}
+                      onClick={() => handleRSVP(event, status)}
+                      className={`px-4 py-1 text-white rounded-full text-xs font-semibold transition ${
+                        rsvpStatus[event.id] === status
+                          ? "bg-primary/80"
+                          : "bg-primary hover:bg-primary/90"
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
                 </div>
               </div>
             ))}

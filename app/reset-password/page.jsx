@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function ResetPassword() {
   const supabase = createClientComponentClient();
@@ -14,6 +15,8 @@ export default function ResetPassword() {
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     const exchangeToken = async () => {
@@ -53,6 +56,11 @@ export default function ResetPassword() {
       return;
     }
 
+    if (newPassword.length < 6) {
+      setErrorMessage("Password must be at least 6 characters long.");
+      return;
+    }
+
     setLoading(true);
     setErrorMessage("");
 
@@ -62,11 +70,22 @@ export default function ResetPassword() {
       if (error) {
         setErrorMessage(error.message || "Password reset failed.");
       } else {
-        // ✅ Clear the cookie now that reset is done
+        // ✅ Clear the reset flow cookie
         document.cookie = "fromResetFlow=false; path=/; max-age=0;";
+        
+        // ✅ Sign out the user completely to clear the session
+        await supabase.auth.signOut();
+        
+        // ✅ Clear any other auth-related cookies
+        document.cookie.split(";").forEach(function(c) { 
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        });
 
         setSuccessMessage("Password reset successful! Redirecting to login...");
-        setTimeout(() => router.push("/login"), 2500);
+        setTimeout(() => {
+          // Force a full page reload to ensure clean state
+          window.location.href = "/login";
+        }, 2500);
       }
     } catch (err) {
       setErrorMessage("Something went wrong. Try again.");
@@ -96,32 +115,63 @@ export default function ResetPassword() {
             <label htmlFor="newPassword" className="block text-sm font-medium text-black">
               New Password
             </label>
-            <input
-              type="password"
-              id="newPassword"
-              className="mt-1 w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                id="newPassword"
+                className="mt-1 w-full px-4 py-2 pr-10 text-black bg-white border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="••••••••"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+              >
+                {showNewPassword ? (
+                  <FaEyeSlash className="h-4 w-4 text-black hover:text-gray-700" />
+                ) : (
+                  <FaEye className="h-4 w-4 text-black hover:text-gray-700" />
+                )}
+              </button>
+            </div>
           </div>
+          
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-black">
               Confirm Password
             </label>
-            <input
-              type="password"
-              id="confirmPassword"
-              className="mt-1 w-full px-4 py-2 text-black bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                className="mt-1 w-full px-4 py-2 pr-10 text-black bg-white border border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-green-700"
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? (
+                  <FaEyeSlash className="h-4 w-4 text-black hover:text-gray-700" />
+                ) : (
+                  <FaEye className="h-4 w-4 text-black hover:text-gray-700" />
+                )}
+              </button>
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition"
+            className="w-full bg-[#1E3D2F] text-white py-2 rounded-lg hover:bg-[#162E24] transition disabled:opacity-50"
             disabled={loading}
           >
             {loading ? "Resetting Password..." : "Reset Password"}
