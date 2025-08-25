@@ -122,7 +122,7 @@ export default function SignUp() {
         
         {/* Right side - Check email message */}
         <div className="w-1/3 flex items-center justify-center bg-white px-8">
-          <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200 text-center">
+          <div className="max-w-md w-full bg-white p-8">
             <h2 className="text-2xl font-bold mb-6 text-[#1E3D2F]">
               Check Your Email!
             </h2>
@@ -150,7 +150,7 @@ export default function SignUp() {
       
       {/* Right side - Sign up form */}
       <div className="w-1/3 flex justify-center bg-white px-8 pt-32 pb-16">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+      <div className="max-w-md w-full bg-white p-8">
           <h2 className="text-3xl font-bold text-center mb-6 text-black">
             Sign Up
           </h2>
