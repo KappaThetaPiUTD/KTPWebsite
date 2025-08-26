@@ -33,8 +33,8 @@ export default function AdminPage() {
         }
 
         setUser(authData.user);
-        setFullName(authData.user.user_metadata?.full_name || "");
-        setGradYear(authData.user.user_metadata?.grad_year || "");
+        // setFullName(authData.user.user_metadata?.full_name || "");
+        // setGradYear(authData.user.user_metadata?.grad_year || "");
 
         const { data: profileRow, error: profileError } = await supabase
           .from("users")
@@ -57,6 +57,9 @@ export default function AdminPage() {
           } else {
             setPhone("");
             setRole("guest");
+
+            setFullName(authData.user.user_metadata?.full_name || "");
+            setGradYear(authData.user.user_metadata?.grad_year || "");
           }
         } else {
           setPhone(profileRow.phone || "");
