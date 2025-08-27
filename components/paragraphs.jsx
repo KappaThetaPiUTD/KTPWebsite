@@ -51,13 +51,14 @@ const Letter = () => {
         and please don’t hesitate to reach out to our executive board through
         the contact page if you have any questions. You can also email us at{" "}
         <a
-          className="underline text-primary"
+          className="underline text-white hover:text-black"
           href="mailto:kappathetapiutd@gmail.com"
         >
           kappathetapiutd@gmail.com
         </a>{" "}
         with any concerns or inquiries.
       </p>
+
 
       <p className="text-sm sm:text-base lg:text-lg leading-relaxed">
         Dearest Regards, <br />
