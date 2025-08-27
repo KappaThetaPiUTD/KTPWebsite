@@ -54,7 +54,6 @@ const AboutUs = () => {
           </div>
         </div>
 
-
         {/* Pie Chart Section */}
         <div className="flex flex-row justify-center pt-10 pb-24">
           <PieChartComponent />
