@@ -229,12 +229,17 @@ export default function Login() {
 
           {/* OAuth Buttons */}
           <div className="space-y-3">
-            <button
-              onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg text-black hover:bg-gray-100 transition"
-            >
-              <FaGoogle className="mr-2 text-lg" /> Continue with Google
-            </button>
+          <button
+  onClick={handleGoogleLogin}
+  className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg text-black hover:bg-gray-100 transition"
+>
+  <img 
+    src="https://developers.google.com/identity/images/g-logo.png" 
+    alt="Google logo" 
+    className="mr-2 w-5 h-5"
+  /> 
+  Continue with Google
+</button>
             <button
               onClick={handleDiscordLogin}
               className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg text-black hover:bg-gray-100 transition"
