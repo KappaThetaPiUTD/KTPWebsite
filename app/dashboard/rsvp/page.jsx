@@ -135,9 +135,9 @@ export default function RSVPPage() {
 
     if (error) {
       console.error("RSVP failed:", error.message);
+      alert("RSVP failed. Please try again.");
     } else {
       setRsvpStatus((prev) => ({ ...prev, [event.id]: response }));
-      alert(`RSVPed as "${response}" to ${event.event_name}!`);
     }
   };
 
@@ -268,7 +268,7 @@ export default function RSVPPage() {
                       onClick={() => handleRSVP(event, status)}
                       className={`px-4 py-1.5 text-white rounded-full text-xs font-semibold transition mx-1 ${
                         rsvpStatus[event.id] === status
-                          ? "bg-primary/80"
+                          ? "bg-primary/15 text-primary/90"
                           : "bg-primary hover:bg-primary/90"
                       }`}
                     >
