@@ -120,7 +120,7 @@ export default function AdminCreateEventPage() {
               {
                 event_id: createdEvent[0].id,
                 user_id: user?.id,
-                response: "going",
+                response: "going", // Default RSVP status
               },
             ]);
 
@@ -135,11 +135,29 @@ export default function AdminCreateEventPage() {
             const repeatEndDate = new Date(repeatEnd);
             const clonedEvents = [];
             const repeatInterval =
-              repeatOption === "Daily" ? 1 : repeatOption === "Weekly" ? 7 : 30; // Approximation for monthly
+              repeatOption === "Daily"
+                ? 1
+                : repeatOption === "Weekly"
+                ? 7
+                : null;
 
             let currentDate = new Date(repeatStartDate);
+
+            // Helper function to compare dates (ignoring time)
+            const isSameDate = (date1, date2) =>
+              date1.getFullYear() === date2.getFullYear() &&
+              date1.getMonth() === date2.getMonth() &&
+              date1.getDate() === date2.getDate();
+
             while (currentDate <= repeatEndDate) {
-              if (currentDate > eventDate) {
+              // Skip the original event date by comparing only the date components
+              if (!isSameDate(currentDate, eventDate)) {
+                // Copy the time from the original event date to the currentDate
+                currentDate.setHours(eventDate.getHours());
+                currentDate.setMinutes(eventDate.getMinutes());
+                currentDate.setSeconds(eventDate.getSeconds());
+                currentDate.setMilliseconds(eventDate.getMilliseconds());
+
                 const repeatDescription = `${description} (Repeats every ${
                   repeatOption === "Daily"
                     ? "day"
@@ -166,7 +184,62 @@ export default function AdminCreateEventPage() {
                 });
               }
 
-              currentDate.setDate(currentDate.getDate() + repeatInterval);
+              if (repeatOption === "Daily" || repeatOption === "Weekly") {
+                currentDate.setDate(currentDate.getDate() + repeatInterval);
+              } else if (repeatOption === "Monthly") {
+                const previousDate = currentDate.getDate(); // Save the current day
+                currentDate.setMonth(currentDate.getMonth() + 1);
+
+                // Ensure the day remains consistent, adjusting for shorter months
+                if (currentDate.getDate() !== previousDate) {
+                  currentDate.setDate(
+                    Math.min(
+                      previousDate,
+                      new Date(
+                        currentDate.getFullYear(),
+                        currentDate.getMonth() + 1,
+                        0
+                      ).getDate()
+                    )
+                  );
+                }
+              }
+            }
+
+            // Ensure the last event is created if it falls on the repeatEndDate
+            if (
+              repeatOption === "Monthly" &&
+              isSameDate(
+                repeatEndDate,
+                new Date(
+                  eventDate.getFullYear(),
+                  eventDate.getMonth() + 2,
+                  eventDate.getDate()
+                )
+              )
+            ) {
+              repeatEndDate.setHours(eventDate.getHours());
+              repeatEndDate.setMinutes(eventDate.getMinutes());
+              repeatEndDate.setSeconds(eventDate.getSeconds());
+              repeatEndDate.setMilliseconds(eventDate.getMilliseconds());
+
+              clonedEvents.push({
+                event_name: title,
+                description: `${description} (Repeats every ${eventDate.getDate()}th of the month at ${eventDate.toLocaleTimeString(
+                  [],
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                )})`,
+                event_date: new Date(repeatEndDate),
+                repeat: repeatOption,
+                repeat_start: repeatOption !== "None" ? repeatStart : null,
+                repeat_end: repeatOption !== "None" ? repeatEnd : null,
+                visibility,
+                created_by: user?.id,
+                created_by_email: user?.email || null,
+              });
             }
 
             const { error: cloneError, data: clonedEventData } = await supabase
@@ -180,22 +253,41 @@ export default function AdminCreateEventPage() {
             }
 
             // Automatically RSVP the creator for all repeating events
-            const rsvpEntries = clonedEventData.map((event) => ({
-              event_id: event.id,
-              user_id: user?.id,
-              response: "going",
-            }));
+            for (const event of clonedEventData) {
+              const { data: existingRSVP, error: fetchRSVPError } =
+                await supabase
+                  .from("rsvps")
+                  .select("*")
+                  .eq("event_id", event.id)
+                  .eq("user_id", user?.id)
+                  .single();
 
-            const { error: rsvpRepeatsError } = await supabase
-              .from("rsvps")
-              .insert(rsvpEntries);
+              if (fetchRSVPError && fetchRSVPError.code !== "PGRST116") {
+                // Handle unexpected errors (PGRST116 means no rows found, which is fine)
+                alert(
+                  "Error checking existing RSVP: " + fetchRSVPError.message
+                );
+                return;
+              }
 
-            if (rsvpRepeatsError) {
-              alert(
-                "Error RSVPing for repeating events: " +
-                  rsvpRepeatsError.message
-              );
-              return;
+              if (!existingRSVP) {
+                const { error: rsvpError } = await supabase
+                  .from("rsvps")
+                  .insert([
+                    {
+                      event_id: event.id,
+                      user_id: user?.id,
+                      response: "going",
+                    },
+                  ]);
+
+                if (rsvpError) {
+                  alert(
+                    "Error RSVPing for repeating events: " + rsvpError.message
+                  );
+                  return;
+                }
+              }
             }
           }
 

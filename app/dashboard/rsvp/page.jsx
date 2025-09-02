@@ -125,18 +125,16 @@ export default function RSVPPage() {
       [
         {
           event_id: event.id,
-          event_title: event.event_name,
           user_id: user.id,
           response,
           response_updated_at: new Date().toISOString(),
         },
       ],
-      { onConflict: ["event_id", "user_id"] }
+      { onConflict: ["event_id", "user_id"] } // Ensure conflict resolution is based on event_id and user_id
     );
 
     if (error) {
       console.error("RSVP failed:", error.message);
-      alert("RSVP failed.");
     } else {
       setRsvpStatus((prev) => ({ ...prev, [event.id]: response }));
       alert(`RSVPed as "${response}" to ${event.event_name}!`);
