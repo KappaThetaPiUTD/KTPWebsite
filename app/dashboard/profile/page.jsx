@@ -33,8 +33,6 @@ export default function AdminPage() {
         }
 
         setUser(authData.user);
-        setFullName(authData.user.user_metadata?.full_name || "");
-        setGradYear(authData.user.user_metadata?.grad_year || "");
 
         const { data: profileRow, error: profileError } = await supabase
           .from("users")
@@ -48,7 +46,6 @@ export default function AdminPage() {
 
         if (!profileRow) {
           console.warn("No profile found for user ID:", userId);
-          // Auto-create blank profile row for this user
           const { error: insertError } = await supabase
             .from("users")
             .insert({ id: userId, phone: "", role: "guest" });
@@ -57,6 +54,8 @@ export default function AdminPage() {
           } else {
             setPhone("");
             setRole("guest");
+            setFullName(authData.user.user_metadata?.full_name || "");
+            setGradYear(authData.user.user_metadata?.grad_year || "");
           }
         } else {
           setPhone(profileRow.phone || "");
@@ -83,8 +82,6 @@ export default function AdminPage() {
     }
     console.log("Updating user with id:", userId);
 
-    // Use server-side API to update users table (service role key)
-    // Note: We're not updating auth metadata to avoid triggering role reset
     const gradYearNum = gradYear ? Number(gradYear) : null;
     try {
       const resp = await fetch('/api/profile/update', {
@@ -96,7 +93,6 @@ export default function AdminPage() {
       console.log('Server profile update response:', json);
       if (!resp.ok) {
         if (json.errors) {
-          // Handle multiple validation errors
           setFieldErrors(json.errors);
           setStatusMessage({ text: 'Please correct the errors below', type: 'error' });
         } else {
@@ -104,7 +100,6 @@ export default function AdminPage() {
         }
         return;
       }
-      // Clear any existing field errors on successful save
       setFieldErrors({});
     } catch (err) {
       console.error('Network error calling profile update API:', err);
@@ -112,7 +107,6 @@ export default function AdminPage() {
       return;
     }
 
-    // Re-fetch user and profile data to update UI
     try {
       setLoading(true);
       const { data: authData, error: authFetchError } = await supabase.auth.getUser();
@@ -126,7 +120,6 @@ export default function AdminPage() {
       }
       setUser(authData.user);
       
-      // Get updated data from users table (this is the source of truth)
       const { data: profileRow, error: fetchError } = await supabase
         .from("users")
         .select("name, graduation_date, role, phone")
@@ -134,7 +127,6 @@ export default function AdminPage() {
         .single();
       console.log("Fetched profile after update:", profileRow, fetchError);
       
-      // Update state with database values
       setPhone(profileRow?.phone || "");
       setRole(profileRow?.role || "");
       setFullName(profileRow?.name || "");
@@ -145,9 +137,8 @@ export default function AdminPage() {
       setLoading(false);
       setIsEditing(false);
       setStatusMessage({ text: "Profile updated successfully!", type: "success" });
-      // Scroll to profile view for immediate feedback
       setTimeout(() => {
-        const profileSection = document.querySelector('.bg-white.border.rounded-xl.shadow-sm.max-w-xl');
+        const profileSection = document.querySelector('.bg-white.border.rounded-2xl.shadow-lg.max-w-2xl');
         if (profileSection) profileSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 100);
     }
@@ -186,7 +177,7 @@ export default function AdminPage() {
         <Sidebar />
       </aside>
 
-      <main className="px-8 py-6 w-full">
+      <main className="px-8 py-6 w-full flex flex-col items-center">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-bold text-[#1E3D2F]">Profile</h1>
         </div>
@@ -202,7 +193,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg max-w-2xl mx-auto overflow-hidden relative">
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg w-full max-w-md sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-6xl mx-auto overflow-hidden relative">
           {/* Edit Button - Floating in top right of card */}
           <button
             className="absolute top-4 right-4 z-10 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow border border-gray-200"
