@@ -4,8 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { supabase } from "../../../../lib/supabase";
 
-/** Excel‑style header filter (chevron opens a small floating menu) */
-
+/** Excel‑style header filter (popover rendered to body to avoid clipping) */
 function HeaderFilter({
   label,
   value,
@@ -98,7 +97,6 @@ function HeaderFilter({
               zIndex: 9999,
             }}
             className="w-48 bg-white text-black border border-gray-300 rounded shadow-lg p-2"
-            // prevent outside-click handler from firing when interacting inside
             onPointerDown={(e) => e.stopPropagation()}
           >
             <label className="text-xs text-gray-600 block mb-1">
@@ -149,6 +147,17 @@ export default function AdminRsvpsPage() {
   const [selectedEventId, setSelectedEventId] = useState("all");
   const [selectedResponse, setSelectedResponse] = useState("all");
   const [nameFilter, setNameFilter] = useState("all");
+
+  // NEW: clear-all helper and active state
+  const clearAllFilters = () => {
+    setSelectedEventId("all");
+    setSelectedResponse("all");
+    setNameFilter("all");
+  };
+  const anyFilterActive =
+    selectedEventId !== "all" ||
+    selectedResponse !== "all" ||
+    nameFilter !== "all";
 
   useEffect(() => {
     (async () => {
@@ -277,9 +286,26 @@ export default function AdminRsvpsPage() {
     <section>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-semibold text-primary">RSVP Submissions</h2>
-        <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-          Showing {rsvpCount} RSVP{rsvpCount === 1 ? "" : "s"}
-        </span>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={clearAllFilters}
+            disabled={!anyFilterActive}
+            className={`px-3 py-1 rounded border text-sm transition ${
+              anyFilterActive
+                ? "border-gray-300 bg-white hover:bg-gray-50 text-gray-800"
+                : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
+            }`}
+            title="Reset all filters"
+          >
+            Clear filters
+          </button>
+
+          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+            Showing {rsvpCount} RSVP{rsvpCount === 1 ? "" : "s"}
+          </span>
+        </div>
       </div>
 
       <div className="overflow-x-auto border border-gray-300 rounded-lg">
@@ -329,7 +355,6 @@ export default function AdminRsvpsPage() {
                   <td className="px-4 py-2">
                     {entry.user_name ||
                       (() => {
-                        // display the same fallback we used to build options
                         const prefix =
                           (entry.user_email || "").split("@")[0] || "";
                         return (
