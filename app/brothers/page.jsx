@@ -1,6 +1,6 @@
 import Image from "next/image";
 import React from "react";
-import { FaLinkedin } from "react-icons/fa"; 
+import { FaLinkedin } from "react-icons/fa";
 
 export const metadata = {
   title: "Kappa Theta Pi UTD - Brothers",
@@ -9,60 +9,59 @@ export const metadata = {
 
 const executiveBoardMembers = [
   {
-    name: "Afsar Arif",
+    name: "Mohamed Afsar Harsath Arif",
     position: "President",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683145/image_3_u0bo8p.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276761/IMG_6821_ynqfbt.jpg",
     linkedin: "https://www.linkedin.com/in/afsararif",
   },
   {
     name: "Ethan Lobo",
     position: "VP of Internal Affairs",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683155/EthanLoboHeadshot_f7pcoz.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276762/IMG_6827_pnkd2t.jpg",
     linkedin: "https://www.linkedin.com/in/ethanlobo",
   },
   {
     name: "Ajay Kumaran",
     position: "VP of External Affairs",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683119/image_10_misxan.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276806/P10238171_npaldi.jpg",
     linkedin: "https://www.linkedin.com/in/ajay-kumaran",
   },
   {
     name: "Mekha Mathew",
     position: "VP of Social Engagement",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683113/image_21_gig0ha.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276796/P1023770_jtxnfl.jpg",
     linkedin: "https://www.linkedin.com/in/mekha-mathew-7402b4275",
   },
   {
     name: "Mansi Cherukupally",
     position: "VP of Finance",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683085/MansiHeadshot_kyrcjw.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276747/IMG_4233_troejc.jpg",
     linkedin: "https://www.linkedin.com/in/mansi-cherukupally-b399a6214/",
+  },
+  {
+    name: "Aashay Vishwakarma",
+    position: "VP of Professional Development",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276762/IMG_6826_odqf9u.jpg",
+    linkedin: "https://www.linkedin.com/in/aashayvishwakarma/",
   },
   {
     name: "Venkat Sai Eshwar Varma Sagi",
     position: "VP of Technology",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683082/VenkatHeadshot_n9o2km.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276762/IMG_6825_khcqhn.jpg",
     linkedin: "https://www.linkedin.com/in/venkat-sagi/",
+  },
+  {
+    name: "Kavinram Senthil",
+    position: "VP of Membership",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276796/P1023742_gqdojj.jpg",
+    linkedin: "https://www.linkedin.com/in/kavinram-senthil-640349249/",
   },
   {
     name: "Vadhanaa Venkatakrishnan",
     position: "VP of Marketing",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683116/image_17_appdpu.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276762/IMG_6828_gezoow.jpg",
     linkedin: "https://www.linkedin.com/in/vadhanaavenkatakrishnan",
-  },  
-  {
-    name: "Kavinram Senthil",
-    position: "VP of Membership",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683144/image_6_kpccke.png",
-    linkedin: "https://www.linkedin.com/in/kavinram-senthil-640349249/",
   },
-  {
-    name: "Aashay Vishwakarma",
-    position: "Director of Professional Development",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683161/AashayHeadshot_n84axq.png",
-    linkedin: "https://www.linkedin.com/in/aashayvishwakarma/",
-  },
-
 ];
 
 const directorBoardMembers = [
@@ -88,21 +87,21 @@ const directorBoardMembers = [
     name: "Ariha Kothari",
     position: "Director of Standards",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Ariha's image link
-    linkedin: "", // Add Ariha's LinkedIn link
+    linkedin: "https://www.linkedin.com/in/arihak/",
   },
   {
     name: "Praneel Sreepada",
     position: "Director of Recruitment",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Praneel's image link
-    linkedin: "", // Add Praneel's LinkedIn link
+    linkedin: "https://www.linkedin.com/in/praneelsreepada/",
   },
   {
     name: "Abhinav Atluri",
     position: "Director of Industry Relations",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Abhi's image link
-    linkedin: "", // Add Abhi's LinkedIn link
+    linkedin: "http://linkedin.com/in/abhinav-atluri/",
   },
-  
+
   {
     name: "Noel Emmanuel",
     position: "Director of Career Development",
@@ -113,7 +112,7 @@ const directorBoardMembers = [
     name: "Ruthvik Penmatsa",
     position: "Director of Finance",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Ruthvik's image link
-    linkedin: "https://www.linkedin.com/in/ruthvikpenmatsa/", // Add Ruthvik's LinkedIn link
+    linkedin: "https://www.linkedin.com/in/ruthvikpenmatsa/",
   },
   {
     name: "Vignesh Selvam",
@@ -125,7 +124,7 @@ const directorBoardMembers = [
     name: "Arnav Jain",
     position: "Director of Web Systems",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Arnav's image link
-    linkedin: "", // Add Arnav's LinkedIn link
+    linkedin: "https://www.linkedin.com/in/arnavjainpro/",
   },
   {
     name: "Arya Thombre",
@@ -135,9 +134,7 @@ const directorBoardMembers = [
   },
 ];
 
-
 const activeMembers = [
-
   {
     name: "Itbaan Alam",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683119/image_11_uatklb.png",
@@ -187,17 +184,17 @@ const activeMembers = [
     name: "Aadhav Manimurugan",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683127/image_9_cmr6km.png",
     linkedin: "http://linkedin.com/in/aadhav-",
-  },  
+  },
   {
     name: "Bhavya Rayankula",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683116/image_16_oag2bh.png",
     linkedin: "http://www.linkedin.com/in/bhavya-rayankula-37219a1b9",
-  },  
+  },
   {
     name: "Shreyas Ankolekar",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683141/image_7_jjoa5d.png",
     linkedin: "https://www.linkedin.com/in/shreyas-ankolekar-b55851325/",
-  },  
+  },
   {
     name: "Mohammed Faadil Khan",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683151/FaadilHeadshot_t5xhvb.png",
@@ -219,11 +216,11 @@ const activeMembers = [
     linkedin: "",
   },
   {
-     name: "Tariq Mahamid",
-     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716144869/Brother%20Page/Executive%20Board/Tariq_mxviux.jpg",
-     linkedin: "https://www.linkedin.com/in/tariq-mahamid-b316a520a/",
-   },
-   {
+    name: "Tariq Mahamid",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716144869/Brother%20Page/Executive%20Board/Tariq_mxviux.jpg",
+    linkedin: "https://www.linkedin.com/in/tariq-mahamid-b316a520a/",
+  },
+  {
     name: "Simon Beyene",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Simon's image URL
     linkedin: "", // Add Simon's LinkedIn URL
@@ -231,59 +228,50 @@ const activeMembers = [
   {
     name: "Sahaj Dahal",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Sahaj's image URL
-    linkedin: "", // Add Sahaj's LinkedIn URL
+    linkedin: "https://www.linkedin.com/in/sahaj-dahal-239433240/",
   },
   {
     name: "Sachin Selvakumar",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Sachin's image URL
-    linkedin: "", // Add Sachin's LinkedIn URL
+    linkedin: "https://www.linkedin.com/in/sachinselvakumar24/",
   },
   {
     name: "Rishi Ramesh",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Rishi's image URL
-    linkedin: "", // Add Rishi's LinkedIn URL
+    linkedin: "https://www.linkedin.com/in/seyyonrishiramesh/",
   },
   {
     name: "Jeevika Balaji",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Jeevika's image URL
-    linkedin: "", // Add Jeevika's LinkedIn URL
+    linkedin: "https://www.linkedin.com/in/jeevika-balaji-a71b67240/",
   },
   {
     name: "Ayush Velhal",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Ayush's image URL
-    linkedin: "", // Add Ayush's LinkedIn URL
+    linkedin: "https://www.linkedin.com/in/ayush-velhal/",
   },
   {
     name: "Ayaan Khan",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Ayaan's image URL
-    linkedin: "", // Add Ayaan's LinkedIn URL
+    linkedin: "https://www.linkedin.com/in/ayaan-r-khan/",
   },
   {
     name: "Anvi Siddabhattuni",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Anvi's image URL
-    linkedin: "", // Add Anvi's LinkedIn URL
+    linkedin: "https://www.linkedin.com/in/anvi-siddabhattuni/",
   },
-  {
-    name: "Aditya Dixit",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Adi's image URL
-    linkedin: "", // Add Adi's LinkedIn URL
-  },
+
   {
     name: "Aaron Gheevarghese",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Aaron's image URL
-    linkedin: "", // Add Aaron's LinkedIn URL
+    linkedin: "https://www.linkedin.com/in/aarongheevarghese/",
   },
-  {
-    name: "Abdul Qazzafi",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Aaron's image URL
-    linkedin: "", // Add Aaron's LinkedIn URL
-  },
+
   {
     name: "Krish Patel",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Aaron's image URL
-    linkedin: "", // Add Aaron's LinkedIn URL
+    linkedin: "https://www.linkedin.com/in/krish-patel10/",
   },
-  
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const alphaClassMembers = [
@@ -294,7 +282,7 @@ const alphaClassMembers = [
   "Raghav Pillai",
   "Manasa Paruchuri",
   "Sanjana Shangle",
-  "Yeshas Nath"
+  "Yeshas Nath",
 ].sort((a, b) => a.localeCompare(b));
 
 const betaClassMembers = [
@@ -332,30 +320,30 @@ const gammaClassMembers = [
   "Shreyas Ankolekar",
   "Vadhanna Venkatakrishnan",
   "Vignesh Selvam",
-  "Venkat Sai Eshwar Varma Sagi"
+  "Venkat Sai Eshwar Varma Sagi",
 ].sort((a, b) => a.localeCompare(b));
 
 const deltaClassMembers = [
- "Aaron Gheevarghese",
- "Abdul Qazzafi",
- "Abhinav Atluri",
- "Aditya Dixit",
- "Anvi Siddabhattuni",
- "Ariha Kothari",
- "Arnav Jain",
- "Ayaan Khan",
- "Ayush Velhal",
- "Jeevika Balaji",
- "Joel Philipose",
- "Krish Patel",
- "Nihita Soma",
- "Praneel Sreepada",
- "Rahil Islam",
- "Rishi Ramesh",
- "Ruthvik Penmatsa",
- "Sachin Selvakumar",
- "Sahaj Dahal",
- "Simon Beyene"
+  "Aaron Gheevarghese",
+  "Abdul Qazzafi",
+  "Abhinav Atluri",
+  "Aditya Dixit",
+  "Anvi Siddabhattuni",
+  "Ariha Kothari",
+  "Arnav Jain",
+  "Ayaan Khan",
+  "Ayush Velhal",
+  "Jeevika Balaji",
+  "Joel Philipose",
+  "Krish Patel",
+  "Nihita Soma",
+  "Praneel Sreepada",
+  "Rahil Islam",
+  "Rishi Ramesh",
+  "Ruthvik Penmatsa",
+  "Sachin Selvakumar",
+  "Sahaj Dahal",
+  "Simon Beyene",
 ].sort((a, b) => a.localeCompare(b));
 
 const splitIntoColumns = (arr, columns) => {
@@ -389,7 +377,8 @@ const Brother = () => {
           >
             <div className="relative w-40 h-40 mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
-                src={member.src} class="center"
+                src={member.src}
+                class="center"
                 alt={`${member.name} - ${member.position}`}
                 fill
                 className="object-cover"
@@ -421,7 +410,8 @@ const Brother = () => {
           >
             <div className="relative w-40 h-40 mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
-                src={member.src} class="center"
+                src={member.src}
+                class="center"
                 alt={`${member.name} - ${member.position}`}
                 fill
                 className="object-cover"

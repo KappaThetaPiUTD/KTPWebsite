@@ -6,7 +6,9 @@ const Portrait = () => {
       <div className="text-center">
         <Image
           className="border-[2px] text-gray mr-0 sm:mr-[135px] aspect-square object-scale-down"
-          src={"https://res.cloudinary.com/dha44tosd/image/upload/v1740683145/image_3_u0bo8p.png"}
+          src={
+            "https://res.cloudinary.com/dha44tosd/image/upload/v1740683145/image_3_u0bo8p.png"
+          }
           alt="Afsar Arif KTP President"
           width={720}
           height={428}

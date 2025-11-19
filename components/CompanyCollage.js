@@ -157,6 +157,34 @@ const CompanyCollage = () => {
       src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741213657/Brother%20Page/Companies/USAA-Emblem_qxyr11.png",
       alt: "USAA",
     },
+    {
+     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1747429844/Brother%20Page/Companies/pepsico-logo-removebg-preview_nlaymk.png",
+     alt: "PepsiCo",
+    },
+    {
+     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1747430073/Brother%20Page/Companies/Cognizant-Logo_q3u8qv.png",
+     alt: "Cognizant",
+    },
+    {
+     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1747432025/Brother%20Page/Companies/MetroScientific_gz3tpv.png",
+     alt: "MetroScientific",
+    },
+    {
+     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1747432126/Brother%20Page/Companies/tcs-logo_ijpgjg.png",
+     alt: "Tata Consulting Services",
+    },
+    {
+     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1747432384/Brother%20Page/Companies/ruvati-logo_atqhqp.png",
+     alt: "Ruvati",
+    },
+    {
+     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1747432951/Brother%20Page/Companies/oceaneering-logo_isteen.png",
+     alt: "Oceaneering",
+    },
+    {
+     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1747432938/Brother%20Page/Companies/l_t-logo_lagqrp.png",
+     alt: "L&T Construction",
+    },
   ];
 
   const rows = 3;
