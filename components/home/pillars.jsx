@@ -25,7 +25,7 @@ const Pillars = () => {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 bg-gray-50">
+    <div className="flex flex-col items-center justify-center p-8 bg-white">
       <h2 className="text-header2 font-bold text-black mb-6">Our Core Values</h2>
       <div className="grid grid-cols-1 md:grid-cols-1 gap-4 w-full max-w-4xl">
         {pillarsData.map((pillar, index) => (

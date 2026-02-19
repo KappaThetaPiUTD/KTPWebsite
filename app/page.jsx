@@ -1,8 +1,11 @@
+import dynamic from "next/dynamic";
 import Hero from "../components/home/hero";
 import WhoWeIs from "../components/home/who-we-is";
 import Pillars from "../components/home/pillars";
-import CompanyCollage from "../components/CompanyCollage";
 
+const CompanyCollage = dynamic(() => import("../components/CompanyCollage"), {
+  loading: () => <div className="w-screen h-64 bg-white animate-pulse" />,
+});
 
 export const metadata = {
   title: "Kappa Theta Pi UTD - Home",
@@ -15,7 +18,7 @@ export default function Home() {
       <Hero />
       <WhoWeIs />
       <Pillars />
-      <CompanyCollage/>
+      <CompanyCollage />
     </div>
   );
 }

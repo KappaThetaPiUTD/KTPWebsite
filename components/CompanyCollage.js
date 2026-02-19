@@ -213,6 +213,8 @@ const CompanyCollage = () => {
                       src={logo.src}
                       alt={logo.alt}
                       fill
+                      sizes="128px"
+                      loading="lazy"
                       style={{ objectFit: "contain" }}
                       className="object-contain"
                     />

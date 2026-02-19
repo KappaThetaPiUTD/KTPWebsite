@@ -16,8 +16,8 @@
 
 @layer utilities {
   html {
-    background-color: backg;
-    color: white;
+    background-color: #ffffff;
+    color: #000000;
   }
 
   .text-shadow {
