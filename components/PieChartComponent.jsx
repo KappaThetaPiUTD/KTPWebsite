@@ -13,18 +13,18 @@ const dataAcademicYear = {
       label: " Students",
       data: [5, 8, 20, 16, 1],
       backgroundColor: [
-        "#d3d0cb",
-        "#393e41",
-        "#1e2019",
-        "#374526",
-        "#04b43b",
+        "#f5f5f5",
+        "#000000",
+        "#00542C",
+        "#5a5a5a",
+        "#2d8b57",
       ],
       hoverBackgroundColor: [
-        "#d3d0cb",
-        "#393e41",
-        "#1e2019",
-        "#374526",
-        "#04b43b",
+        "#f5f5f5",
+        "#000000",
+        "#00542C",
+        "#5a5a5a",
+        "#2d8b57",
       ],
     },
   ],
@@ -36,7 +36,6 @@ const dataMajors = {
     "Computer Information System and Technology",
     "Software Engineering",
     "Data Science",
-    "Business Analytics",
     "Business Administration",
     "Finance",
     "Cognitive Science",
@@ -46,30 +45,28 @@ const dataMajors = {
   datasets: [
     {
       label: " Students",
-      data: [33, 6, 3, 5, 0, 2, 2, 1, 1, 1],
+      data: [33, 6, 3, 5, 2, 2, 1, 1, 1],
       backgroundColor: [
-        "#04b43b",
-        "#374526",
-        "#1e2019",
-        "#393e41",
-        "#d3d0cb",
-        "#a9927d",
-        "#5F8237",
-        "#9ED29E",
-        "#F2F4F3",
-        "#BFCCAF",
+        "#00542C",
+        "#000000",
+        "#5a5a5a",
+        "#2d8b57",
+        "#f5f5f5",
+        "#1a5c35",
+        "#c5e8d3",
+        "#8a8a8a",
+        "#7fb892",
       ],
       hoverBackgroundColor: [
-        "#04b43b",
-        "#374526",
-        "#1e2019",
-        "#393e41",
-        "#d3d0cb",
-        "#a9927d",
-        "#5F8237",
-        "#9ED29E",
-        "#F2F4F3",
-        "#BFCCAF",
+        "#00542C",
+        "#000000",
+        "#5a5a5a",
+        "#2d8b57",
+        "#f5f5f5",
+        "#1a5c35",
+        "#c5e8d3",
+        "#8a8a8a",
+        "#7fb892",
       ],
     },
   ],
@@ -94,7 +91,11 @@ const baseOptions = {
       },
     },
     datalabels: {
-      color: "#fff",
+      color: (context) => {
+        const bg = context.dataset.backgroundColor[context.dataIndex];
+        const light = ["#f5f5f5", "#c5e8d3", "#7fb892"];
+        return light.includes(bg) ? "#000000" : "#ffffff";
+      },
       font: {
         weight: "bold",
         size: 14,
@@ -102,7 +103,6 @@ const baseOptions = {
       formatter: (value, context) => {
         const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
         const percentage = ((value / total) * 100);
-        // Only show percentage if it's 10% or greater
         return percentage >= 5 ? `${percentage.toFixed(1)}%` : "";
       },
     },
