@@ -7,11 +7,11 @@ import ChartDataLabels from "chartjs-plugin-datalabels";
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const dataAcademicYear = {
-  labels: ["Freshman", "Sophomore", "Junior", "Senior", "Graduate"],
+  labels: ["Freshman", "Sophomore", "Junior", "Senior"],
   datasets: [
     {
       label: " Students",
-      data: [5, 8, 20, 16, 1],
+      data: [5, 8, 20, 16],
       backgroundColor: [
         "#f5f5f5",
         "#000000",
@@ -36,24 +36,24 @@ const dataMajors = {
     "Computer Information System and Technology",
     "Software Engineering",
     "Data Science",
+    "Business Analytics",
     "Business Administration",
     "Finance",
-    "Cognitive Science",
     "Healthcare Management",
     "Biochemistry"
   ],
   datasets: [
     {
       label: " Students",
-      data: [33, 6, 3, 5, 2, 2, 1, 1, 1],
+      data: [33, 6, 3, 5, 1, 2, 2, 1, 1],
       backgroundColor: [
         "#00542C",
         "#000000",
         "#5a5a5a",
         "#2d8b57",
+        "#e0e0e0",
         "#f5f5f5",
         "#1a5c35",
-        "#c5e8d3",
         "#8a8a8a",
         "#7fb892",
       ],
@@ -62,9 +62,9 @@ const dataMajors = {
         "#000000",
         "#5a5a5a",
         "#2d8b57",
+        "#e0e0e0",
         "#f5f5f5",
         "#1a5c35",
-        "#c5e8d3",
         "#8a8a8a",
         "#7fb892",
       ],
