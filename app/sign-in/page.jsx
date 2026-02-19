@@ -1,9 +1,30 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaCheck, FaTimes } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
+
+const PASSWORD_REQUIREMENTS_BASE = [
+  { id: "maxLength", label: "Maximum 64 characters", test: (p) => p.length <= 64 },
+  { id: "upper", label: "At least one uppercase letter (A–Z)", test: (p) => /[A-Z]/.test(p) },
+  { id: "lower", label: "At least one lowercase letter (a–z)", test: (p) => /[a-z]/.test(p) },
+  { id: "number", label: "At least one number (0–9)", test: (p) => /\d/.test(p) },
+  { id: "special", label: "At least one special character (e.g. ! @ # $ % ^ & *)", test: (p) => /[!@#$%^&*()\-_=+[\]{}|;:',.<>?/"\\`~]/.test(p) },
+];
+
+function getPasswordStrength(p) {
+  if (!p.length) return { level: 0, label: "Weak" };
+  let score = 0;
+  if (p.length >= 8) score++;
+  if (/[A-Z]/.test(p)) score++;
+  if (/[a-z]/.test(p)) score++;
+  if (/\d/.test(p)) score++;
+  if (/[!@#$%^&*()\-_=+[\]{}|;:',.<>?/"\\`~]/.test(p)) score++;
+  const level = score <= 1 ? 1 : score <= 2 ? 2 : score <= 3 ? 3 : 4;
+  const labels = ["Weak", "Weak", "Fair", "Good", "Strong"];
+  return { level, label: labels[level] };
+}
 
 export default function SignUp() {
   const router = useRouter();
@@ -35,8 +56,20 @@ export default function SignUp() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    const displayNameForCheck = `${firstName.trim()} ${lastName.trim()}`.toLowerCase();
+    const emailLower = email.trim().toLowerCase();
+    const requirements = [
+      ...PASSWORD_REQUIREMENTS_BASE,
+      {
+        id: "notMatch",
+        label: "Must not match username or email",
+        test: (p) =>
+          p.toLowerCase() !== emailLower &&
+          (displayNameForCheck.length < 2 || p.toLowerCase() !== displayNameForCheck),
+      },
+    ];
+    if (!requirements.every((r) => r.test(password))) {
+      setError("Please meet all password requirements below.");
       setLoading(false);
       return;
     }
@@ -66,6 +99,9 @@ export default function SignUp() {
     if (error) {
       console.error("Email sign up failed:", error.message);
       setError(error.message);
+      setLoading(false);
+    } else if (data?.user?.identities?.length === 0) {
+      setError("This email is already in use. Please sign in instead.");
       setLoading(false);
     } else {
       console.log("Sign up successful:", data);
@@ -275,6 +311,7 @@ export default function SignUp() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  maxLength={64}
                 />
                 <button
                   type="button"
@@ -288,6 +325,53 @@ export default function SignUp() {
                   )}
                 </button>
               </div>
+              {password.length > 0 && (() => {
+                const { level, label } = getPasswordStrength(password);
+                const colors = ["bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500"];
+                return (
+                  <div className="mt-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="flex gap-0.5 flex-1 h-1.5 rounded-full overflow-hidden bg-gray-200">
+                        {[0, 1, 2, 3].map((i) => (
+                          <div
+                            key={i}
+                            className={`flex-1 transition-colors ${i < level ? colors[level - 1] : "bg-gray-200"}`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-xs font-medium text-black capitalize">{label}</span>
+                    </div>
+                  </div>
+                );
+              })()}
+              {password.length > 0 && (
+                <div className="mt-2 space-y-1.5">
+                  <p className="text-xs font-medium text-black mb-1.5">Password requirements:</p>
+                  {[
+                    ...PASSWORD_REQUIREMENTS_BASE,
+                    {
+                      id: "notMatch",
+                      label: "Must not match username or email",
+                      test: (p) =>
+                        p.toLowerCase() !== email.trim().toLowerCase() &&
+                        (`${firstName.trim()} ${lastName.trim()}`.toLowerCase().length < 2 ||
+                          p.toLowerCase() !== `${firstName.trim()} ${lastName.trim()}`.toLowerCase()),
+                    },
+                  ].map((req) => {
+                    const met = req.test(password);
+                    return (
+                      <div key={req.id} className="flex items-center gap-2 text-sm">
+                        {met ? (
+                          <FaCheck className="h-4 w-4 text-green-600 shrink-0" aria-hidden />
+                        ) : (
+                          <FaTimes className="h-4 w-4 text-red-500 shrink-0" aria-hidden />
+                        )}
+                        <span className="text-black">{req.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div>
@@ -306,6 +390,7 @@ export default function SignUp() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
+                  maxLength={64}
                 />
                 <button
                   type="button"
@@ -319,6 +404,21 @@ export default function SignUp() {
                   )}
                 </button>
               </div>
+              {confirmPassword.length > 0 && (
+                <div className="flex items-center gap-2 text-sm mt-1.5">
+                  {password === confirmPassword ? (
+                    <>
+                      <FaCheck className="h-4 w-4 text-green-600 shrink-0" />
+                      <span className="text-gray-700">Passwords match</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaTimes className="h-4 w-4 text-red-500 shrink-0" />
+                      <span className="text-black">Passwords do not match</span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {error && <p className="text-red-500 text-sm">{error}</p>}
