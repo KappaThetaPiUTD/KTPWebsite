@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaGoogle, FaDiscord, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 
@@ -43,35 +43,6 @@ export default function Login() {
     });
     if (error) {
       console.error("Google login failed:", error.message);
-    } else {
-      // Try to get user email after OAuth
-      setTimeout(async () => {
-        const { data } = await supabase.auth.getUser();
-        const userEmail = data?.user?.email;
-        if (userEmail) {
-          try {
-            await fetch('/api/notify/new-user', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: userEmail })
-            });
-          } catch (notifyErr) {
-            console.warn('Notify new-user failed', notifyErr);
-          }
-        }
-      }, 1000); // Wait for OAuth session
-    }
-  };
-
-  const handleDiscordLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ 
-      provider: "discord",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
-      }
-    });
-    if (error) {
-      console.error("Discord login failed:", error.message);
     } else {
       // Try to get user email after OAuth
       setTimeout(async () => {
@@ -260,13 +231,7 @@ export default function Login() {
   /> 
   Continue with Google
 </button>
-            <button
-              onClick={handleDiscordLogin}
-              className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg text-black hover:bg-gray-100 transition"
-            >
-              <FaDiscord className="mr-2 text-lg text-[#5865F2]" /> Continue with Discord
-            </button>
-          </div>
+            </div>
 
           {/* Link to sign up */}
           <div className="text-center mt-4">

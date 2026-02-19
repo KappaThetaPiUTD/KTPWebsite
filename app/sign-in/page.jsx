@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FaGoogle, FaDiscord, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { supabase } from "../../lib/supabase";
 import { useRouter } from "next/navigation";
 
@@ -92,14 +92,6 @@ export default function SignUp() {
       options: { redirectTo: `${window.location.origin}/dashboard` },
     });
     if (error) console.error("Google login failed:", error.message);
-  };
-
-  const handleDiscordLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "discord",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
-    });
-    if (error) console.error("Discord login failed:", error.message);
   };
 
   useEffect(() => {
@@ -357,12 +349,6 @@ export default function SignUp() {
       className="mr-2 w-5 h-5"
     /> 
     Sign up with Google
-  </button>
-  <button
-    onClick={handleDiscordLogin}
-    className="w-full flex items-center justify-center border border-gray-300 py-2 rounded-lg text-black hover:bg-gray-100 transition"
-  >
-    <FaDiscord className="mr-2 text-lg text-[#5865F2]" /> Sign up with Discord
   </button>
 </div>
           <div className="text-center mt-6">
