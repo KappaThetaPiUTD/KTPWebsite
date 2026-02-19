@@ -2,26 +2,29 @@
 import React from "react";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const dataAcademicYear = {
-  labels: ["Freshman", "Sophomore", "Junior", "Senior"],
+  labels: ["Freshman", "Sophomore", "Junior", "Senior", "Graduate"],
   datasets: [
     {
       label: " Students",
-      data: [1, 8, 19, 8],
+      data: [5, 8, 20, 16, 1],
       backgroundColor: [
-        "#7FB3D5", // Soft Blue
-        "#9ED29E", // Gentle Green
-        "#F4E285", // Pale Yellow
-        "#D8A7B1", // Muted Pink
+        "#d3d0cb",
+        "#393e41",
+        "#1e2019",
+        "#374526",
+        "#04b43b",
       ],
       hoverBackgroundColor: [
-        "#7FB3D5", // Soft Blue
-        "#9ED29E", // Gentle Green
-        "#F4E285", // Pale Yellow
-        "#D8A7B1", // Muted Pink
+        "#d3d0cb",
+        "#393e41",
+        "#1e2019",
+        "#374526",
+        "#04b43b",
       ],
     },
   ],
@@ -29,43 +32,44 @@ const dataAcademicYear = {
 
 const dataMajors = {
   labels: [
-    "Information Technology and Systems",
     "Computer Science",
-    "Computer Engineering",
-    "Cognitive Science",
-    "Business Analytics",
-    "Software Engineering",
-    "Biology",
     "Computer Information System and Technology",
-    "Marketing"
+    "Software Engineering",
+    "Data Science",
+    "Business Analytics",
+    "Business Administration",
+    "Finance",
+    "Cognitive Science",
+    "Healthcare Management",
+    "Biochemistry"
   ],
   datasets: [
     {
       label: " Students",
-      data: [5, 22, 1, 2, 1, 1, 1, 2, 1],
+      data: [33, 6, 3, 5, 0, 2, 2, 1, 1, 1],
       backgroundColor: [
-        "#BAA6D2", // Lavender
-        "#FAC8B4", // Peach
-        "#D3D3D3", // Light Gray
-        "#FFDAB9", // Soft Orange
-        "#B0E0E6", // Mint Green
-        "#C8A2C8", // Lilac
-        "#7FB3D5", // Soft Blue
-        "#9ED29E", // Gentle Green
-        "#F4E285", // Pale Yellow
-        "#D8A7B1", // Muted Pink
+        "#04b43b",
+        "#374526",
+        "#1e2019",
+        "#393e41",
+        "#d3d0cb",
+        "#a9927d",
+        "#5F8237",
+        "#9ED29E",
+        "#F2F4F3",
+        "#BFCCAF",
       ],
       hoverBackgroundColor: [
-        "#BAA6D2", // Lavender
-        "#FAC8B4", // Peach
-        "#D3D3D3", // Light Gray
-        "#FFDAB9", // Soft Orange
-        "#B0E0E6", // Mint Green
-        "#C8A2C8", // Lilac
-        "#7FB3D5", // Soft Blue
-        "#9ED29E", // Gentle Green
-        "#F4E285", // Pale Yellow
-        "#D8A7B1", // Muted Pink
+        "#04b43b",
+        "#374526",
+        "#1e2019",
+        "#393e41",
+        "#d3d0cb",
+        "#a9927d",
+        "#5F8237",
+        "#9ED29E",
+        "#F2F4F3",
+        "#BFCCAF",
       ],
     },
   ],
@@ -83,6 +87,30 @@ const options = {
         color: "#000000",
       },
     },
+    datalabels: {
+      color: "#fff",
+      font: {
+        weight: "bold",
+        size: 14,
+      },
+      formatter: (value, context) => {
+        const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+        const percentage = ((value / total) * 100);
+        // Only show percentage if it's 10% or greater
+        return percentage >= 5 ? `${percentage.toFixed(1)}%` : "";
+      },
+    },
+    tooltip: {
+      callbacks: {
+        label: function (context) {
+          const label = context.label || '';
+          const value = context.parsed;
+          const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+          const percentage = ((value / total) * 100).toFixed(1);
+          return `${label}: ${value} (${percentage}%)`;
+        }
+      }
+    },
   },
   maintainAspectRatio: false,
 };
@@ -94,7 +122,7 @@ const PieChartComponent = () => (
     </h2>
     <div className="flex flex-col md:flex-row justify-center md:gap-8">
       <div className="text-center mb-8 md:mb-0">
-        <h3 className="text-white text-header4 font-bold font-poppins mb-4">
+        <h3 className="text-black text-header4 font-bold font-poppins mb-4">
           Academic Year
         </h3>
         <div
@@ -110,7 +138,7 @@ const PieChartComponent = () => (
         </div>
       </div>
       <div className="text-center">
-        <h3 className="text-white text-header4 font-bold font-poppins mb-4">
+        <h3 className="text-black text-header4 font-bold font-poppins mb-4">
           Major
         </h3>
         <div
