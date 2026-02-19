@@ -75,7 +75,10 @@ const dataMajors = {
   ],
 };
 
-const options = {
+const CHART_SIZE = 450;
+const MAJOR_EXTRA_HEIGHT = 55;
+
+const baseOptions = {
   plugins: {
     legend: {
       display: true,
@@ -83,8 +86,11 @@ const options = {
       labels: {
         font: {
           family: "Public Sans",
+          size: 11,
         },
         color: "#000000",
+        boxWidth: 12,
+        padding: 8,
       },
     },
     datalabels: {
@@ -116,8 +122,8 @@ const options = {
 };
 
 const PieChartComponent = () => (
-  <div className="bg-white p-8 text-black w-full">
-    <h2 className="text-black text-4xl lg:text-header1 font-bold font-poppins text-center mb-8 tracking--2">
+  <div className="bg-white p-8 text-black w-full pb-8">
+    <h2 className="text-black text-4xl lg:text-header1 font-bold font-poppins text-center mb-14 tracking--2">
       KTP Wrapped
     </h2>
     <div className="flex flex-col md:flex-row justify-center md:gap-8">
@@ -127,13 +133,13 @@ const PieChartComponent = () => (
         </h3>
         <div
           className="flex justify-center items-center w-full"
-          style={{ maxWidth: "480px" }}
+          style={{ width: `${CHART_SIZE}px`, minWidth: `${CHART_SIZE}px` }}
         >
           <Pie
             data={dataAcademicYear}
-            options={options}
-            width={410}
-            height={410}
+            options={baseOptions}
+            width={CHART_SIZE}
+            height={CHART_SIZE}
           />
         </div>
       </div>
@@ -143,16 +149,13 @@ const PieChartComponent = () => (
         </h3>
         <div
           className="flex justify-center items-center w-full"
-          style={{ maxWidth: "480px" }}
+          style={{ width: `${CHART_SIZE}px`, minWidth: `${CHART_SIZE}px`, minHeight: `${CHART_SIZE + MAJOR_EXTRA_HEIGHT}px` }}
         >
           <Pie
             data={dataMajors}
-            options={{
-              ...options,
-              legend: { display: true, position: "bottom" },
-            }}
-            width={450}
-            height={450}
+            options={baseOptions}
+            width={CHART_SIZE}
+            height={CHART_SIZE + MAJOR_EXTRA_HEIGHT}
           />
         </div>
       </div>
