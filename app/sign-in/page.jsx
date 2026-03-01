@@ -29,8 +29,6 @@ function getPasswordStrength(p) {
 export default function SignUp() {
   const router = useRouter();
   // Form state
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -55,17 +53,14 @@ export default function SignUp() {
       setLoading(false);
       return;
     }
-
-    const displayNameForCheck = `${firstName.trim()} ${lastName.trim()}`.toLowerCase();
     const emailLower = email.trim().toLowerCase();
     const requirements = [
       ...PASSWORD_REQUIREMENTS_BASE,
       {
         id: "notMatch",
-        label: "Must not match username or email",
+        label: "Must not match email",
         test: (p) =>
-          p.toLowerCase() !== emailLower &&
-          (displayNameForCheck.length < 2 || p.toLowerCase() !== displayNameForCheck),
+          p.toLowerCase() !== emailLower,
       },
     ];
     if (!requirements.every((r) => r.test(password))) {
@@ -74,24 +69,16 @@ export default function SignUp() {
       return;
     }
 
-    if (!firstName.trim() || !lastName.trim()) {
-      setError("First name and last name are required");
-      setLoading(false);
-      return;
-    }
-
-    const displayName = `${firstName.trim()} ${lastName.trim()}`;
+    const displayName = email.trim();
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/onboarding`,
         data: {
-          full_name: displayName, // ensures trigger uses correct value
+          full_name: displayName,
           display_name: displayName,
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
         },
       },
     });
@@ -125,7 +112,7 @@ export default function SignUp() {
   const handleGoogleLogin = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: `${window.location.origin}/onboarding` },
     });
     if (error) console.error("Google login failed:", error.message);
   };
@@ -240,43 +227,6 @@ export default function SignUp() {
           </h2>
 
           <form onSubmit={handleEmailSignUp} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label
-                  htmlFor="firstName"
-                  className="block text-sm font-medium text-black"
-                >
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  id="firstName"
-                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-green-700"
-                  placeholder="John"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="lastName"
-                  className="block text-sm font-medium text-black"
-                >
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  id="lastName"
-                  className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-green-700"
-                  placeholder="Doe"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
             <div>
               <label
                 htmlFor="email"
@@ -351,11 +301,9 @@ export default function SignUp() {
                     ...PASSWORD_REQUIREMENTS_BASE,
                     {
                       id: "notMatch",
-                      label: "Must not match username or email",
+                      label: "Must not match email",
                       test: (p) =>
-                        p.toLowerCase() !== email.trim().toLowerCase() &&
-                        (`${firstName.trim()} ${lastName.trim()}`.toLowerCase().length < 2 ||
-                          p.toLowerCase() !== `${firstName.trim()} ${lastName.trim()}`.toLowerCase()),
+                        p.toLowerCase() !== email.trim().toLowerCase(),
                     },
                   ].map((req) => {
                     const met = req.test(password);
