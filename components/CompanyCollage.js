@@ -6,10 +6,6 @@ import React from "react";
 const CompanyCollage = () => {
   const companyLogos = [
     {
-      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1724951550/Brother%20Page/Companies/c640688e-d185-4b93-a7d5-f8402a1b9d23.png",
-      alt: "PWC",
-    },
-    {
       src: "https://res.cloudinary.com/dha44tosd/image/upload/v1732828144/Brother%20Page/Companies/30cd328f-409a-4c74-9100-b24f7a23e382.png",
       alt: "Fannie Mae",
     },

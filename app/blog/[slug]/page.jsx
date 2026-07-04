@@ -116,18 +116,7 @@ export default function BlogPostPage() {
 
     if (!post) return <div className="p-10 text-red-600">Post not found</div>;
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navbar */}
-      <nav className="flex justify-center items-center py-6 border-b border-gray-200">
-        <div className="flex space-x-8 font-medium">
-          <Link href="/" className="text-primary">HOME</Link>
-          <Link href="/about" className="text-primary">ABOUT</Link>
-          <Link href="/recruitment" className="text-primary">RECRUITMENT</Link>
-          <Link href="/blog" className="text-primary">BLOG</Link>
-          <Link href="/contact" className="text-primary">CONTACT</Link>
-        </div>
-      </nav>
-
+    <div className="min-h-screen bg-white pt-24">
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 py-12 flex">
         {/* Left Side */}
