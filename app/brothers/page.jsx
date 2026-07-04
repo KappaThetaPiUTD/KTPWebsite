@@ -10,43 +10,43 @@ const executiveBoardMembers = [
   {
     name: "Kavinram Senthil",
     position: "President",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190975/Brother%20Page/Actives/IMG_5423_fxoxkr.jpg",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276796/Brother%20Page/Executive%20Board/P1023742_gqdojj.jpg",
     linkedin: "https://www.linkedin.com/in/kavinram-senthil-640349249/",
   },
   {
     name: "Vignesh Selvam",
     position: "Executive Vice President",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741221585/IMG_4351_z0ensz.jpg",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741221585/Brother%20Page/Executive%20Board/IMG_4351_z0ensz.jpg",
     linkedin: "https://www.linkedin.com/in/vignesh-2004-selvam/",
   },
   {
     name: "Abhinav Atluri",
     position: "VP of Social Engagement",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190820/Brother%20Page/Actives/IMG_5740_knge0i.jpg",
     linkedin: "http://linkedin.com/in/abhinav-atluri/",
   },
   {
     name: "Navmi Srithaj",
     position: "VP of Professional Development",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190844/Brother%20Page/Actives/IMG_5599_dcvebb.jpg",
     linkedin: "",
   },
   {
     name: "Ashrita Dara",
     position: "VP of Marketing",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771192288/Brother%20Page/Actives/IMG_5624_di54se.jpg",
     linkedin: "",
   },
   {
     name: "Aman Balam",
     position: "VP of Technology",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683157/AmanHeadshot_rgmejh.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190985/Brother%20Page/Actives/IMG_5431_xp2cvs.jpg",
     linkedin: "https://www.linkedin.com/in/aman-balam-838b32214",
   },
   {
     name: "Yeshwanth Vajinapalli",
     position: "VP of Membership",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190679/Brother%20Page/Actives/IMG_5750_hagvvk.jpg",
     linkedin: "",
   },
 ];
@@ -55,13 +55,13 @@ const directorBoardMembers = [
   {
     name: "Om Pansuriya",
     position: "Director of Membership",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771277289/Brother%20Page/Actives/IMG_5588_v1wq7k.jpg",
     linkedin: "",
   },
   {
     name: "Jiya Khurana",
     position: "Director of Technology",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190628/Brother%20Page/Actives/IMG_5681_yio6e3.jpg",
     linkedin: "",
   },
   {
@@ -91,13 +91,13 @@ const directorBoardMembers = [
   {
     name: "Simon Beyene",
     position: "Director of Social Logistics",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190933/Brother%20Page/Actives/IMG_5527_c7shnm.jpg",
     linkedin: "",
   },
   {
     name: "Bhavaneeth Parnapalli",
     position: "Chief of Compliance",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190953/Brother%20Page/Actives/IMG_5497_tgo41k.jpg",
     linkedin: "",
   },
   {
@@ -115,6 +115,16 @@ const directorBoardMembers = [
 ];
 
 const activeMembers = [
+  {
+    name: "Ruthvik Penmatsa",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190823/Brother%20Page/Actives/IMG_5706_pehj8h.jpg",
+    linkedin: "https://www.linkedin.com/in/ruthvikpenmatsa/",
+  },
+  {
+    name: "Praneel Sreepada",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771277580/Brother%20Page/Actives/IMG_5702_xqkzil.jpg",
+    linkedin: "https://www.linkedin.com/in/praneelsreepada/",
+  },
   {
     name: "Itbaan Alam",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683119/image_11_uatklb.png",
@@ -137,12 +147,12 @@ const activeMembers = [
   },
   {
     name: "Mohammed Faadil Khan",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683151/FaadilHeadshot_t5xhvb.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190962/Brother%20Page/Actives/IMG_5452_issyik.jpg",
     linkedin: "https://www.linkedin.com/in/mohammed-faadil-khan-6a196b287/",
   },
   {
     name: "Joel Philipose",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771193096/Brother%20Page/Actives/IMG_5558_ajgu8v.jpg",
     linkedin: "",
   },
   {
@@ -157,12 +167,12 @@ const activeMembers = [
   },
   {
     name: "Sachin Selvakumar",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Sachin's image URL
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190965/Brother%20Page/Actives/IMG_5451_ubtsje.jpg", // Add Sachin's image URL
     linkedin: "https://www.linkedin.com/in/sachinselvakumar24/",
   },
   {
     name: "Rishi Ramesh",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Rishi's image URL
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190974/Brother%20Page/Actives/IMG_5440_miludq.jpg", // Add Rishi's image URL
     linkedin: "https://www.linkedin.com/in/seyyonrishiramesh/",
   },
   {
@@ -172,7 +182,7 @@ const activeMembers = [
   },
   {
     name: "Ayush Velhal",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Ayush's image URL
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190875/Brother%20Page/Actives/IMG_5569_ceoasl.jpg", // Add Ayush's image URL
     linkedin: "https://www.linkedin.com/in/ayush-velhal/",
   },
   {
@@ -183,13 +193,13 @@ const activeMembers = [
 
   {
     name: "Aaron Gheevarghese",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Aaron's image URL
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771193596/Brother%20Page/Actives/IMG_5572_v5jgz8.jpg", // Add Aaron's image URL
     linkedin: "https://www.linkedin.com/in/aarongheevarghese/",
   },
 
   {
     name: "Krish Patel",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Aaron's image URL
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190927/Brother%20Page/Actives/IMG_5530_gwhixw.jpg", // Add Aaron's image URL
     linkedin: "https://www.linkedin.com/in/krish-patel10/",
   },
   {
@@ -234,7 +244,7 @@ const activeMembers = [
   },
   {
     name: "Lalith Keertipati",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771276882/Brother%20Page/Actives/IMG_5712_fjmsow.jpg",
     linkedin: "",
   },
   {
@@ -264,12 +274,12 @@ const activeMembers = [
   },
   {
     name: "Siri Kishore Dola",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190835/Brother%20Page/Actives/IMG_5646_hiubqi.jpg",
     linkedin: "",
   },
   {
     name: "Tanmayi Addanki",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190850/Brother%20Page/Actives/IMG_5607_fpscrf.jpg",
     linkedin: "",
   },
   {

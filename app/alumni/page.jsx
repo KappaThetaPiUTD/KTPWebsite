@@ -9,7 +9,7 @@ export const metadata = {
 const alumniMembers = [
   {
     name: "Aamir Mohammed",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683105/image_s3dmun.png",
     linkedin: "",
   },
   {
@@ -19,7 +19,7 @@ const alumniMembers = [
   },
   {
     name: "Aashna Pathi",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683163/AashnaHeadshot_rwzh2y.png",
     linkedin: "",
   },
   {
@@ -44,12 +44,12 @@ const alumniMembers = [
   },
   {
     name: "Ayaan Khan",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190927/Brother%20Page/Actives/IMG_5520_iyzv9s.jpg",
     linkedin: "https://www.linkedin.com/in/ayaan-r-khan/",
   },
   {
     name: "Ethan Varghese",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683148/image_4_wvnt8p.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190963/Brother%20Page/Actives/IMG_5469_sx1vxt.jpg",
     linkedin: "https://www.linkedin.com/in/pakkuu/",
   },
   {
@@ -59,12 +59,12 @@ const alumniMembers = [
   },
   {
     name: "Ishaan Dhandapani",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771191009/Brother%20Page/Actives/IMG_5372_ntqmj1.jpg",
     linkedin: "http://www.linkedin.com/in/ishaandhandapani",
   },
   {
     name: "Kairavi Pandya",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683117/image_15_pgpji4.png",
     linkedin: "",
   },
   {
@@ -79,7 +79,7 @@ const alumniMembers = [
   },
   {
     name: "Laiba Piracha",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683141/image_8_klwk6y.png",
     linkedin: "",
   },
   {
@@ -94,7 +94,7 @@ const alumniMembers = [
   },
   {
     name: "Mohamed Afsar Harsath Arif",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771191016/Brother%20Page/Actives/IMG_5341_i545ve.jpg",
     linkedin: "",
   },
   {
@@ -124,7 +124,7 @@ const alumniMembers = [
   },
   {
     name: "Shraddha Gangaram",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190834/Brother%20Page/Actives/IMG_5632_t8zmop.jpg",
     linkedin: "",
   },
   {
