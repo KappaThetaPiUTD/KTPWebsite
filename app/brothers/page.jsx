@@ -9,10 +9,10 @@ export const metadata = {
 
 const executiveBoardMembers = [
   {
-    name: "Kavin Selvam",
+    name: "Kavin Senthil",
     position: "President",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190975/Brother%20Page/Actives/IMG_5423_fxoxkr.jpg",
-    linkedin: "", // TODO: add Kavin Selvam's LinkedIn URL
+    linkedin: "", // TODO: add Kavin Senthil's LinkedIn URL
   },
   {
     name: "Ethan Lobo",
@@ -279,6 +279,7 @@ const alphaClassMembers = [
   "Kairavi Pandya",
   "Kanishk Garg",
   "Manasa Paruchuri",
+  "Raghav Pillai",
   "Sanjana Shangle",
   "Yeshas Nath",
 ].sort((a, b) => a.localeCompare(b));
