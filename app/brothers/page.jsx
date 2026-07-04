@@ -420,7 +420,6 @@ const Brother = () => {
             <div className="relative w-40 h-40 mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
-                class="center"
                 alt={`${member.name} - ${member.position}`}
                 fill
                 className="object-cover"
@@ -454,7 +453,6 @@ const Brother = () => {
             <div className="relative w-40 h-40 mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
-                class="center"
                 alt={`${member.name} - ${member.position}`}
                 fill
                 className="object-cover"
@@ -489,7 +487,6 @@ const Brother = () => {
               <Image
                 src={member.src}
                 alt={`${member.name}`}
-                class="center"
                 fill
                 className="object-cover"
               />

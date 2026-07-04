@@ -14,9 +14,7 @@ const FormPage = () => {
           className="w-full"
           width="100%"
           height="1622"
-          frameBorder="0"
-          marginHeight="0"
-          marginWidth="0"
+          style={{ border: 0 }}
         >
           Loading…
         </iframe>
