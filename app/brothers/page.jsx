@@ -326,7 +326,7 @@ const gammaClassMembers = [
   "Mohammed Faadil Khan",
   "Noel Emmanuel",
   "Shreyas Ankolekar",
-  "Venkat Sai Eshwar Varma Sagi",
+  "Venkat Sagi",
   "Vignesh Selvam",
 ].sort((a, b) => a.localeCompare(b));
 
