@@ -104,7 +104,7 @@ const alumniMembers = [
   },
   {
     name: "Nivedh Koya",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741827747/image_5_1_mhdqxz.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683150/image_5_tuqtmk.png",
     linkedin: "https://www.linkedin.com/nivedh-koya",
   },
   {
@@ -129,7 +129,7 @@ const alumniMembers = [
   },
   {
     name: "Sumi Suseendrababu",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716401955/Brother%20Page/Alumni/sumi_s_hgs2th.jpg",
     linkedin: "",
   },
   {
@@ -144,7 +144,7 @@ const alumniMembers = [
   },
   {
     name: "Wildan Susanto",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683144/image_2_awllqf.png",
     linkedin: "",
   },
   {
