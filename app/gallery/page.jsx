@@ -40,6 +40,8 @@ const Gallery = () => {
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148663/Gallery/F14B0698-D79B-4CB8-9E21-C2B369FD96D1-11728-000001EA10514D98_o1zsvt.jpg', alt: 'Broken Bow 7' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148665/Gallery/IMG_2826_yoirgp.jpg', alt: 'Broken Bow 8' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148686/Gallery/IMG_2850_dspjs8.jpg', alt: 'Broken Bow 10' },
+    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741203400/Gallery/IMG_5532_kjtadd_qx0gzi.jpg', alt: 'AWS Pres 4' },
+
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148687/Gallery/IMG_2851_bod1x9.jpg', alt: 'Broken Bow 11' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741148688/Gallery/IMG_5220_vyju1x.jpg', alt: 'Truck Eating' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741203133/Gallery/IMG_5506_jwp21u_n0gsyy.jpg', alt: 'AWS Pres 1' },
@@ -47,16 +49,6 @@ const Gallery = () => {
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741203326/Gallery/IMG_5523_djd7nm_uz6snk.jpg', alt: 'AWS Pres 3' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741203400/Gallery/IMG_5532_kjtadd_qx0gzi.jpg', alt: 'AWS Pres 4' },
     { src: 'https://res.cloudinary.com/dha44tosd/image/upload/v1741203490/Gallery/IMG_5680_uv7qbu_sgis8b.jpg', alt: 'Halloween' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/Gallery/IMG_2410_lggqpr.jpg', alt: "Buc-ee's group" },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/Gallery/DSC00803_gswvgt.jpg', alt: "Buc-ee's stop" },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/Gallery/DSC00971_bgvqzo.jpg', alt: 'KTP jerseys' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/Gallery/DSC01133_xdynxe.jpg', alt: 'KTP jerseys 2' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/Gallery/DSC01041_iyjldn.jpg', alt: 'Group photo' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/Gallery/DSC01092_gotnlf.jpg', alt: 'Brothers hangout' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/Gallery/DSC01108_agdq0c.jpg', alt: 'Dinner social' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/Gallery/DSC01146_r60sdl.jpg', alt: 'Dinner social 2' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/Gallery/DSC01005_hnxwvs.jpg', alt: 'Backyard soccer' },
-    { src: 'https://res.cloudinary.com/dha44tosd/image/upload/Gallery/IMG_2842_yfgdjw.jpg', alt: 'Broken Bow swing' },
     
 
   ];
