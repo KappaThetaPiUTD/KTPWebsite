@@ -13,7 +13,6 @@ export default function BlogPage() {
     const fetchPosts = async () => {
       const res = await fetch("/api/blog");
       const data = await res.json();
-      console.log("FULL POSTS DATA:", data); // Add this line
       setPosts(Array.isArray(data) ? data : data?.posts || []);
     };
     fetchPosts();
@@ -21,7 +20,9 @@ export default function BlogPage() {
 
   const filteredPosts = Array.isArray(posts) ? posts.filter(post => {
     if (filter === "all") return true;
-    return post.category?.trim().toLowerCase() === filter.toLowerCase();
+    const category = post.category?.trim().toLowerCase();
+    // Cards label anything that isn't "alumni" as "Brothers", so mirror that here.
+    return filter === "alumni" ? category === "alumni" : category !== "alumni";
   }) : [];
 
   const pinnedPosts = filteredPosts.filter(post => Boolean(post.is_pinned) === true);
@@ -111,9 +112,9 @@ export default function BlogPage() {
               
             <div className="flex flex-wrap gap-2 mb-3">
               <span className={`px-3 py-1 rounded-full text-sm font-medium shadow-sm ${
-                post.category === "alumni" ? "bg-purple-200 text-purple-800" : "bg-green-300 text-green-800"
+                post.category?.trim().toLowerCase() === "alumni" ? "bg-purple-200 text-purple-800" : "bg-green-300 text-green-800"
               }`}>
-                {post.category === "alumni" ? "Alumni" : "Brothers"}
+                {post.category?.trim().toLowerCase() === "alumni" ? "Alumni" : "Brothers"}
               </span>
 
               {(Array.isArray(post.tags) ? post.tags : (typeof post.tags === 'string' ? post.tags.split(',') : [])).map((tag, index) => (
