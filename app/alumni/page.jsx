@@ -40,7 +40,7 @@ const alumniMembers = [
   {
     name: "Avani Mehrotra",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683156/AvaniHeadshot_sxhzel.png",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/avanimehrotra",
   },
   {
     name: "Ayaan Khan",
@@ -65,7 +65,7 @@ const alumniMembers = [
   {
     name: "Kairavi Pandya",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683117/image_15_pgpji4.png",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/kairavi-pandya",
   },
   {
     name: "Kanishk Garg",
