@@ -10,7 +10,7 @@ const FormPage = () => {
         {/* Google Form */}
         <iframe
           title="KTP Recruitment Form"
-          src="https://docs.google.com/forms/d/e/1FAIpQLSfv3EUhso2iIs51kqR9rRUvOsTSvx6gs287xIO7A9RDwKGTaw/viewform?embedded=true"
+          src="https://docs.google.com/forms/d/e/1FAIpQLScidx1iGVOf9Zt2NUk4glr5QuIrC2kS6Kgmmhwy5rerR-bqgw/viewform?embedded=true"
           className="w-full"
           width="100%"
           height="1622"
