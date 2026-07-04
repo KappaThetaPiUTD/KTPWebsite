@@ -15,12 +15,6 @@ const executiveBoardMembers = [
     linkedin: "", // TODO: add Kavin Senthil's LinkedIn URL
   },
   {
-    name: "Ethan Lobo",
-    position: "VP of Internal Affairs",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276762/IMG_6827_pnkd2t.jpg",
-    linkedin: "https://www.linkedin.com/in/ethanlobo",
-  },
-  {
     name: "Ajay Kumaran",
     position: "VP of External Affairs",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276806/P10238171_npaldi.jpg",
@@ -55,12 +49,6 @@ const executiveBoardMembers = [
     position: "VP of Membership",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276796/P1023742_gqdojj.jpg",
     linkedin: "https://www.linkedin.com/in/kavinram-senthil-640349249/",
-  },
-  {
-    name: "Vadhanaa Venkatakrishnan",
-    position: "VP of Marketing",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276762/IMG_6828_gezoow.jpg",
-    linkedin: "https://www.linkedin.com/in/vadhanaavenkatakrishnan",
   },
 ];
 
@@ -184,11 +172,6 @@ const activeMembers = [
     name: "Aadhav Manimurugan",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683127/image_9_cmr6km.png",
     linkedin: "http://linkedin.com/in/aadhav-",
-  },
-  {
-    name: "Bhavya Rayankula",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683116/image_16_oag2bh.png",
-    linkedin: "http://www.linkedin.com/in/bhavya-rayankula-37219a1b9",
   },
   {
     name: "Shreyas Ankolekar",
