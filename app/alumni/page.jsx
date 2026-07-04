@@ -99,7 +99,7 @@ const alumniMembers = [
   },
   {
     name: "Monish Ravishankar",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715884812/Brother%20Page/Alumni/MONISH_HEADSHOT_om9ujn.jpg",
     linkedin: "",
   },
   {
@@ -138,7 +138,7 @@ const alumniMembers = [
     linkedin: "https://www.linkedin.com/in/tariq-mahamid-b316a520a/",
   },
   {
-    name: "Venkat Sai Eshwar Varma Sagi",
+    name: "Venkat Sagi",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683082/VenkatHeadshot_n9o2km.png",
     linkedin: "https://www.linkedin.com/in/venkat-sagi/",
   },
