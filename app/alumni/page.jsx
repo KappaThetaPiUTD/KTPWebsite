@@ -29,7 +29,7 @@ const alumniMembers = [
   },
   {
     name: "Ariha Kothari",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207293/Brother%20Page/Actives/ariha_kothari.jpg",
     linkedin: "https://www.linkedin.com/in/arihak/",
   },
   {
