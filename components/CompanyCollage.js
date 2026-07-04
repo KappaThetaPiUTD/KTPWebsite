@@ -189,6 +189,62 @@ const CompanyCollage = () => {
       src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783198678/Brother%20Page/Companies/microsoft_logo.png",
       alt: "Microsoft",
     },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199437/Brother%20Page/Companies/snowflake.png",
+      alt: "Snowflake",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199438/Brother%20Page/Companies/pwc_2025.png",
+      alt: "PwC",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199439/Brother%20Page/Companies/sas.png",
+      alt: "SAS",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199440/Brother%20Page/Companies/cardinal_health.jpg",
+      alt: "Cardinal Health",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199440/Brother%20Page/Companies/textron.png",
+      alt: "Textron",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199441/Brother%20Page/Companies/albertsons.png",
+      alt: "Albertsons",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199441/Brother%20Page/Companies/yardi.png",
+      alt: "Yardi",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199442/Brother%20Page/Companies/bluecross_blueshield.png",
+      alt: "BlueCross BlueShield",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199443/Brother%20Page/Companies/cyrusone.png",
+      alt: "CyrusOne",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199443/Brother%20Page/Companies/gainwell.png",
+      alt: "Gainwell Technologies",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199444/Brother%20Page/Companies/plaiced.png",
+      alt: "Plaiced",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199445/Brother%20Page/Companies/cencora.png",
+      alt: "Cencora",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199445/Brother%20Page/Companies/oreilly.jpg",
+      alt: "O'Reilly",
+    },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199446/Brother%20Page/Companies/uworld.jpg",
+      alt: "UWorld",
+    },
   ];
 
   const rows = 3;
