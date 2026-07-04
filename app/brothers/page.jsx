@@ -73,7 +73,7 @@ const directorBoardMembers = [
   {
     name: "Sreyas Chakka",
     position: "Director of Industry Relations",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207409/Brother%20Page/Actives/sreyas_chakka.jpg",
     linkedin: "",
   },
   {
@@ -214,7 +214,7 @@ const activeMembers = [
   },
   {
     name: "Anya Konda",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207410/Brother%20Page/Actives/anya_konda.jpg",
     linkedin: "",
   },
   {
@@ -234,7 +234,7 @@ const activeMembers = [
   },
   {
     name: "Kushagra Mathur",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207409/Brother%20Page/Actives/kushagra_mathur.jpg",
     linkedin: "",
   },
   {
