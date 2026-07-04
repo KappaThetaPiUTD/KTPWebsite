@@ -162,7 +162,7 @@ const activeMembers = [
   },
   {
     name: "Rahil Islam",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207516/Brother%20Page/Actives/rahil_islam.jpg",
     linkedin: "",
   },
   {
