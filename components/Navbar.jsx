@@ -16,10 +16,11 @@ const Navbar = () => {
     { id: 1, text: "HOME", path: "/" },
     { id: 2, text: "ABOUT", path: "/about-us" },
     { id: 3, text: "BROTHERS", path: "/brothers" },
-    { id: 4, text: "RECRUITMENT", path: "/recruitment" },
-    { id: 5, text: "BLOG", path: "/blog" },
-    { id: 6, text: "GALLERY", path: "/gallery" },
-    { id: 7, text: "CONTACT", path: "/contact-us" },
+    { id: 4, text: "ALUMNI", path: "/alumni" },
+    { id: 5, text: "RECRUITMENT", path: "/recruitment" },
+    { id: 6, text: "BLOG", path: "/blog" },
+    { id: 7, text: "GALLERY", path: "/gallery" },
+    { id: 8, text: "CONTACT", path: "/contact-us" },
   ];
 
   return (

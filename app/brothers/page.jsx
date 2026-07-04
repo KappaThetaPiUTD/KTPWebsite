@@ -9,10 +9,10 @@ export const metadata = {
 
 const executiveBoardMembers = [
   {
-    name: "Kavin Senthil",
+    name: "Kavinram Senthil",
     position: "President",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190975/Brother%20Page/Actives/IMG_5423_fxoxkr.jpg",
-    linkedin: "", // TODO: add Kavin Senthil's LinkedIn URL
+    linkedin: "https://www.linkedin.com/in/kavinram-senthil-640349249/",
   },
   {
     name: "Ajay Kumaran",
@@ -45,10 +45,10 @@ const executiveBoardMembers = [
     linkedin: "https://www.linkedin.com/in/venkat-sagi/",
   },
   {
-    name: "Kavinram Senthil",
+    name: "Yeshwanth Vajinapalli",
     position: "VP of Membership",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276796/P1023742_gqdojj.jpg",
-    linkedin: "https://www.linkedin.com/in/kavinram-senthil-640349249/",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "",
   },
 ];
 
@@ -129,44 +129,14 @@ const activeMembers = [
     linkedin: "http://linkedin.com/in/itbaanalam",
   },
   {
-    name: "Yeshas Nath",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683065/YeshasHeadshot_kxpvse.png",
-    linkedin: "https://www.linkedin.com/in/yeshasnath",
-  },
-  {
     name: "Aman Balam",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683157/AmanHeadshot_rgmejh.png",
     linkedin: "https://www.linkedin.com/in/aman-balam-838b32214",
   },
   {
-    name: "Sanjana Shangle",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683105/image_25_r2yumm.png",
-    linkedin: "http://www.linkedin.com/in/sanjanashangle",
-  },
-  {
-    name: "Hima Nagi Reddy",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683151/HimaHeadshot_vh7tjm.png",
-    linkedin: "https://www.linkedin.com/in/hima-nagi-reddy",
-  },
-  {
-    name: "Krisha Amaravathi",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683115/image_18_vlsqgo.png",
-    linkedin: "http://www.linkedin.com/in/krisha-amaravathi",
-  },
-  {
-    name: "Nivedh Koya",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741827747/image_5_1_mhdqxz.png",
-    linkedin: "https://www.linkedin.com/nivedh-koya",
-  },
-  {
     name: "Meghana Pula",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683113/image_20_ijskwh.png",
     linkedin: "http://www.linkedin.com/in/sai-meghana-pula",
-  },
-  {
-    name: "Ethan Varghese",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683148/image_4_wvnt8p.png",
-    linkedin: "https://www.linkedin.com/in/pakkuu/",
   },
   {
     name: "Aadhav Manimurugan",
@@ -199,19 +169,9 @@ const activeMembers = [
     linkedin: "",
   },
   {
-    name: "Tariq Mahamid",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1716144869/Brother%20Page/Executive%20Board/Tariq_mxviux.jpg",
-    linkedin: "https://www.linkedin.com/in/tariq-mahamid-b316a520a/",
-  },
-  {
     name: "Simon Beyene",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Simon's image URL
     linkedin: "", // Add Simon's LinkedIn URL
-  },
-  {
-    name: "Sahaj Dahal",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Sahaj's image URL
-    linkedin: "https://www.linkedin.com/in/sahaj-dahal-239433240/",
   },
   {
     name: "Sachin Selvakumar",
@@ -232,11 +192,6 @@ const activeMembers = [
     name: "Ayush Velhal",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Ayush's image URL
     linkedin: "https://www.linkedin.com/in/ayush-velhal/",
-  },
-  {
-    name: "Ayaan Khan",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Ayaan's image URL
-    linkedin: "https://www.linkedin.com/in/ayaan-r-khan/",
   },
   {
     name: "Anvi Siddabhattuni",
@@ -395,11 +350,6 @@ const activeMembers = [
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
     linkedin: "",
   },
-  {
-    name: "Yeshwanth Vajinapalli",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
-    linkedin: "",
-  },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
 const alphaClassMembers = [
@@ -543,14 +493,16 @@ const Brother = () => {
                 fill
                 className="object-cover"
               />
-              <a
-                href={member.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              >
-                <FaLinkedin className="text-black text-4xl" />
-              </a>
+              {member.linkedin && (
+                <a
+                  href={member.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                >
+                  <FaLinkedin className="text-black text-4xl" />
+                </a>
+              )}
             </div>
             <div className="mt-2">{member.name}</div>
             <div className="text-sm text-gray-400">{member.position}</div>
@@ -576,14 +528,16 @@ const Brother = () => {
                 fill
                 className="object-cover"
               />
-              <a
-                href={member.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              >
-                <FaLinkedin className="text-black text-4xl" />
-              </a>
+              {member.linkedin && (
+                <a
+                  href={member.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                >
+                  <FaLinkedin className="text-black text-4xl" />
+                </a>
+              )}
             </div>
             <div className="mt-2">{member.name}</div>
             <div className="text-sm text-gray-400">{member.position}</div>
@@ -609,14 +563,16 @@ const Brother = () => {
                 fill
                 className="object-cover"
               />
-              <a
-                href={member.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              >
-                <FaLinkedin className="text-white text-4xl" />
-              </a>
+              {member.linkedin && (
+                <a
+                  href={member.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                >
+                  <FaLinkedin className="text-white text-4xl" />
+                </a>
+              )}
             </div>
             <div className="mt-2">{member.name}</div>
           </div>
