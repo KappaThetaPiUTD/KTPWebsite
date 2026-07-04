@@ -46,7 +46,7 @@ const Letter = () => {
 
       <p className="text-sm sm:text-base lg:text-lg leading-relaxed mb-4">
         Thank you for your genuine interest in our fraternity. It is a privilege
-        to serve as KTP’s President for the 2025–2026 academic year. On this
+        to serve as KTP’s President for the 2026–2027 academic year. On this
         website, you’ll find information about rush and our brotherhood. Enjoy,
         and please don’t hesitate to reach out to our executive board through
         the contact page if you have any questions. You can also email us at{" "}
@@ -62,8 +62,8 @@ const Letter = () => {
 
       <p className="text-sm sm:text-base lg:text-lg leading-relaxed">
         Dearest Regards, <br />
-        <span className="font-semibold">Mohamed Afsar Harsath Arif</span> <br />
-        President, 2025–2026
+        <span className="font-semibold">Kavinram Senthil</span> <br />
+        President, 2026–2027
       </p>
     </div>
   );
