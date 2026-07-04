@@ -185,6 +185,10 @@ const CompanyCollage = () => {
      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1747432938/Brother%20Page/Companies/l_t-logo_lagqrp.png",
      alt: "L&T Construction",
     },
+    {
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783198039/Brother%20Page/Companies/microsoft_transparent.png",
+      alt: "Microsoft",
+    },
   ];
 
   const rows = 3;
