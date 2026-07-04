@@ -9,10 +9,10 @@ export const metadata = {
 
 const executiveBoardMembers = [
   {
-    name: "Mohamed Afsar Harsath Arif",
+    name: "Kavin Selvam",
     position: "President",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276761/IMG_6821_ynqfbt.jpg",
-    linkedin: "https://www.linkedin.com/in/afsararif",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190975/Brother%20Page/Actives/IMG_5423_fxoxkr.jpg",
+    linkedin: "", // TODO: add Kavin Selvam's LinkedIn URL
   },
   {
     name: "Ethan Lobo",
@@ -276,17 +276,15 @@ const activeMembers = [
 
 const alphaClassMembers = [
   "Aashna Pathi",
-  "Ethan Lobo",
   "Kairavi Pandya",
   "Kanishk Garg",
-  "Raghav Pillai",
   "Manasa Paruchuri",
   "Sanjana Shangle",
   "Yeshas Nath",
 ].sort((a, b) => a.localeCompare(b));
 
 const betaClassMembers = [
-  "Arya Thombre",
+  "Arya Thombare",
   "Avani Mehrotra",
   "Ethan Varghese",
   "Hima Nagi Reddy",
@@ -297,7 +295,7 @@ const betaClassMembers = [
   "Monish Ravishankar",
   "Nivedh Koya",
   "Rushil Patel",
-  "Sumedha Suseendrababu",
+  "Sumi Suseendrababu",
   "Tariq Mahamid",
   "Wildan Susanto",
 ].sort((a, b) => a.localeCompare(b));
@@ -306,34 +304,29 @@ const gammaClassMembers = [
   "Aadhav Manimurugan",
   "Aamir Mohammed",
   "Aashay Vishwakarma",
+  "Ajay Kumaran",
   "Aman Balam",
   "Ayushi Deshmukh",
-  "Ajay Kumaran",
-  "Bhavya Rayankula",
   "Ishaan Dhandapani",
   "Itbaan Alam",
   "Kavinram Senthil",
   "Meghana Pula",
   "Mekha Mathew",
-  "Mohammed Faadhil Khan",
+  "Mohammed Faadil Khan",
   "Noel Emmanuel",
   "Shreyas Ankolekar",
-  "Vadhanna Venkatakrishnan",
-  "Vignesh Selvam",
   "Venkat Sai Eshwar Varma Sagi",
+  "Vignesh Selvam",
 ].sort((a, b) => a.localeCompare(b));
 
 const deltaClassMembers = [
   "Aaron Gheevarghese",
-  "Abdul Qazzafi",
   "Abhinav Atluri",
-  "Aditya Dixit",
   "Anvi Siddabhattuni",
   "Ariha Kothari",
   "Arnav Jain",
   "Ayaan Khan",
   "Ayush Velhal",
-  "Jeevika Balaji",
   "Joel Philipose",
   "Krish Patel",
   "Nihita Soma",
@@ -344,6 +337,42 @@ const deltaClassMembers = [
   "Sachin Selvakumar",
   "Sahaj Dahal",
   "Simon Beyene",
+].sort((a, b) => a.localeCompare(b));
+
+const epsilonClassMembers = [
+  "Ashrita Dara",
+  "Bhavaneeth Parnapalli",
+  "Ethan Philipose",
+  "Jashanpreet Singh",
+  "Jiya Khurana",
+  "Lalith Keertipati",
+  "Navmi Srithaj",
+  "Om Pansuriya",
+  "Pranay Chintakunta",
+  "Prateek Banda",
+  "Shraddha Gangaram",
+  "Siri Kishore Dola",
+  "Tanmayi Addanki",
+  "Viraaj Singh",
+  "Yeshwanth Vajinapalli",
+].sort((a, b) => a.localeCompare(b));
+
+const zetaClassMembers = [
+  "Aarav Ashok",
+  "Aashini Chalasani",
+  "Afeef Zarraf",
+  "Anya Konda",
+  "Hemant Pacha",
+  "Jonathan Ebenezer",
+  "Kida Khanooni",
+  "Kushagra Mathur",
+  "Madhav Suri",
+  "Nirmal Shah",
+  "Onkar Bajwa",
+  "Pranav Cheedalla",
+  "Sam Paudel",
+  "Sanika Tripathi",
+  "Sreyas Chakka",
 ].sort((a, b) => a.localeCompare(b));
 
 const splitIntoColumns = (arr, columns) => {
@@ -362,6 +391,8 @@ const Brother = () => {
   const betaColumns = splitIntoColumns(betaClassMembers, 3);
   const gammaColumns = splitIntoColumns(gammaClassMembers, 3);
   const deltaColumns = splitIntoColumns(deltaClassMembers, 3);
+  const epsilonColumns = splitIntoColumns(epsilonClassMembers, 3);
+  const zetaColumns = splitIntoColumns(zetaClassMembers, 3);
 
   return (
     <div className="w-screen h-full bg-white pt-24 text-black">
@@ -496,7 +527,7 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Gamma Class
       </div>
-      <div className="flex justify-center mt-4 mb-20">
+      <div className="flex justify-center mt-4">
         {gammaColumns.map((column, index) => (
           <div key={index} className="mx-4">
             {column.map((member, idx) => (
@@ -511,8 +542,38 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Delta Class
       </div>
-      <div className="flex justify-center mt-4 mb-20">
+      <div className="flex justify-center mt-4">
         {deltaColumns.map((column, index) => (
+          <div key={index} className="mx-4">
+            {column.map((member, idx) => (
+              <div key={idx} className="m-2 text-center">
+                {member}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
+        Epsilon Class
+      </div>
+      <div className="flex justify-center mt-4">
+        {epsilonColumns.map((column, index) => (
+          <div key={index} className="mx-4">
+            {column.map((member, idx) => (
+              <div key={idx} className="m-2 text-center">
+                {member}
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
+        Zeta Class
+      </div>
+      <div className="flex justify-center mt-4 mb-20">
+        {zetaColumns.map((column, index) => (
           <div key={index} className="mx-4">
             {column.map((member, idx) => (
               <div key={idx} className="m-2 text-center">
