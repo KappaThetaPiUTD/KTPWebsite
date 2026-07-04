@@ -284,7 +284,7 @@ const activeMembers = [
   },
   {
     name: "Viraaj Singh",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190894/Brother%20Page/Actives/IMG_5549_yaalv0.jpg",
     linkedin: "",
   },
 ].sort((a, b) => a.name.localeCompare(b.name));
