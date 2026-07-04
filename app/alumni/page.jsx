@@ -15,7 +15,7 @@ const alumniMembers = [
   },
   {
     name: "Aashay Vishwakarma",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276762/IMG_6826_odqf9u.jpg",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683161/AashayHeadshot_n84axq.png",
     linkedin: "https://www.linkedin.com/in/aashayvishwakarma/",
   },
   {
@@ -25,7 +25,7 @@ const alumniMembers = [
   },
   {
     name: "Ajay Kumaran",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276806/P10238171_npaldi.jpg",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683119/image_10_misxan.png",
     linkedin: "https://www.linkedin.com/in/ajay-kumaran",
   },
   {
@@ -40,7 +40,7 @@ const alumniMembers = [
   },
   {
     name: "Avani Mehrotra",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683156/AvaniHeadshot_sxhzel.png",
     linkedin: "",
   },
   {
@@ -90,7 +90,7 @@ const alumniMembers = [
   },
   {
     name: "Mansi Cherukupally",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276747/IMG_4233_troejc.jpg",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683085/MansiHeadshot_kyrcjw.png",
     linkedin: "https://www.linkedin.com/in/mansi-cherukupally-b399a6214/",
   },
   {
@@ -140,7 +140,7 @@ const alumniMembers = [
   },
   {
     name: "Venkat Sai Eshwar Varma Sagi",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276762/IMG_6825_khcqhn.jpg",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683082/VenkatHeadshot_n9o2km.png",
     linkedin: "https://www.linkedin.com/in/venkat-sagi/",
   },
   {
