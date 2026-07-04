@@ -176,11 +176,6 @@ const activeMembers = [
     linkedin: "https://www.linkedin.com/in/seyyonrishiramesh/",
   },
   {
-    name: "Jeevika Balaji",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png", // Add Jeevika's image URL
-    linkedin: "https://www.linkedin.com/in/jeevika-balaji-a71b67240/",
-  },
-  {
     name: "Ayush Velhal",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190875/Brother%20Page/Actives/IMG_5569_ceoasl.jpg", // Add Ayush's image URL
     linkedin: "https://www.linkedin.com/in/ayush-velhal/",
