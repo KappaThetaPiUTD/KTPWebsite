@@ -9,13 +9,13 @@ const WhoWeIs = () => {
       style={{ scrollMarginTop: "6rem" }}
     >
       {/* Left Side: Image */}
-      <div className="flex-shrink-0 w-[90%] md:w-1/3 max-w-sm bg-white rounded-lg overflow-hidden border-[5px] border-white md:mr-6">
+      <div className="flex-shrink-0 w-[90%] md:w-1/2 max-w-lg bg-white rounded-lg overflow-hidden border-[5px] border-white md:mr-6">
         <Image
-          src="https://res.cloudinary.com/dha44tosd/image/upload/v1732829630/Assets%20for%20website/IMG_7602_1_xih7px.jpg" // Replace with your Cloudinary URL
+          src="https://res.cloudinary.com/dha44tosd/image/upload/v1783200474/Assets%20for%20website/who_we_are_spring26.jpg"
           alt="KTP Members"
           layout="responsive"
-          width={300}
-          height={300}
+          width={1600}
+          height={900}
           className="rounded-lg object-cover"
         />
       </div>
