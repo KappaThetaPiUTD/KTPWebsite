@@ -190,7 +190,7 @@ const CompanyCollage = () => {
       alt: "Microsoft",
     },
     {
-      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199437/Brother%20Page/Companies/snowflake.png",
+      src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783199724/Brother%20Page/Companies/snowflake.png",
       alt: "Snowflake",
     },
     {
@@ -306,7 +306,7 @@ const CompanyCollage = () => {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(-100%);
+            transform: translateX(-50%);
           }
         }
         .scroll:nth-child(2) {
