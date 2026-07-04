@@ -1,6 +1,5 @@
 import Image from "next/image";
 import React from "react";
-import { FaLinkedin } from "react-icons/fa";
 
 export const metadata = {
   title: "Kappa Theta Pi UTD - Brothers",
@@ -498,10 +497,9 @@ const Brother = () => {
                   href={member.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                >
-                  <FaLinkedin className="text-black text-4xl" />
-                </a>
+                  className="absolute inset-0"
+                
+              />
               )}
             </div>
             <div className="mt-2">{member.name}</div>
@@ -533,10 +531,9 @@ const Brother = () => {
                   href={member.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                >
-                  <FaLinkedin className="text-black text-4xl" />
-                </a>
+                  className="absolute inset-0"
+                
+              />
               )}
             </div>
             <div className="mt-2">{member.name}</div>
@@ -568,10 +565,9 @@ const Brother = () => {
                   href={member.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                >
-                  <FaLinkedin className="text-white text-4xl" />
-                </a>
+                  className="absolute inset-0"
+                
+              />
               )}
             </div>
             <div className="mt-2">{member.name}</div>
