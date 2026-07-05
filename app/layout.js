@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/footer";
 import PageTransition from "../components/PageTransition";
 import GoogleAnalytics from "../components/GoogleAnalytics";
+import Chatbot from "../components/Chatbot";
 import { ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -94,6 +95,7 @@ export default function RootLayout({ children }) {
         <Navbar />
         <PageTransition>{children}</PageTransition>
         <Footer />
+        <Chatbot />
         <ToastContainer
           closeOnClick
           closeButton={false}
