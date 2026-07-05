@@ -398,12 +398,12 @@ const Brother = () => {
             key={index}
             className="text-center"
           >
-            <div className="relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="group relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
               <Image
                 src={member.src}
                 alt={`${member.name} - ${member.position}`}
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               {member.linkedin && (
                 <a
@@ -430,12 +430,12 @@ const Brother = () => {
             key={index}
             className="text-center"
           >
-            <div className="relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="group relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
               <Image
                 src={member.src}
                 alt={`${member.name} - ${member.position}`}
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               {member.linkedin && (
                 <a
@@ -462,12 +462,12 @@ const Brother = () => {
             key={index}
             className="text-center"
           >
-            <div className="relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="group relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
               <Image
                 src={member.src}
                 alt={`${member.name}`}
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               {member.linkedin && (
                 <a

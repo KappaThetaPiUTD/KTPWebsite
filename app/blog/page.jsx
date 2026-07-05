@@ -70,7 +70,7 @@ export default function BlogPage() {
           {["all", "brothers", "alumni"].map((cat) => (
             <button 
               key={cat}
-              className={`px-4 py-2 rounded-lg ${filter === cat ? "bg-primary text-white" : "bg-gray-200 text-primary"}`}
+              className={`px-4 py-2 rounded-lg transition-colors duration-200 ${filter === cat ? "bg-primary text-white" : "bg-gray-200 text-primary hover:bg-gray-300"}`}
               onClick={() => setFilter(cat)}
             >
               {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -82,7 +82,7 @@ export default function BlogPage() {
           {["newest", "oldest"].map((method) => (
             <button 
               key={method}
-              className={`px-4 py-2 rounded-lg ${sortMethod === method ? "bg-primary text-white" : "bg-gray-200 text-primary"}`}
+              className={`px-4 py-2 rounded-lg transition-colors duration-200 ${sortMethod === method ? "bg-primary text-white" : "bg-gray-200 text-primary hover:bg-gray-300"}`}
               onClick={() => setSortMethod(method)}
             >
               {method.charAt(0).toUpperCase() + method.slice(1)}

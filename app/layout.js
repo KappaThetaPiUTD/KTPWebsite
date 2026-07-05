@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import * as React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/footer";
+import PageTransition from "../components/PageTransition";
 import { ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -48,7 +49,7 @@ export default function RootLayout({ children }) {
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <body className={inter.className} style={{ overflowX: "hidden" }}>
         <Navbar />
-        {children}
+        <PageTransition>{children}</PageTransition>
         <Footer />
         <ToastContainer
           closeOnClick

@@ -51,7 +51,7 @@ const Letter = () => {
         and please don’t hesitate to reach out to our executive board through
         the contact page if you have any questions. You can also email us at{" "}
         <a
-          className="underline text-white hover:text-black"
+          className="underline text-white hover:text-black transition-colors duration-200"
           href="mailto:kappathetapiutd@gmail.com"
         >
           kappathetapiutd@gmail.com

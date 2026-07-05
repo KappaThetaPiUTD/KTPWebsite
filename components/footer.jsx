@@ -16,16 +16,16 @@ const Footer = () => {
         <div className="flex items-center">
           <div className="flex flex-col sm:flex-row items-center ml-0 sm:ml-5 mt-5 sm:mt-0">
             <a href="https://www.linkedin.com/company/ktputd" target="_blank" rel="noopener noreferrer">
-              <FaLinkedin className="mr-0 sm:mr-[2px] text-[#ffffff]" size={40} />
+              <FaLinkedin className="mr-0 sm:mr-[2px] text-[#ffffff] transition-transform duration-300 hover:scale-125" size={40} />
             </a>
             <a href="https://www.instagram.com/utdktp/" target="_blank" rel="noopener noreferrer" className="sm:ml-5">
-              <FaInstagram className="mr-0 sm:mr-[2px] text-[#ffffff]" size={40} />
+              <FaInstagram className="mr-0 sm:mr-[2px] text-[#ffffff] transition-transform duration-300 hover:scale-125" size={40} />
             </a>
             <a href="mailto:kappathetapiutd@gmail.com" className="sm:ml-5">
-              <FaEnvelope className="mr-0 sm:mr-[2px] text-[#ffffff]" size={40} />
+              <FaEnvelope className="mr-0 sm:mr-[2px] text-[#ffffff] transition-transform duration-300 hover:scale-125" size={40} />
             </a>
             <a href="https://github.com/KappaThetaPiUTD" className="sm:ml-5">
-              <FaGithub className="mr-0 sm:mr-[2px] text-[#ffffff]" size={40} />
+              <FaGithub className="mr-0 sm:mr-[2px] text-[#ffffff] transition-transform duration-300 hover:scale-125" size={40} />
             </a>
           </div>
         </div>
