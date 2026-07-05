@@ -392,11 +392,11 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex text-center justify-center items-center">
         Executive Board
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8 mt-8 justify-items-center max-w-5xl mx-auto px-4">
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-8 mt-8 max-w-5xl mx-auto px-4">
         {executiveBoardMembers.map((member, index) => (
           <div
             key={index}
-            className="text-center"
+            className="w-32 sm:w-40 text-center"
           >
             <div className="group relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
               <Image
@@ -424,11 +424,11 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex text-center justify-center items-center">
         Director Board
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8 mt-8 justify-items-center max-w-5xl mx-auto px-4">
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-8 mt-8 max-w-5xl mx-auto px-4">
         {directorBoardMembers.map((member, index) => (
           <div
             key={index}
-            className="text-center"
+            className="w-32 sm:w-40 text-center"
           >
             <div className="group relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
               <Image
@@ -456,11 +456,11 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-16">
         Actives
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8 mt-8 justify-items-center max-w-5xl mx-auto px-4">
+      <div className="flex flex-wrap justify-center gap-x-4 gap-y-8 mt-8 max-w-5xl mx-auto px-4">
         {activeMembers.map((member, index) => (
           <div
             key={index}
-            className="text-center"
+            className="w-32 sm:w-40 text-center"
           >
             <div className="group relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
               <Image
