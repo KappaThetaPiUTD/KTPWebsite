@@ -25,13 +25,14 @@ const Hero = () => {
       </div>
 
       {/* Learn More Section */}
-      <div
-        className="absolute text-lg sm:text-xl md:text-2xl text-accent font-poppins left-1/2 transform -translate-x-1/2 bottom-8 sm:bottom-12 lg:bottom-16 flex items-center gap-x-2 cursor-pointer"
+      <button
+        type="button"
+        className="absolute text-lg sm:text-xl md:text-2xl text-accent font-poppins left-1/2 transform -translate-x-1/2 bottom-8 sm:bottom-12 lg:bottom-16 flex items-center gap-x-2 cursor-pointer bg-transparent border-0"
         onClick={handleScroll}
       >
         <span>Learn more about us</span>
         <FaArrowDown className="text-accent text-lg sm:text-xl md:text-2xl" />
-      </div>
+      </button>
     </div>
   );
 };

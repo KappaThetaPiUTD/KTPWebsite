@@ -179,6 +179,7 @@ const Alumni = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="absolute inset-0"
+                  aria-label={`${member.name} LinkedIn profile`}
                 
               />
               )}

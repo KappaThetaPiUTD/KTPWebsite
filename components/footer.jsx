@@ -15,16 +15,16 @@ const Footer = () => {
       <div className="flex flex-col sm:flex-row items-center w-full sm:w-auto">
         <div className="flex items-center">
           <div className="flex flex-col sm:flex-row items-center ml-0 sm:ml-5 mt-5 sm:mt-0">
-            <a href="https://www.linkedin.com/company/ktputd" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.linkedin.com/company/ktputd" target="_blank" rel="noopener noreferrer" aria-label="KTP on LinkedIn">
               <FaLinkedin className="mr-0 sm:mr-[2px] text-[#ffffff] transition-transform duration-300 hover:scale-125" size={40} />
             </a>
-            <a href="https://www.instagram.com/utdktp/" target="_blank" rel="noopener noreferrer" className="sm:ml-5">
+            <a href="https://www.instagram.com/utdktp/" target="_blank" rel="noopener noreferrer" className="sm:ml-5" aria-label="KTP on Instagram">
               <FaInstagram className="mr-0 sm:mr-[2px] text-[#ffffff] transition-transform duration-300 hover:scale-125" size={40} />
             </a>
-            <a href="mailto:kappathetapiutd@gmail.com" className="sm:ml-5">
+            <a href="mailto:kappathetapiutd@gmail.com" className="sm:ml-5" aria-label="Email KTP">
               <FaEnvelope className="mr-0 sm:mr-[2px] text-[#ffffff] transition-transform duration-300 hover:scale-125" size={40} />
             </a>
-            <a href="https://github.com/KappaThetaPiUTD" className="sm:ml-5">
+            <a href="https://github.com/KappaThetaPiUTD" target="_blank" rel="noopener noreferrer" className="sm:ml-5" aria-label="KTP on GitHub">
               <FaGithub className="mr-0 sm:mr-[2px] text-[#ffffff] transition-transform duration-300 hover:scale-125" size={40} />
             </a>
           </div>

@@ -57,16 +57,24 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Icon */}
-        <div onClick={handleNav} className="md:hidden z-50">
+        <button
+          type="button"
+          onClick={handleNav}
+          className="md:hidden z-50"
+          aria-label={nav ? "Close menu" : "Open menu"}
+          aria-expanded={nav}
+          aria-controls="mobile-menu"
+        >
           {nav ? (
             <AiOutlineClose size={20} className="text-[#000000]" />
           ) : (
             <AiOutlineMenu size={20} className="text-[#000000]" />
           )}
-        </div>
+        </button>
 
         {/* Mobile Nav */}
         <ul
+          id="mobile-menu"
           className={`absolute md:hidden h-screen w-full top-24 bottom-0 right-0 ease-in-out transition-transform transform duration-700 bg-[#FFFFFF] z-50 ${
             nav ? "translate-x-0" : "translate-x-full"
           }`}
