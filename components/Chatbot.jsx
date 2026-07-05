@@ -106,7 +106,7 @@ const Chatbot = () => {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close chat assistant" : "Open chat assistant"}
         aria-expanded={open}
-        style={{ transform: lift ? `translateY(-${lift}px)` : undefined }}
+        style={{ transform: lift && !open ? `translateY(-${lift}px)` : undefined }}
         className="fixed bottom-5 right-5 z-[60] bg-primary text-white rounded-full p-4 shadow-lg hover:scale-110 transition-transform"
       >
         {open ? <FaTimes size={22} /> : <FaCommentDots size={22} />}
@@ -116,7 +116,6 @@ const Chatbot = () => {
         <div
           role="dialog"
           aria-label="KTP chat assistant"
-          style={{ transform: lift ? `translateY(-${lift}px)` : undefined }}
           className="fixed bottom-24 right-5 z-[60] flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl w-[calc(100vw-2.5rem)] sm:w-96 h-[70vh] sm:h-[30rem]"
         >
           <div className="flex items-center justify-between bg-primary px-4 py-3 font-poppins font-semibold text-white">
