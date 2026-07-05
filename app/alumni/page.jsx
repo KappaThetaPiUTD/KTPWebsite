@@ -160,14 +160,13 @@ const Alumni = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex text-center justify-center items-center">
         Alumni
       </div>
-      <div className="flex flex-wrap justify-center mt-8 mb-20">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8 mt-8 mb-20 justify-items-center max-w-5xl mx-auto px-4">
         {alumniMembers.map((member, index) => (
           <div
             key={index}
-            className="m-4 text-center"
-            style={{ maxWidth: "calc(100% - 2rem)" }}
+            className="text-center"
           >
-            <div className="relative w-40 h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="relative w-full max-w-[10rem] aspect-[10/13] mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
                 alt={`${member.name}`}

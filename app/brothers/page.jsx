@@ -386,38 +386,19 @@ const zetaClassMembers = [
   "Sreyas Chakka",
 ].sort((a, b) => a.localeCompare(b));
 
-const splitIntoColumns = (arr, columns) => {
-  const result = [];
-  const columnSize = Math.ceil(arr.length / columns);
-
-  for (let i = 0; i < columns; i++) {
-    result.push(arr.slice(i * columnSize, (i + 1) * columnSize));
-  }
-
-  return result;
-};
-
 const Brother = () => {
-  const alphaColumns = splitIntoColumns(alphaClassMembers, 3);
-  const betaColumns = splitIntoColumns(betaClassMembers, 3);
-  const gammaColumns = splitIntoColumns(gammaClassMembers, 3);
-  const deltaColumns = splitIntoColumns(deltaClassMembers, 3);
-  const epsilonColumns = splitIntoColumns(epsilonClassMembers, 3);
-  const zetaColumns = splitIntoColumns(zetaClassMembers, 3);
-
   return (
     <div className="w-full h-full bg-white pt-24 text-black">
       <div className="text-primary text-header1 font-bold font-poppins flex text-center justify-center items-center">
         Executive Board
       </div>
-      <div className="flex flex-wrap justify-center mt-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8 mt-8 justify-items-center max-w-5xl mx-auto px-4">
         {executiveBoardMembers.map((member, index) => (
           <div
             key={index}
-            className="m-4 text-center"
-            style={{ maxWidth: "calc(100% - 2rem)" }}
+            className="text-center"
           >
-            <div className="relative w-40 h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="relative w-full max-w-[10rem] aspect-[10/13] mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
                 alt={`${member.name} - ${member.position}`}
@@ -443,14 +424,13 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex text-center justify-center items-center">
         Director Board
       </div>
-      <div className="flex flex-wrap justify-center mt-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8 mt-8 justify-items-center max-w-5xl mx-auto px-4">
         {directorBoardMembers.map((member, index) => (
           <div
             key={index}
-            className="m-4 text-center"
-            style={{ maxWidth: "calc(100% - 2rem)" }}
+            className="text-center"
           >
-            <div className="relative w-40 h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="relative w-full max-w-[10rem] aspect-[10/13] mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
                 alt={`${member.name} - ${member.position}`}
@@ -476,14 +456,13 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-16">
         Actives
       </div>
-      <div className="flex flex-wrap justify-center mt-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-8 mt-8 justify-items-center max-w-5xl mx-auto px-4">
         {activeMembers.map((member, index) => (
           <div
             key={index}
-            className="m-4 text-center"
-            style={{ maxWidth: "calc(100% - 2rem)" }}
+            className="text-center"
           >
-            <div className="relative w-40 h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="relative w-full max-w-[10rem] aspect-[10/13] mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
                 alt={`${member.name}`}
@@ -508,14 +487,10 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Alpha Class
       </div>
-      <div className="flex justify-center mt-4">
-        {alphaColumns.map((column, index) => (
-          <div key={index} className="mx-4">
-            {column.map((member, idx) => (
-              <div key={idx} className="m-2 text-center">
-                {member}
-              </div>
-            ))}
+      <div className="columns-2 sm:columns-3 gap-8 max-w-2xl mx-auto mt-4 px-4">
+        {alphaClassMembers.map((member, idx) => (
+          <div key={idx} className="m-2 text-center break-inside-avoid">
+            {member}
           </div>
         ))}
       </div>
@@ -523,14 +498,10 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Beta Class
       </div>
-      <div className="flex justify-center mt-4">
-        {betaColumns.map((column, index) => (
-          <div key={index} className="mx-4">
-            {column.map((member, idx) => (
-              <div key={idx} className="m-2 text-center">
-                {member}
-              </div>
-            ))}
+      <div className="columns-2 sm:columns-3 gap-8 max-w-2xl mx-auto mt-4 px-4">
+        {betaClassMembers.map((member, idx) => (
+          <div key={idx} className="m-2 text-center break-inside-avoid">
+            {member}
           </div>
         ))}
       </div>
@@ -538,14 +509,10 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Gamma Class
       </div>
-      <div className="flex justify-center mt-4">
-        {gammaColumns.map((column, index) => (
-          <div key={index} className="mx-4">
-            {column.map((member, idx) => (
-              <div key={idx} className="m-2 text-center">
-                {member}
-              </div>
-            ))}
+      <div className="columns-2 sm:columns-3 gap-8 max-w-2xl mx-auto mt-4 px-4">
+        {gammaClassMembers.map((member, idx) => (
+          <div key={idx} className="m-2 text-center break-inside-avoid">
+            {member}
           </div>
         ))}
       </div>
@@ -553,14 +520,10 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Delta Class
       </div>
-      <div className="flex justify-center mt-4">
-        {deltaColumns.map((column, index) => (
-          <div key={index} className="mx-4">
-            {column.map((member, idx) => (
-              <div key={idx} className="m-2 text-center">
-                {member}
-              </div>
-            ))}
+      <div className="columns-2 sm:columns-3 gap-8 max-w-2xl mx-auto mt-4 px-4">
+        {deltaClassMembers.map((member, idx) => (
+          <div key={idx} className="m-2 text-center break-inside-avoid">
+            {member}
           </div>
         ))}
       </div>
@@ -568,14 +531,10 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Epsilon Class
       </div>
-      <div className="flex justify-center mt-4">
-        {epsilonColumns.map((column, index) => (
-          <div key={index} className="mx-4">
-            {column.map((member, idx) => (
-              <div key={idx} className="m-2 text-center">
-                {member}
-              </div>
-            ))}
+      <div className="columns-2 sm:columns-3 gap-8 max-w-2xl mx-auto mt-4 px-4">
+        {epsilonClassMembers.map((member, idx) => (
+          <div key={idx} className="m-2 text-center break-inside-avoid">
+            {member}
           </div>
         ))}
       </div>
@@ -583,14 +542,10 @@ const Brother = () => {
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center items-center mt-14">
         Zeta Class
       </div>
-      <div className="flex justify-center mt-4 mb-20">
-        {zetaColumns.map((column, index) => (
-          <div key={index} className="mx-4">
-            {column.map((member, idx) => (
-              <div key={idx} className="m-2 text-center">
-                {member}
-              </div>
-            ))}
+      <div className="columns-2 sm:columns-3 gap-8 max-w-2xl mx-auto mt-4 mb-20 px-4">
+        {zetaClassMembers.map((member, idx) => (
+          <div key={idx} className="m-2 text-center break-inside-avoid">
+            {member}
           </div>
         ))}
       </div>
