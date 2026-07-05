@@ -10,7 +10,7 @@ const executiveBoardMembers = [
   {
     name: "Kavinram Senthil",
     position: "President",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/c_thumb,g_face,ar_5:6,z_0.45/v1771190975/Brother%20Page/Actives/IMG_5423_fxoxkr.jpg",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/c_thumb,g_face,ar_5:6,z_0.75/v1771190975/Brother%20Page/Actives/IMG_5423_fxoxkr.jpg",
     linkedin: "https://www.linkedin.com/in/kavinram-senthil-640349249/",
   },
   {
