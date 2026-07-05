@@ -46,11 +46,11 @@ const ContactUs = () => {
         name="description"
         content="Have a question or concern?"
       />
-      <div className="flex flex-col w-screen h-[1100px] bg-white items-center pt-24">
+      <div className="flex flex-col w-full min-h-screen bg-white items-center pt-24 pb-20">
         <div className="text-primary font-poppins text-header1 font-bold mb-[0px]">
           Contact Us
         </div>
-        <div className="text-black text-header4 md:text-header2">
+        <div className="text-black text-header4 md:text-header2 text-center px-4">
           Have a question or concern?
         </div>
         <Inputs inputState={state} inputDispatch={dispatch} />

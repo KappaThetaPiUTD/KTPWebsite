@@ -54,7 +54,7 @@ const Gallery = () => {
   ];
 
   return (
-    <div className="w-screen h-full bg-white pt-24">
+    <div className="w-full h-full bg-white pt-24">
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center">
         Gallery
       </div>
@@ -71,7 +71,7 @@ const Gallery = () => {
                 width={500}
                 height={300}
                 
-                className="transition-all duration-300 rounded-lg group-hover:brightness-100"
+                className="w-full h-auto transition-all duration-300 rounded-lg group-hover:brightness-100"
               />
               <div className="absolute top-4 right-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                 <a href={img.src} download={img.alt} className="text-white rounded-full p-2 bg-gray-800 bg-opacity-75 hover:bg-opacity-100">

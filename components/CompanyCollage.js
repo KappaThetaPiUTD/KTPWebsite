@@ -247,7 +247,7 @@ const CompanyCollage = () => {
   const logosPerRow = Math.ceil(companyLogos.length / rows);
 
   return (
-    <div className="w-screen h-full flex flex-col justify-center items-center p-6 bg-white">
+    <div className="w-full h-full flex flex-col justify-center items-center p-6 bg-white">
       <h2 className="text-header1 font-bold font-poppins text-primary text-center mb-6">
         Our Companies
       </h2>

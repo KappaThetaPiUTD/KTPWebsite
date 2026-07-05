@@ -5,7 +5,7 @@ const WhoWeIs = () => {
   return (
     <div
       id="who-we-are"
-      className="flex flex-col md:flex-row items-center justify-center w-screen h-1000 p-8 bg-primary"
+      className="flex flex-col md:flex-row items-center justify-center w-full p-8 bg-primary"
       style={{ scrollMarginTop: "6rem" }}
     >
       {/* Left Side: Image */}

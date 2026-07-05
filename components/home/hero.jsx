@@ -10,7 +10,7 @@ const Hero = () => {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-white"></div>
 

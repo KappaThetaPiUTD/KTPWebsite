@@ -406,7 +406,7 @@ const Brother = () => {
   const zetaColumns = splitIntoColumns(zetaClassMembers, 3);
 
   return (
-    <div className="w-screen h-full bg-white pt-24 text-black">
+    <div className="w-full h-full bg-white pt-24 text-black">
       <div className="text-primary text-header1 font-bold font-poppins flex text-center justify-center items-center">
         Executive Board
       </div>

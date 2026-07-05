@@ -6,8 +6,8 @@ const Input = ({ inputState, inputDispatch }) => {
     });
 
   return (
-    <div className="font-poppins">
-      <div className="flex flex-col md:flex-row md:items-start text-[16px] md:text-[20px] text-black font-semibold mt-[32px] md:mt-[32px] w-[75vw]">
+    <div className="font-poppins w-[90%] max-w-[640px] mx-auto">
+      <div className="flex flex-col md:flex-row md:items-start text-[16px] md:text-[20px] text-black font-semibold mt-[32px] md:mt-[32px] w-full">
         <div className="flex flex-col w-full md:w-1/2">
           <p className="text-black ml-[2px]">First Name</p>
           <input
