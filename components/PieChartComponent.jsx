@@ -94,7 +94,7 @@ const PieChartComponent = () => (
     </h2>
     <div className="flex flex-col md:flex-row justify-center md:gap-8">
       <div className="text-center mb-8 md:mb-0">
-        <h3 className="text-white text-header4 font-bold font-poppins mb-4">
+        <h3 className="text-black text-header4 font-bold font-poppins mb-4">
           Academic Year
         </h3>
         <div
@@ -110,7 +110,7 @@ const PieChartComponent = () => (
         </div>
       </div>
       <div className="text-center">
-        <h3 className="text-white text-header4 font-bold font-poppins mb-4">
+        <h3 className="text-black text-header4 font-bold font-poppins mb-4">
           Major
         </h3>
         <div

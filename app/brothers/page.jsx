@@ -398,7 +398,7 @@ const Brother = () => {
             key={index}
             className="text-center"
           >
-            <div className="relative w-full max-w-[10rem] aspect-[10/13] mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
                 alt={`${member.name} - ${member.position}`}
@@ -430,7 +430,7 @@ const Brother = () => {
             key={index}
             className="text-center"
           >
-            <div className="relative w-full max-w-[10rem] aspect-[10/13] mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
                 alt={`${member.name} - ${member.position}`}
@@ -462,7 +462,7 @@ const Brother = () => {
             key={index}
             className="text-center"
           >
-            <div className="relative w-full max-w-[10rem] aspect-[10/13] mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
                 alt={`${member.name}`}
