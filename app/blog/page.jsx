@@ -8,12 +8,26 @@ export default function BlogPage() {
   const [posts, setPosts] = useState([]);
   const [sortMethod, setSortMethod] = useState("newest");
   const [filter, setFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const res = await fetch("/api/blog");
-      const data = await res.json();
-      setPosts(Array.isArray(data) ? data : data?.posts || []);
+      try {
+        const res = await fetch("/api/blog");
+        const data = await res.json();
+        if (!res.ok || (data && data.error)) {
+          setError(true);
+          setPosts([]);
+        } else {
+          setPosts(Array.isArray(data) ? data : data?.posts || []);
+        }
+      } catch (err) {
+        setError(true);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchPosts();
   }, []);
@@ -77,6 +91,21 @@ export default function BlogPage() {
         </div>
       </div>
 
+      {loading ? (
+        <div className="w-full text-center text-primary text-lg py-20 font-light">
+          Loading posts…
+        </div>
+      ) : error ? (
+        <div className="w-full text-center text-primary text-lg py-20 font-light">
+          We couldn&apos;t load the blog right now. Please check back soon.
+        </div>
+      ) : sortedPosts.length === 0 ? (
+        <div className="w-full text-center text-primary text-lg py-20 font-light">
+          {posts.length === 0
+            ? "No blog posts yet — check back soon!"
+            : "No posts match this filter."}
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4 md:px-8 w-full">
         {sortedPosts.map((post) => (
           <Link href={`/blog/${post.slug || post.id}`} key={post.id} className="group">
@@ -132,7 +161,7 @@ export default function BlogPage() {
             </h3>
 
             <p className="text-green-800 mb-1 flex-grow font-light leading-relaxed">
-              {post.content.substring(0, 100)}...
+              {(post.content || "").substring(0, 100)}...
               <span className="ml-2 text-green-900 font-medium group-hover:text-green-800 transition-colors">
                 Read more →
               </span>
@@ -155,6 +184,7 @@ export default function BlogPage() {
           </Link>
         ))}
       </div>
+      )}
     </div>
   );
 
