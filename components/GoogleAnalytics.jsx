@@ -4,7 +4,9 @@ import Script from "next/script";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef } from "react";
 
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+// GA4 Measurement ID. Public by design (visible in page source), so it's safe
+// to commit. Can be overridden per-environment via NEXT_PUBLIC_GA_ID.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-BSMVDKXTBF";
 
 function PageViewTracker() {
   const pathname = usePathname();
