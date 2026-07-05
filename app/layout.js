@@ -3,6 +3,7 @@ import * as React from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/footer";
 import PageTransition from "../components/PageTransition";
+import GoogleAnalytics from "../components/GoogleAnalytics";
 import { ToastContainer } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -48,6 +49,7 @@ export default function RootLayout({ children }) {
       </style>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <body className={inter.className} style={{ overflowX: "hidden" }}>
+        <GoogleAnalytics />
         <Navbar />
         <PageTransition>{children}</PageTransition>
         <Footer />
