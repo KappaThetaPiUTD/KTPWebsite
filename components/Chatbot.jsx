@@ -13,8 +13,37 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lift, setLift] = useState(0);
   const endRef = useRef(null);
   const inputRef = useRef(null);
+
+  // Lift the widget above the footer when it scrolls into view so it never
+  // covers the footer's social links.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const footer = document.querySelector("footer");
+    if (!footer) return;
+
+    let raf = null;
+    const update = () => {
+      raf = null;
+      const rect = footer.getBoundingClientRect();
+      const overlap = window.innerHeight - rect.top;
+      setLift(overlap > 0 ? Math.round(overlap) + 16 : 0);
+    };
+    const onScroll = () => {
+      if (raf == null) raf = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf != null) cancelAnimationFrame(raf);
+    };
+  }, []);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -77,6 +106,7 @@ const Chatbot = () => {
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close chat assistant" : "Open chat assistant"}
         aria-expanded={open}
+        style={{ transform: lift ? `translateY(-${lift}px)` : undefined }}
         className="fixed bottom-5 right-5 z-[60] bg-primary text-white rounded-full p-4 shadow-lg hover:scale-110 transition-transform"
       >
         {open ? <FaTimes size={22} /> : <FaCommentDots size={22} />}
@@ -86,6 +116,7 @@ const Chatbot = () => {
         <div
           role="dialog"
           aria-label="KTP chat assistant"
+          style={{ transform: lift ? `translateY(-${lift}px)` : undefined }}
           className="fixed bottom-24 right-5 z-[60] flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl w-[calc(100vw-2.5rem)] sm:w-96 h-[70vh] sm:h-[30rem]"
         >
           <div className="flex items-center justify-between bg-primary px-4 py-3 font-poppins font-semibold text-white">
