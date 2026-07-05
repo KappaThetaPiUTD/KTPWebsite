@@ -167,7 +167,7 @@ const Alumni = () => {
             className="m-4 text-center"
             style={{ maxWidth: "calc(100% - 2rem)" }}
           >
-            <div className="relative w-40 h-40 mx-auto bg-gray-400 rounded-lg overflow-hidden">
+            <div className="relative w-40 h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden">
               <Image
                 src={member.src}
                 alt={`${member.name}`}
