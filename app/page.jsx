@@ -6,7 +6,8 @@ import CompanyCollage from "../components/CompanyCollage";
 
 export const metadata = {
   title: "Kappa Theta Pi UTD - Home",
-  description: "Kappa Theta Pi Descripton",
+  description:
+    "Kappa Theta Pi (KTP) Mu Chapter at UT Dallas — a co-ed professional technology fraternity building technical skills, professional growth, and lifelong community.",
 };
 
 export default function Home() {

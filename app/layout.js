@@ -18,6 +18,23 @@ const OG_IMAGE =
 const SITE_DESCRIPTION =
   "Kappa Theta Pi (KTP) Mu Chapter at UT Dallas - a professional technology fraternity building technical skills, professional growth, and lifelong community.";
 
+const ORG_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Kappa Theta Pi - Mu Chapter",
+  alternateName: "KTP UTD",
+  url: SITE_URL,
+  logo: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+  description: SITE_DESCRIPTION,
+  email: "kappathetapiutd@gmail.com",
+  foundingLocation: "The University of Texas at Dallas",
+  sameAs: [
+    "https://www.instagram.com/utdktp/",
+    "https://www.linkedin.com/company/ktputd",
+    "https://github.com/KappaThetaPiUTD",
+  ],
+};
+
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: "Kappa Theta Pi UTD",
@@ -91,6 +108,10 @@ export default function RootLayout({ children }) {
       </style>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <body className={inter.className} style={{ overflowX: "hidden" }}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(ORG_SCHEMA) }}
+        />
         <GoogleAnalytics />
         <Navbar />
         <PageTransition>{children}</PageTransition>
