@@ -18,7 +18,7 @@ architecture and the common maintenance flows.
 
 ## The Gemini API key
 
-- Model: `gemini-2.5-flash` (free tier). Thinking is disabled so replies aren't truncated.
+- Model: `gemini-2.5-flash-lite` (free tier — 15 req/min, 1000 req/day). Thinking is disabled so replies aren't truncated. Overridable via the `GEMINI_MODEL` env var.
 - Stored as the **`GEMINI_API_KEY`** environment variable in Vercel (Settings -> Environment Variables). **Never** committed to the repo, and **not** prefixed `NEXT_PUBLIC_` (must stay server-only).
 - **Cost:** free tier only. As long as no billing account is attached to the Google Cloud project, it can't be charged; at the limit, requests just return an error.
 

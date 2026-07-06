@@ -63,7 +63,7 @@ export async function POST(request) {
       parts: [{ text: m.text }],
     }));
 
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   try {
@@ -73,46 +73,54 @@ export async function POST(request) {
       .filter(Boolean)
       .join("\n\n");
 
-    const res = await fetch(url, {
+    const payload = {
+      systemInstruction: { parts: [{ text: systemText }] },
+      contents,
+      generationConfig: {
+        temperature: 0.6,
+        maxOutputTokens: 600,
+        thinkingConfig: { thinkingBudget: 0 },
+      },
+    };
+
+    // Retry once on transient rate-limit / unavailable responses.
+    let res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemText }] },
-        contents,
-        generationConfig: {
-          temperature: 0.6,
-          maxOutputTokens: 600,
-          thinkingConfig: { thinkingBudget: 0 },
-        },
-      }),
+      body: JSON.stringify(payload),
     });
+    if (res.status === 429 || res.status === 503) {
+      await new Promise((r) => setTimeout(r, 1500));
+      res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
 
     if (!res.ok) {
       const detail = await res.text();
       console.error("Gemini API error:", res.status, detail);
+      const busy = res.status === 429;
       return Response.json(
         {
-          reply:
-            "Sorry, I'm having trouble responding right now. Please try again, or email kappathetapiutd@gmail.com.",
-          _debug: { status: res.status, detail: detail.slice(0, 300) },
+          reply: busy
+            ? "I'm getting a lot of questions right now — please try again in a moment, or email kappathetapiutd@gmail.com."
+            : "Sorry, I'm having trouble responding right now. Please try again, or email kappathetapiutd@gmail.com.",
         },
         { status: 200 }
       );
     }
 
     const data = await res.json();
-    const cand = data?.candidates?.[0];
     const reply =
-      cand?.content?.parts
+      data?.candidates?.[0]?.content?.parts
         ?.map((p) => p.text)
         .filter(Boolean)
         .join("") ||
       "Sorry, I didn't catch that. Could you rephrase, or email kappathetapiutd@gmail.com?";
 
-    return Response.json(
-      { reply, _debug: { finishReason: cand?.finishReason || null } },
-      { status: 200 }
-    );
+    return Response.json({ reply }, { status: 200 });
   } catch (err) {
     console.error("Chat route error:", err);
     return Response.json(

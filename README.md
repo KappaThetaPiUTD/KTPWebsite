@@ -56,7 +56,7 @@ Gemini API keys **don't expire** — you only need to replace the key if it is l
 3. Redeploy (Deployments → ⋯ → Redeploy).
 4. Optionally delete the old key in AI Studio.
 
-Optional env override: `GEMINI_MODEL` (defaults to `gemini-2.5-flash`).
+Optional env override: `GEMINI_MODEL` (defaults to `gemini-2.5-flash-lite`).
 
 ### Knowledge base (Supabase)
 
