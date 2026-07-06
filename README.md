@@ -58,6 +58,15 @@ Gemini API keys **don't expire** — you only need to replace the key if it is l
 
 Optional env override: `GEMINI_MODEL` (defaults to `gemini-2.5-flash`).
 
+### Knowledge base (Supabase)
+
+Beyond its built-in KTP facts and the live board roster (`lib/roster.js`), the chatbot pulls extra knowledge from a `knowledge` table in the **KTP Blog** Supabase project (`lib/knowledge.js`). Rows are injected into the AI's context using lightweight keyword retrieval with a character budget, so large documents (e.g. the constitution) only load when relevant.
+
+- **Add/edit knowledge:** Supabase dashboard → KTP Blog project → Table Editor → `knowledge` → add a row (`title`, `content`). Set `is_active` to false to hide a row. Changes appear in the bot within ~5 minutes (cache); no redeploy needed.
+- **Only store PUBLIC-safe info** — the chatbot speaks it to any visitor and the table is readable via the public anon key. Do not store private member data or anything confidential.
+- The current board roster is the sole source of truth for who holds a position; names appearing in stored documents are treated as historical.
+
+
 ## Analytics
 
 Google Analytics 4 is wired in via `components/GoogleAnalytics.jsx`. The Measurement ID (`G-…`, which is public by design) is set as a default in code and can be overridden per-environment with the `NEXT_PUBLIC_GA_ID` env var.
