@@ -1,7 +1,6 @@
 import Portrait from "../../components/image";
 import Letter from "../../components/paragraphs";
 import Quote from "../../components/slogan";
-import PieChartComponent from "../../components/PieChartComponent";
 
 export const metadata = {
   title: "Kappa Theta Pi UTD - About Us",
@@ -52,11 +51,6 @@ const AboutUs = () => {
             </div>
             <Letter />
           </div>
-        </div>
-
-        {/* Pie Chart Section */}
-        <div className="flex flex-row justify-center pt-10 pb-24">
-          <PieChartComponent />
         </div>
       </div>
     </div>

@@ -11,6 +11,11 @@ export const metadata = {
 
 const activeMembers = [
   {
+    name: "Mekha Mathew",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    linkedin: "",
+  },
+  {
     name: "Ruthvik Penmatsa",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190823/Brother%20Page/Actives/IMG_5706_pehj8h.jpg",
     linkedin: "https://www.linkedin.com/in/ruthvikpenmatsa/",
@@ -298,6 +303,8 @@ const Brother = () => {
                 src={member.src}
                 alt={`${member.name} - ${member.position}`}
                 fill
+                sizes="(max-width: 640px) 128px, 160px"
+                quality={90}
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               {member.linkedin && (
@@ -331,6 +338,8 @@ const Brother = () => {
                 src={member.src}
                 alt={`${member.name} - ${member.position}`}
                 fill
+                sizes="(max-width: 640px) 128px, 160px"
+                quality={90}
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               {member.linkedin && (
@@ -364,6 +373,8 @@ const Brother = () => {
                 src={member.src}
                 alt={`${member.name}`}
                 fill
+                sizes="(max-width: 640px) 128px, 160px"
+                quality={90}
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               {member.linkedin && (

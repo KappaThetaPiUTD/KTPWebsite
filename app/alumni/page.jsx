@@ -171,6 +171,8 @@ const Alumni = () => {
                 src={member.src}
                 alt={`${member.name}`}
                 fill
+                sizes="(max-width: 640px) 128px, 160px"
+                quality={90}
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               {member.linkedin && (
