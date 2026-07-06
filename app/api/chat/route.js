@@ -1,4 +1,5 @@
 import { executiveBoardMembers, directorBoardMembers } from "../../../lib/roster";
+import { getKnowledge } from "../../../lib/knowledge";
 
 const LEADERSHIP = [
   "Current KTP Mu Chapter leadership (Spring 2026):",
@@ -21,6 +22,7 @@ Key facts you can use:
 
 Rules:
 - Use the leadership roster provided below to answer questions about who holds a specific position (e.g., "who is the VP of Technology?"). Give the person's name.
+- Use the additional knowledge base (if provided below) to answer questions about recruitment, events, policies, and chapter details.
 - For people or roles not listed in the roster, or other details you do not know (specific dates, application status, full member list), say so honestly and direct them to the Brothers/Alumni pages or email kappathetapiutd@gmail.com.
 - Never invent facts, dates, or names.
 - Stay on topics related to KTP and UT Dallas student life.`;
@@ -64,11 +66,16 @@ export async function POST(request) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   try {
+    const knowledge = await getKnowledge();
+    const systemText = [SYSTEM_PROMPT, LEADERSHIP, knowledge]
+      .filter(Boolean)
+      .join("\n\n");
+
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: `${SYSTEM_PROMPT}\n\n${LEADERSHIP}` }] },
+        systemInstruction: { parts: [{ text: systemText }] },
         contents,
         generationConfig: { temperature: 0.6, maxOutputTokens: 400 },
       }),
