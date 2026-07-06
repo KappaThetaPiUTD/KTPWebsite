@@ -83,20 +83,12 @@ export async function POST(request) {
       },
     };
 
-    // Retry once on transient rate-limit / unavailable responses.
     let res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(7000),
     });
-    if (res.status === 429 || res.status === 503) {
-      await new Promise((r) => setTimeout(r, 1500));
-      res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    }
 
     if (!res.ok) {
       const detail = await res.text();
