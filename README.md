@@ -35,6 +35,14 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
+## Contact form
+
+The contact form (`/contact-us`) sends messages via **EmailJS** (client-side, in `components/SubmitButton.jsx`). If EmailJS fails — e.g. its Gmail OAuth grant expires — the form automatically falls back to POSTing to `app/api/contact/route.js`, which sends via **Resend** so submissions aren't lost.
+
+- **EmailJS:** if the form stops working with a "Gmail connection" / 412 error, reconnect the Gmail account in the EmailJS dashboard (Email Services → the Gmail service → Reconnect). Gmail OAuth grants expire periodically.
+- **Resend fallback:** set the `RESEND_API_KEY` env var in Vercel to enable it. Create a free key at [resend.com](https://resend.com) using the KTP Gmail as the account email (lets it send to that inbox from `onboarding@resend.dev` without domain verification). Without the key, the fallback simply no-ops.
+
+
 ## Chatbot (AI Assistant)
 
 The site has a floating AI chat assistant (bottom-right, on every page) powered by the Google Gemini API.

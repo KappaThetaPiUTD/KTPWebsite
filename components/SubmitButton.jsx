@@ -67,8 +67,25 @@ const SubmitButton = ({ inputState, clearForm }) => {
       
     } catch (error) {
       console.error('EmailJS ERROR Details:', error);
-      
-      // More specific error handling
+
+      // Fallback: try the server-side sender (Resend) so a broken EmailJS or
+      // expired Gmail grant doesn't silently lose the visitor's message.
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(templateParams),
+        });
+        if (res.ok) {
+          toast(<ReactToast title="✅ Message sent successfully!" />);
+          clearForm();
+          return;
+        }
+      } catch (fallbackError) {
+        console.error('Fallback send failed:', fallbackError);
+      }
+
+      // Both the primary and fallback senders failed — show an error.
       if (error.status === 412) {
         console.error('412 Error - Template variable mismatch or service connection issue');
         toast(<ReactToast title="❌ Email configuration error. Please try again or contact support." />);
