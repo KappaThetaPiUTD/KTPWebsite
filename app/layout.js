@@ -14,7 +14,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 const SITE_URL = "https://ktp-website.vercel.app";
 const OG_IMAGE =
-  "https://res.cloudinary.com/dha44tosd/image/upload/c_fill,w_1200,h_630,g_auto/v1783200474/Assets%20for%20website/who_we_are_spring26.jpg";
+  "https://res.cloudinary.com/dha44tosd/image/upload/c_pad,w_1200,h_630,b_black/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png";
 const SITE_DESCRIPTION =
   "Kappa Theta Pi (KTP) Mu Chapter at UT Dallas - a professional technology fraternity building technical skills, professional growth, and lifelong community.";
 
