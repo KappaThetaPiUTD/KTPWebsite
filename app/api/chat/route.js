@@ -79,7 +79,11 @@ export async function POST(request) {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemText }] },
         contents,
-        generationConfig: { temperature: 0.6, maxOutputTokens: 600 },
+        generationConfig: {
+          temperature: 0.6,
+          maxOutputTokens: 600,
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       }),
     });
 
