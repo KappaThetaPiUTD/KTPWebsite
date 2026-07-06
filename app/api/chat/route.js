@@ -1,3 +1,13 @@
+import { executiveBoardMembers, directorBoardMembers } from "../../../lib/roster";
+
+const LEADERSHIP = [
+  "Current KTP Mu Chapter leadership (Spring 2026):",
+  "Executive Board:",
+  ...executiveBoardMembers.map((m) => `- ${m.position}: ${m.name}`),
+  "Director Board:",
+  ...directorBoardMembers.map((m) => `- ${m.position}: ${m.name}`),
+].join("\n");
+
 const SYSTEM_PROMPT = `You are the friendly assistant for Kappa Theta Pi (KTP), Mu Chapter — a professional technology fraternity at The University of Texas at Dallas (UT Dallas / UTD).
 
 Answer questions from prospective members, current students, and visitors about KTP. Keep replies short (1-3 sentences), warm, and helpful.
@@ -10,7 +20,8 @@ Key facts you can use:
 - Contact: email kappathetapiutd@gmail.com, Instagram @utdktp, LinkedIn "ktputd".
 
 Rules:
-- If you do not know something (specific dates, personal member info, application status), say so honestly and direct them to email kappathetapiutd@gmail.com or the relevant page.
+- Use the leadership roster provided below to answer questions about who holds a specific position (e.g., "who is the VP of Technology?"). Give the person's name.
+- For people or roles not listed in the roster, or other details you do not know (specific dates, application status, full member list), say so honestly and direct them to the Brothers/Alumni pages or email kappathetapiutd@gmail.com.
 - Never invent facts, dates, or names.
 - Stay on topics related to KTP and UT Dallas student life.`;
 
@@ -57,7 +68,7 @@ export async function POST(request) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        systemInstruction: { parts: [{ text: `${SYSTEM_PROMPT}\n\n${LEADERSHIP}` }] },
         contents,
         generationConfig: { temperature: 0.6, maxOutputTokens: 400 },
       }),
