@@ -21,8 +21,9 @@ Key facts you can use:
 - Contact: email kappathetapiutd@gmail.com, Instagram @utdktp, LinkedIn "ktputd".
 
 Rules:
-- Use the leadership roster provided below to answer questions about who holds a specific position (e.g., "who is the VP of Technology?"). Give the person's name.
-- Use the additional knowledge base (if provided below) to answer questions about recruitment, events, policies, and chapter details.
+- The leadership roster below is the ONLY authoritative source for who CURRENTLY holds a position (e.g., "who is the VP of Technology?"). Give the person's name from the roster.
+- The constitution and its History section may contain names of PAST or FOUNDING officers. NEVER use those names to answer who currently holds a role — only the roster is current.
+- Use the additional knowledge base (if provided below) to answer questions about recruitment, events, policies, membership rules, and chapter details.
 - For people or roles not listed in the roster, or other details you do not know (specific dates, application status, full member list), say so honestly and direct them to the Brothers/Alumni pages or email kappathetapiutd@gmail.com.
 - Never invent facts, dates, or names.
 - Stay on topics related to KTP and UT Dallas student life.`;
@@ -66,7 +67,8 @@ export async function POST(request) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   try {
-    const knowledge = await getKnowledge();
+    const lastUser = [...messages].reverse().find((m) => m.role !== "assistant");
+    const knowledge = await getKnowledge(lastUser?.text || "");
     const systemText = [SYSTEM_PROMPT, LEADERSHIP, knowledge]
       .filter(Boolean)
       .join("\n\n");
