@@ -94,20 +94,25 @@ export async function POST(request) {
         {
           reply:
             "Sorry, I'm having trouble responding right now. Please try again, or email kappathetapiutd@gmail.com.",
+          _debug: { status: res.status, detail: detail.slice(0, 300) },
         },
         { status: 200 }
       );
     }
 
     const data = await res.json();
+    const cand = data?.candidates?.[0];
     const reply =
-      data?.candidates?.[0]?.content?.parts
+      cand?.content?.parts
         ?.map((p) => p.text)
         .filter(Boolean)
         .join("") ||
       "Sorry, I didn't catch that. Could you rephrase, or email kappathetapiutd@gmail.com?";
 
-    return Response.json({ reply }, { status: 200 });
+    return Response.json(
+      { reply, _debug: { finishReason: cand?.finishReason || null } },
+      { status: 200 }
+    );
   } catch (err) {
     console.error("Chat route error:", err);
     return Response.json(
