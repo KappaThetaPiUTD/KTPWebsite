@@ -43,6 +43,16 @@ The contact form (`/contact-us`) sends messages via **EmailJS** (client-side, in
 - **Resend fallback:** set the `RESEND_API_KEY` env var in Vercel to enable it. Create a free key at [resend.com](https://resend.com) using the KTP Gmail as the account email (lets it send to that inbox from `onboarding@resend.dev` without domain verification). Without the key, the fallback simply no-ops.
 
 
+## Upcoming Events
+
+The Recruitment page shows an "Upcoming Events" section that is managed entirely from Supabase, so no code change or redeploy is needed to add or remove an event.
+
+- **Code:** UI in `components/EventsSection.jsx`; server route in `app/api/events/route.js`. Events live in an `events` table in the **KTP Blog** Supabase project.
+- **Add an event:** Supabase dashboard → KTP Blog project → Table Editor → `events` → Insert row. Set `title` and `event_date` (use Central time); `location`, `description`, and `rsvp_url` are optional. It shows on the site immediately.
+- **Remove / hide an event:** set the row's `is_active` to `false` to hide it (reversible), or Delete the row to remove it permanently. Past events drop off automatically by date.
+- Only active, upcoming events are shown, and the section hides itself when there are none. See [`docs/EVENTS.md`](docs/EVENTS.md) for full details and the one-time setup SQL.
+
+
 ## Chatbot (AI Assistant)
 
 The site has a floating AI chat assistant (bottom-right, on every page) powered by the Google Gemini API.
