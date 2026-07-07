@@ -2,6 +2,7 @@
 
 import React from 'react';
 import FormPage from './form';
+import FAQ from '../../components/FAQ';
 
 /* ------------------------------------------------------------------
    FUTURE: Events + RSVP (keep for later; uncomment when ready)
@@ -45,6 +46,8 @@ const RecruitmentPage = () => {
       <section className="w-full max-w-5xl">
         <FormPage />
       </section>
+
+      <FAQ />
 
       {/* -----------------------------------------------------------
          FUTURE: Events Grid with RSVP buttons
