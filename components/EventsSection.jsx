@@ -66,13 +66,13 @@ export default function EventsSection() {
       <h2 className="text-primary text-[24px] sm:text-[28px] md:text-header2 font-bold font-poppins text-center mb-6">
         Upcoming Events
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
         {events.map((e) => {
           const time = formatTime(e.event_date);
           return (
             <div
               key={e.id}
-              className="rounded-lg border border-gray-200 p-5 bg-white shadow-sm flex flex-col"
+              className="w-full sm:w-80 rounded-lg border border-gray-200 p-5 bg-white shadow-sm flex flex-col"
             >
               <div className="text-sm font-semibold text-primary">
                 {formatDate(e.event_date)}

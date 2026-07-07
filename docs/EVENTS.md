@@ -54,6 +54,21 @@ Supabase dashboard -> **KTP Blog** project -> **Table Editor** -> `events` -> **
 
 The event appears on the site immediately (just refresh the Recruitment page).
 
+## Examples
+
+Prefer SQL? You can add several events at once from the SQL Editor. Note the
+`-05` (Central) offset on each timestamp, and that a `null` `rsvp_url` simply
+hides the RSVP button (handy for invite-only events):
+
+```sql
+insert into public.events (title, description, location, event_date, rsvp_url) values
+  ('Info Session',     'Learn what KTP is all about. Free food!', 'ECSW 1.365',        '2026-09-03 19:00:00-05', 'https://tally.so/r/xxxxxx'),
+  ('Meet the Bros',    'Hang out and meet our members.',          'Science Courtyard', '2026-09-05 19:00:00-05', 'https://tally.so/r/xxxxxx'),
+  ('Game Night',       'Board games and snacks.',                 'NS Skylounge',      '2026-09-09 19:00:00-05', 'https://tally.so/r/xxxxxx'),
+  ('KTP Speed Dating', 'Quick one-on-ones with brothers.',        'GR 3.420',          '2026-09-10 19:00:00-05', 'https://tally.so/r/xxxxxx'),
+  ('Professional Event (Invite Only)', 'Details are sent with your invite.', 'Sent with invite', '2026-09-11 19:00:00-05', null);
+```
+
 ## View events
 
 The easiest way to see your events is the **Table Editor** (`events` table),
