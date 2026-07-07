@@ -37,7 +37,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ## Contact form
 
-The contact form (`/contact-us`) sends messages via **EmailJS** (client-side, in `components/SubmitButton.jsx`). If EmailJS fails — e.g. its Gmail OAuth grant expires — the form automatically falls back to POSTing to `app/api/contact/route.js`, which sends via **Resend** so submissions aren't lost.
+The contact form (`/contact-us`) sends messages via **EmailJS** (client-side, in `components/SubmitButton.jsx`). If EmailJS fails (for example, its Gmail OAuth grant expires), the form automatically falls back to POSTing to `app/api/contact/route.js`, which sends via **Resend** so submissions aren't lost.
 
 - **EmailJS:** if the form stops working with a "Gmail connection" / 412 error, reconnect the Gmail account in the EmailJS dashboard (Email Services → the Gmail service → Reconnect). Gmail OAuth grants expire periodically.
 - **Resend fallback:** set the `RESEND_API_KEY` env var in Vercel to enable it. Create a free key at [resend.com](https://resend.com) using the KTP Gmail as the account email (lets it send to that inbox from `onboarding@resend.dev` without domain verification). Without the key, the fallback simply no-ops.
@@ -53,13 +53,13 @@ The site has a floating AI chat assistant (bottom-right, on every page) powered 
 
 ### When / how to replace the key
 
-Gemini API keys **don't expire** — you only need to replace the key if it is leaked publicly, abused, or you want it on a different (chapter-owned) Google account.
+Gemini API keys **don't expire**. You only need to replace the key if it is leaked publicly, abused, or you want it on a different (chapter-owned) Google account.
 
 **How you'll know there's a key problem:** the chatbot consistently replies with its fallback line (*"…email kappathetapiutd@gmail.com"*) instead of real answers. The route degrades gracefully, so a bad/missing key never breaks the site.
 
 **To replace it (~2 min):**
 
-1. Create a new key at https://aistudio.google.com/apikey (use a personal 18+ Google account — the chapter Gmail is age-blocked from AI Studio).
+1. Create a new key at https://aistudio.google.com/apikey (use a personal 18+ Google account; the chapter Gmail is age-blocked from AI Studio).
 2. In Vercel → KTPWebsite → Settings → Environment Variables, edit `GEMINI_API_KEY` with the new value and Save.
 3. Redeploy (Deployments → ⋯ → Redeploy).
 4. Optionally delete the old key in AI Studio.
@@ -71,7 +71,7 @@ Optional env override: `GEMINI_MODEL` (defaults to `gemini-2.5-flash-lite`).
 Beyond its built-in KTP facts and the live board roster (`lib/roster.js`), the chatbot pulls extra knowledge from a `knowledge` table in the **KTP Blog** Supabase project (`lib/knowledge.js`). Rows are injected into the AI's context using lightweight keyword retrieval with a character budget, so large documents (e.g. the constitution) only load when relevant.
 
 - **Add/edit knowledge:** Supabase dashboard → KTP Blog project → Table Editor → `knowledge` → add a row (`title`, `content`). Set `is_active` to false to hide a row. Changes appear in the bot within ~5 minutes (cache); no redeploy needed.
-- **Only store PUBLIC-safe info** — the chatbot speaks it to any visitor and the table is readable via the public anon key. Do not store private member data or anything confidential.
+- **Only store PUBLIC-safe info.** The chatbot speaks it to any visitor and the table is readable via the public anon key. Do not store private member data or anything confidential.
 - The current board roster is the sole source of truth for who holds a position; names appearing in stored documents are treated as historical.
 
 

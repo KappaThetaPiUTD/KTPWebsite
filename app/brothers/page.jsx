@@ -5,7 +5,7 @@ import { executiveBoardMembers, directorBoardMembers } from "../../lib/roster";
 export const metadata = {
   title: "Kappa Theta Pi UTD - Brothers",
   description:
-    "Meet the brothers of Kappa Theta Pi Mu Chapter at UT Dallas — our executive board, director board, and active members.",
+    "Meet the brothers of Kappa Theta Pi Mu Chapter at UT Dallas: our executive board, director board, and active members.",
 };
 
 

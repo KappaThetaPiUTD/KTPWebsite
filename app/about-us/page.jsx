@@ -5,7 +5,7 @@ import Quote from "../../components/slogan";
 export const metadata = {
   title: "Kappa Theta Pi UTD - About Us",
   description:
-    "Learn about Kappa Theta Pi's Mu Chapter at UT Dallas — our mission, our five pillars, and the values that shape our professional technology fraternity.",
+    "Learn about Kappa Theta Pi's Mu Chapter at UT Dallas: our mission, our five pillars, and the values that shape our professional technology fraternity.",
 };
 
 const AboutUs = () => {

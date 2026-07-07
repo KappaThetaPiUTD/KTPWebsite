@@ -85,7 +85,7 @@ const SubmitButton = ({ inputState, clearForm }) => {
         console.error('Fallback send failed:', fallbackError);
       }
 
-      // Both the primary and fallback senders failed — show an error.
+      // Both the primary and fallback senders failed, so show an error.
       if (error.status === 412) {
         console.error('412 Error - Template variable mismatch or service connection issue');
         toast(<ReactToast title="❌ Email configuration error. Please try again or contact support." />);

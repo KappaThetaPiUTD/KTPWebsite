@@ -4,7 +4,7 @@ import React from "react";
 export const metadata = {
   title: "Kappa Theta Pi UTD - Alumni",
   description:
-    "Meet the alumni of Kappa Theta Pi Mu Chapter at UT Dallas — where our brothers are now.",
+    "Meet the alumni of Kappa Theta Pi Mu Chapter at UT Dallas, and see where our brothers are now.",
 };
 
 const alumniMembers = [

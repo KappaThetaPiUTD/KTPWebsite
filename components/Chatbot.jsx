@@ -8,6 +8,13 @@ const INITIAL_MESSAGE = {
   text: "Hi! I'm the KTP assistant. Ask me about recruitment, our chapter, or how to get involved!",
 };
 
+const QUICK_QUESTIONS = [
+  "When is recruitment?",
+  "What are the five pillars?",
+  "Do I need to be a CS major?",
+  "How do I join?",
+];
+
 const Chatbot = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([INITIAL_MESSAGE]);
@@ -53,8 +60,8 @@ const Chatbot = () => {
     if (open) inputRef.current?.focus();
   }, [open]);
 
-  const send = async () => {
-    const text = input.trim();
+  const send = async (preset) => {
+    const text = (typeof preset === "string" ? preset : input).trim();
     if (!text || loading) return;
 
     const next = [...messages, { role: "user", text }];
@@ -159,26 +166,42 @@ const Chatbot = () => {
             <div ref={endRef} />
           </div>
 
-          <div className="flex items-center gap-2 border-t border-gray-200 bg-white p-3">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder="Ask about KTP…"
-              aria-label="Type your message"
-              className="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <button
-              type="button"
-              onClick={send}
-              disabled={loading || !input.trim()}
-              aria-label="Send message"
-              className="rounded-full bg-primary p-2.5 text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              <FaPaperPlane size={16} />
-            </button>
+          <div className="border-t border-gray-200 bg-white">
+            {messages.length === 1 && !loading && (
+              <div className="flex flex-wrap gap-2 px-3 pt-3">
+                {QUICK_QUESTIONS.map((q) => (
+                  <button
+                    key={q}
+                    type="button"
+                    onClick={() => send(q)}
+                    className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs text-primary hover:bg-primary/10 transition-colors"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center gap-2 p-3">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder="Ask about KTP…"
+                aria-label="Type your message"
+                className="flex-1 rounded-full border border-gray-300 px-4 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <button
+                type="button"
+                onClick={() => send()}
+                disabled={loading || !input.trim()}
+                aria-label="Send message"
+                className="rounded-full bg-primary p-2.5 text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                <FaPaperPlane size={16} />
+              </button>
+            </div>
           </div>
         </div>
       )}

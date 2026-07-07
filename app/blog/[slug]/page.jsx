@@ -151,7 +151,7 @@ export default function BlogPostPage() {
 
           {/* Meta + Like */}
           <div className="flex items-center gap-6 mb-6">
-            <span className="text-sm text-primary font-medium">{post.readTime || '—'} </span>
+            <span className="text-sm text-primary font-medium">{post.readTime || '-'} </span>
             <button
               onClick={handleLike}
               disabled={liking || isLiked}

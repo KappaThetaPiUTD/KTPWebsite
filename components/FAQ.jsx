@@ -5,7 +5,7 @@ import { useState } from "react";
 const faqs = [
   {
     q: "Who can join KTP?",
-    a: "Kappa Theta Pi is a co-ed professional technology fraternity open to all UT Dallas students who are passionate about technology — regardless of major or year.",
+    a: "Kappa Theta Pi is a co-ed professional technology fraternity open to all UT Dallas students who are passionate about technology, regardless of major or year.",
   },
   {
     q: "Do I need to be a Computer Science major?",
@@ -17,15 +17,15 @@ const faqs = [
   },
   {
     q: "What does the recruitment process look like?",
-    a: "Rush typically includes info sessions, social events, and interviews — chances for us to get to know you and for you to get to know our brotherhood. Watch our Instagram and this page for the schedule.",
+    a: "Rush typically includes info sessions, social events, and interviews, giving us a chance to get to know you and you a chance to get to know our brotherhood. Watch our Instagram and this page for the schedule.",
   },
   {
     q: "Is there a GPA requirement?",
-    a: "Yes — KTP members maintain a minimum 3.0 GPA, in keeping with our focus on academic and professional excellence.",
+    a: "Yes. KTP members maintain a minimum 3.0 GPA, in keeping with our focus on academic and professional excellence.",
   },
   {
     q: "What will I get out of joining?",
-    a: "Technical workshops, professional development like resume and interview prep, mentorship, alumni connections, and a close-knit community — all built around our five pillars.",
+    a: "Technical workshops, professional development like resume and interview prep, mentorship, alumni connections, and a close-knit community, all built around our five pillars.",
   },
   {
     q: "I still have questions. Who do I contact?",

@@ -1,4 +1,4 @@
-# KTP Chatbot — How it works & how to maintain it
+# KTP Chatbot: How it works and how to maintain it
 
 The site has a floating AI assistant (bottom-right on every page) that answers
 questions about KTP from prospective members and visitors. This doc explains the
@@ -18,18 +18,18 @@ architecture and the common maintenance flows.
 
 ## The Gemini API key
 
-- Model: `gemini-2.5-flash-lite` (free tier — 15 req/min, 1000 req/day). Thinking is disabled so replies aren't truncated. Overridable via the `GEMINI_MODEL` env var.
+- Model: `gemini-2.5-flash-lite` (free tier: 15 req/min, 1000 req/day). Thinking is disabled so replies aren't truncated. Overridable via the `GEMINI_MODEL` env var.
 - Stored as the **`GEMINI_API_KEY`** environment variable in Vercel (Settings -> Environment Variables). **Never** committed to the repo, and **not** prefixed `NEXT_PUBLIC_` (must stay server-only).
 - **Cost:** free tier only. As long as no billing account is attached to the Google Cloud project, it can't be charged; at the limit, requests just return an error.
 
 ### When / how to replace the key
 
-Gemini keys don't expire — only replace it if it leaks, is abused, or you want it on a different (chapter-owned) Google account.
+Gemini keys don't expire. Only replace it if it leaks, is abused, or you want it on a different (chapter-owned) Google account.
 
 **Symptom of a key problem:** the bot consistently replies with its fallback line
 (*"...email kappathetapiutd@gmail.com"*). The route degrades gracefully, so a bad/missing key never breaks the site.
 
-1. Create a new key at https://aistudio.google.com/apikey (use a personal 18+ Google account — the chapter Gmail is age-blocked from AI Studio).
+1. Create a new key at https://aistudio.google.com/apikey (use a personal 18+ Google account; the chapter Gmail is age-blocked from AI Studio).
 2. Vercel -> KTPWebsite -> Settings -> Environment Variables -> edit `GEMINI_API_KEY` -> Save.
 3. Redeploy (Deployments -> ... -> Redeploy). Optionally delete the old key in AI Studio.
 
@@ -73,7 +73,7 @@ Because knowledge content should **not** be committed to GitHub, the flow is:
 1. Make the doc link-shareable ("anyone with the link can view").
 2. Export it as text: `https://docs.google.com/document/d/<DOC_ID>/export?format=txt`.
 3. Split it into sensible rows (e.g. one per article/section) and insert each into the `knowledge` table via the Supabase SQL Editor. Use Postgres dollar-quoting (`$kb$ ... $kb$`) to avoid escaping issues.
-4. **Strip anything with outdated names** (e.g. signature blocks). Current officers must come from `lib/roster.js`, never from a document — the system prompt enforces this, and historical/founding names in docs should be labeled as such.
+4. **Strip anything with outdated names** (e.g. signature blocks). Current officers must come from `lib/roster.js`, never from a document; the system prompt enforces this, and historical/founding names in docs should be labeled as such.
 
 ### How retrieval works
 

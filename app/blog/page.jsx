@@ -102,7 +102,7 @@ export default function BlogPage() {
       ) : sortedPosts.length === 0 ? (
         <div className="w-full text-center text-primary text-lg py-20 font-light">
           {posts.length === 0
-            ? "No blog posts yet — check back soon!"
+            ? "No blog posts yet. Check back soon!"
             : "No posts match this filter."}
         </div>
       ) : (
