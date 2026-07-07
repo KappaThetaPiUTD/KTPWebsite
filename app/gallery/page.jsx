@@ -1,7 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import PhotoAlbum from "react-photo-album";
+import Lightbox from "yet-another-react-lightbox";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 
 const photos = [
   { src: "https://res.cloudinary.com/dha44tosd/image/upload/v1714854893/Austin%20Trip/leetcode_weekly_session_images_kqkd9s.jpg", width: 3024, height: 4032, alt: "leetcode" },
@@ -32,7 +37,18 @@ const photos = [
   { src: "https://res.cloudinary.com/dha44tosd/image/upload/v1741203490/Gallery/IMG_5680_uv7qbu_sgis8b.jpg", width: 3024, height: 4032, alt: "Halloween" },
 ];
 
+// Full-view slides for the lightbox: cap width for fast loading (Cloudinary
+// downscales only, with automatic quality/format).
+const slides = photos.map((p) => ({
+  src: p.src.replace("/upload/", "/upload/c_limit,w_1920,q_auto,f_auto/"),
+  alt: p.alt,
+  width: p.width,
+  height: p.height,
+}));
+
 const Gallery = () => {
+  const [index, setIndex] = useState(-1);
+
   return (
     <div className="w-full h-full bg-white pt-24">
       <div className="text-primary text-header1 font-bold font-poppins flex justify-center">
@@ -48,15 +64,17 @@ const Gallery = () => {
           spacing={12}
           targetRowHeight={260}
           defaultContainerWidth={1120}
-          renderPhoto={({ photo, renderDefaultPhoto, wrapperStyle }) => (
+          renderPhoto={({ photo, layout, renderDefaultPhoto, wrapperStyle }) => (
             <div
-              className="group relative overflow-hidden rounded-lg"
+              className="group relative overflow-hidden rounded-lg cursor-pointer"
               style={wrapperStyle}
+              onClick={() => setIndex(layout.index)}
             >
               {renderDefaultPhoto({ wrapped: true })}
               <div className="absolute top-3 right-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                 <a
                   href={photo.src.replace("/upload/", "/upload/fl_attachment/")}
+                  onClick={(e) => e.stopPropagation()}
                   className="inline-flex text-white rounded-full p-2 bg-gray-800 bg-opacity-75 hover:bg-opacity-100 transition-colors"
                   aria-label={`Download ${photo.alt}`}
                 >
@@ -80,6 +98,14 @@ const Gallery = () => {
           )}
         />
       </div>
+
+      <Lightbox
+        open={index >= 0}
+        index={index}
+        close={() => setIndex(-1)}
+        slides={slides}
+        plugins={[Zoom, Counter]}
+      />
     </div>
   );
 };
