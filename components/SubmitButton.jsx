@@ -2,6 +2,7 @@ import emailjs from "@emailjs/browser";
 import ReactToast from "./react-toast";
 import { toast } from "react-toastify";
 import { useState } from "react";
+import { trackEvent } from "../lib/analytics";
 import {
   normalizePhoneNumber,
   validateEmail,
@@ -62,6 +63,7 @@ const SubmitButton = ({ inputState, clearForm }) => {
       );
       
       console.log('EmailJS SUCCESS:', result);
+      trackEvent('contact_submit', { method: 'emailjs' });
       toast(<ReactToast title="✅ Message sent successfully!" />);
       clearForm();
       
@@ -77,6 +79,7 @@ const SubmitButton = ({ inputState, clearForm }) => {
           body: JSON.stringify(templateParams),
         });
         if (res.ok) {
+          trackEvent('contact_submit', { method: 'resend' });
           toast(<ReactToast title="✅ Message sent successfully!" />);
           clearForm();
           return;

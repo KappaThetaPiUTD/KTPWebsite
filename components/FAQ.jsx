@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackEvent } from "../lib/analytics";
 
 const faqs = [
   {
@@ -54,7 +55,10 @@ const FAQ = () => {
                 id={`faq-button-${i}`}
                 aria-expanded={isOpen}
                 aria-controls={`faq-panel-${i}`}
-                onClick={() => setOpenIndex(isOpen ? null : i)}
+                onClick={() => {
+                  if (!isOpen) trackEvent("faq_open", { question: item.q });
+                  setOpenIndex(isOpen ? null : i);
+                }}
                 className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left font-poppins font-semibold text-primary hover:bg-primary/5 transition-colors"
               >
                 <span>{item.q}</span>

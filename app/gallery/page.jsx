@@ -7,6 +7,7 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
+import { trackEvent } from "../../lib/analytics";
 
 const photos = [
   { src: "https://res.cloudinary.com/dha44tosd/image/upload/v1714854893/Austin%20Trip/leetcode_weekly_session_images_kqkd9s.jpg", width: 3024, height: 4032, alt: "leetcode" },
@@ -68,7 +69,10 @@ const Gallery = () => {
             <div
               className="group relative overflow-hidden rounded-lg cursor-pointer"
               style={wrapperStyle}
-              onClick={() => setIndex(layout.index)}
+              onClick={() => {
+                trackEvent("gallery_open", { photo: photo.alt });
+                setIndex(layout.index);
+              }}
             >
               {renderDefaultPhoto({ wrapped: true })}
               <div className="absolute top-3 right-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">

@@ -73,6 +73,8 @@ export const metadata = {
   },
   icons: {
     icon: "/favicon.ico",
+    apple:
+      "https://res.cloudinary.com/dha44tosd/image/upload/c_pad,w_180,h_180,b_black/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
   },
 };
 
@@ -107,6 +109,7 @@ export default function RootLayout({ children }) {
         `}
       </style>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta name="theme-color" content="#00542C" />
       <body className={inter.className} style={{ overflowX: "hidden" }}>
         <script
           type="application/ld+json"

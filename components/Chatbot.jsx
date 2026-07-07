@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { FaCommentDots, FaTimes, FaPaperPlane } from "react-icons/fa";
+import { trackEvent } from "../lib/analytics";
 
 const INITIAL_MESSAGE = {
   role: "assistant",
@@ -60,10 +61,18 @@ const Chatbot = () => {
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  const toggleOpen = () => {
+    setOpen((o) => {
+      if (!o) trackEvent("chatbot_open");
+      return !o;
+    });
+  };
+
   const send = async (preset) => {
     const text = (typeof preset === "string" ? preset : input).trim();
     if (!text || loading) return;
 
+    trackEvent("chatbot_message");
     const next = [...messages, { role: "user", text }];
     setMessages(next);
     setInput("");
@@ -110,7 +119,7 @@ const Chatbot = () => {
     <>
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={toggleOpen}
         aria-label={open ? "Close chat assistant" : "Open chat assistant"}
         aria-expanded={open}
         style={{ transform: lift && !open ? `translateY(-${lift}px)` : undefined }}
