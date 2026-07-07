@@ -13,7 +13,7 @@ export const metadata = {
 const activeMembers = [
   {
     name: "Mekha Mathew",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1756276796/Brother%20Page/Executive%20Board/P1023770_jtxnfl.jpg",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783395863/Brother%20Page/Spring%202026/Mekha_Mathew.jpg",
     linkedin: "",
   },
   {
