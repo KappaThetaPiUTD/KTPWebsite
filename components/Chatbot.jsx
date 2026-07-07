@@ -11,6 +11,7 @@ const INITIAL_MESSAGE = {
 
 const QUICK_QUESTIONS = [
   "When is recruitment?",
+  "What events are coming up?",
   "What are the five pillars?",
   "Do I need to be a CS major?",
   "How do I join?",

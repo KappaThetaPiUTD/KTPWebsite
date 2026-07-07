@@ -51,6 +51,7 @@ The Recruitment page shows an "Upcoming Events" section that is managed entirely
 - **Add an event:** Supabase dashboard → KTP Blog project → Table Editor → `events` → Insert row. Set `title` and `event_date` (use Central time); `location`, `description`, and `rsvp_url` are optional. It shows on the site immediately.
 - **Remove / hide an event:** set the row's `is_active` to `false` to hide it (reversible), or Delete the row to remove it permanently. Past events drop off automatically by date.
 - Only active, upcoming events are shown, and the section hides itself when there are none. See [`docs/EVENTS.md`](docs/EVENTS.md) for full details and the one-time setup SQL.
+- These events also feed the AI chatbot, so it can answer "what events are coming up?" from the same live list (updates within about 5 minutes).
 
 
 ## Chatbot (AI Assistant)

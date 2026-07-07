@@ -1,5 +1,6 @@
 import { executiveBoardMembers, directorBoardMembers } from "../../../lib/roster";
 import { getKnowledge } from "../../../lib/knowledge";
+import { getEvents } from "../../../lib/events";
 
 const LEADERSHIP = [
   "Current KTP Mu Chapter leadership (Spring 2026):",
@@ -69,8 +70,11 @@ export async function POST(request) {
 
   try {
     const lastUser = [...messages].reverse().find((m) => m.role !== "assistant");
-    const knowledge = await getKnowledge(lastUser?.text || "");
-    const systemText = [SYSTEM_PROMPT, LEADERSHIP, knowledge]
+    const [knowledge, events] = await Promise.all([
+      getKnowledge(lastUser?.text || ""),
+      getEvents(),
+    ]);
+    const systemText = [SYSTEM_PROMPT, LEADERSHIP, events, knowledge]
       .filter(Boolean)
       .join("\n\n");
 

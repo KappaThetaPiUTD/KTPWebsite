@@ -54,6 +54,27 @@ Supabase dashboard -> **KTP Blog** project -> **Table Editor** -> `events` -> **
 
 The event appears on the site immediately (just refresh the Recruitment page).
 
+## View events
+
+The easiest way to see your events is the **Table Editor** (`events` table),
+which lists every row visually. To query them from the **SQL Editor** instead:
+
+```sql
+-- All events, soonest first (includes past and hidden rows)
+select id, title, event_date, location, rsvp_url, is_active
+from public.events
+order by event_date;
+```
+
+```sql
+-- Only what the site is currently showing (active and upcoming)
+select id, title, event_date, location
+from public.events
+where is_active = true
+  and event_date >= now()
+order by event_date;
+```
+
 ## Remove or hide an event
 
 You have two options:
@@ -73,3 +94,4 @@ record if you like.
 - No redeploy is ever needed to manage events; changes are read live.
 - Only PUBLIC-safe info belongs here. The table is readable via the public anon key.
 - `rsvp_url` typically points to a Tally, Google Form, or Luma link.
+- These events also feed the site's AI chatbot, so it can answer "what events are coming up?" using the live list (updates within about 5 minutes due to a short cache).

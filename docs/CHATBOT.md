@@ -12,9 +12,10 @@ architecture and the common maintenance flows.
 | Chat API route | `app/api/chat/route.js` | Server-side proxy to the Google Gemini API. Holds the API key (never exposed to the browser), builds the system prompt, and returns the reply. |
 | Leadership roster | `lib/roster.js` | Shared source of truth for the exec + director boards. Imported by both the Brothers page and the chat route. |
 | Knowledge base | `lib/knowledge.js` | Fetches extra knowledge rows from Supabase and injects the most relevant ones into the AI's context. |
+| Upcoming events | `lib/events.js` | Fetches active, upcoming rows from the Supabase `events` table and injects them so the bot can answer "what events are coming up?" (see `docs/EVENTS.md`). |
 
 **Request flow:** user types -> `POST /api/chat` -> route builds context
-(`system prompt` + `live roster` + `retrieved knowledge`) -> calls Gemini -> returns reply.
+(`system prompt` + `live roster` + `upcoming events` + `retrieved knowledge`) -> calls Gemini -> returns reply.
 
 ## The Gemini API key
 
