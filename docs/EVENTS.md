@@ -110,3 +110,4 @@ record if you like.
 - Only PUBLIC-safe info belongs here. The table is readable via the public anon key.
 - `rsvp_url` typically points to a Tally, Google Form, or Luma link.
 - These events also feed the site's AI chatbot, so it can answer "what events are coming up?" using the live list (updates within about 5 minutes due to a short cache).
+- Each card automatically shows a "Today", "Tomorrow", or "This Week" badge based on the event date. This is computed from `event_date`; there is nothing to set.

@@ -32,6 +32,32 @@ function formatTime(iso) {
   }
 }
 
+// Returns a short "how soon" label based on the event's Central-time calendar
+// date: "Today", "Tomorrow", "This Week" (within 7 days), or null (further out).
+function proximityBadge(iso) {
+  try {
+    const centralDate = (d) =>
+      new Intl.DateTimeFormat('en-CA', {
+        timeZone: TZ,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(d);
+    const startOfDay = (d) => new Date(`${centralDate(d)}T00:00:00`);
+    const dayMs = 24 * 60 * 60 * 1000;
+    const days = Math.round(
+      (startOfDay(new Date(iso)) - startOfDay(new Date())) / dayMs
+    );
+    if (days < 0) return null;
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Tomorrow';
+    if (days <= 7) return 'This Week';
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // Read-only list of upcoming events, managed entirely from the Supabase
 // "events" table (no code changes or redeploy needed to add one). The whole
 // section hides itself while loading or when there are no upcoming events.
@@ -69,11 +95,23 @@ export default function EventsSection() {
       <div className="flex flex-wrap justify-center gap-4">
         {events.map((e) => {
           const time = formatTime(e.event_date);
+          const badge = proximityBadge(e.event_date);
           return (
             <div
               key={e.id}
               className="w-full sm:w-80 rounded-lg border border-gray-200 p-5 bg-white shadow-sm flex flex-col"
             >
+              {badge ? (
+                <span
+                  className={`self-start mb-2 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    badge === 'This Week'
+                      ? 'bg-primary/10 text-primary'
+                      : 'bg-primary text-white'
+                  }`}
+                >
+                  {badge}
+                </span>
+              ) : null}
               <div className="text-sm font-semibold text-primary">
                 {formatDate(e.event_date)}
                 {time ? ` \u00b7 ${time}` : ''}
