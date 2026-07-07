@@ -100,7 +100,7 @@ const activeMembers = [
   },
   {
     name: "Aarav Ashok",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783463311/Brother%20Page/Spring%202026/Aarav_Ashok.png",
     linkedin: "",
   },
   {
@@ -165,7 +165,7 @@ const activeMembers = [
   },
   {
     name: "Sam Paudel",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783463312/Brother%20Page/Spring%202026/Sam_Paudel.png",
     linkedin: "",
   },
   {
