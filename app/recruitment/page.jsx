@@ -3,6 +3,7 @@
 import React from 'react';
 import FormPage from './form';
 import FAQ from '../../components/FAQ';
+import EventsSection from '../../components/EventsSection';
 
 /* ------------------------------------------------------------------
    FUTURE: Events + RSVP (keep for later; uncomment when ready)
@@ -42,7 +43,10 @@ const RecruitmentPage = () => {
         We will release more information closer to Spring 2025.
       </div>*/}
 
-      {/* Only the application form for now */}
+      {/* Upcoming events (managed via Supabase; hidden when there are none) */}
+      <EventsSection />
+
+      {/* Application form */}
       <section className="w-full max-w-5xl">
         <FormPage />
       </section>
