@@ -185,7 +185,7 @@ const activeMembers = [
   },
   {
     name: "Noel Emmanuel",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683083/NoelHeadshot_nbv6gg.png",
     linkedin: "",
   },
 ].sort((a, b) => a.name.localeCompare(b.name));
