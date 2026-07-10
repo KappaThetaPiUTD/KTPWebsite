@@ -105,7 +105,7 @@ const activeMembers = [
   },
   {
     name: "Aashini Chalasani",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783657281/Brother%20Page/Spring%202026/Aashini_Chalasani.png",
     linkedin: "",
   },
   {
