@@ -14,7 +14,7 @@ const activeMembers = [
   {
     name: "Mekha Mathew",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783395863/Brother%20Page/Spring%202026/Mekha_Mathew.jpg",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/mekha-mathew",
   },
   {
     name: "Ruthvik Penmatsa",
@@ -101,17 +101,17 @@ const activeMembers = [
   {
     name: "Aarav Ashok",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783463311/Brother%20Page/Spring%202026/Aarav_Ashok.png",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/aaravashok",
   },
   {
     name: "Aashini Chalasani",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783657281/Brother%20Page/Spring%202026/Aashini_Chalasani.png",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/aashinichalasani/",
   },
   {
     name: "Afeef Zarraf",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207294/Brother%20Page/Actives/afeef_zarraf.jpg",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/afeef-zarraf",
   },
   {
     name: "Anya Konda",
@@ -121,7 +121,7 @@ const activeMembers = [
   {
     name: "Jashanpreet Singh",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/jashanpreet-singh2026",
   },
   {
     name: "Jonathan Ebenezer",
@@ -131,17 +131,17 @@ const activeMembers = [
   {
     name: "Kida Khanooni",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207646/Brother%20Page/Actives/kida_khanooni.jpg",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/kida-khanooni-b89076288",
   },
   {
     name: "Kushagra Mathur",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207409/Brother%20Page/Actives/kushagra_mathur.jpg",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/kushagra-mathur-88a31a28a/",
   },
   {
     name: "Lalith Keertipati",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771276882/Brother%20Page/Actives/IMG_5712_fjmsow.jpg",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/lalith-raju-keertipati/",
   },
   {
     name: "Madhav Suri",
@@ -151,7 +151,7 @@ const activeMembers = [
   {
     name: "Nirmal Shah",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207295/Brother%20Page/Actives/nirmal_shah.jpg",
-    linkedin: "",
+    linkedin: "https://linkedin.com/in/nirmal-shah1",
   },
   {
     name: "Onkar Bajwa",
@@ -166,12 +166,12 @@ const activeMembers = [
   {
     name: "Sam Paudel",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783463312/Brother%20Page/Spring%202026/Sam_Paudel.png",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/samyam-paudel-785302353/",
   },
   {
     name: "Siri Kishore Dola",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190835/Brother%20Page/Actives/IMG_5646_hiubqi.jpg",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/siri-kishore-dola/",
   },
   {
     name: "Tanmayi Addanki",
@@ -181,12 +181,12 @@ const activeMembers = [
   {
     name: "Viraaj Singh",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190894/Brother%20Page/Actives/IMG_5549_yaalv0.jpg",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/viraaj-singh-business/",
   },
   {
     name: "Noel Emmanuel",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683083/NoelHeadshot_nbv6gg.png",
-    linkedin: "",
+    linkedin: "https://www.linkedin.com/in/noel-emmanuel20",
   },
 ].sort((a, b) => a.name.localeCompare(b.name));
 
