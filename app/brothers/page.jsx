@@ -1,4 +1,4 @@
-import Image from "next/image";
+import MemberCard from "../../components/MemberCard";
 import React from "react";
 import { executiveBoardMembers, directorBoardMembers } from "../../lib/roster";
 
@@ -300,33 +300,7 @@ const Brother = () => {
       </div>
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-8 mt-8 max-w-5xl mx-auto px-4">
         {executiveBoardMembers.map((member, index) => (
-          <div
-            key={index}
-            className="w-32 sm:w-40 text-center"
-          >
-            <div className="group relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
-              <Image
-                src={member.src}
-                alt={`${member.name} - ${member.position}`}
-                fill
-                sizes="(max-width: 640px) 128px, 160px"
-                quality={90}
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              {member.linkedin && (
-                <a
-                  href={member.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute inset-0"
-                  aria-label={`${member.name} LinkedIn profile`}
-                
-              />
-              )}
-            </div>
-            <div className="mt-2">{member.name}</div>
-            <div className="text-sm text-gray-400">{member.position}</div>
-          </div>
+          <MemberCard key={index} member={member} />
         ))}
       </div>
 
@@ -335,33 +309,7 @@ const Brother = () => {
       </div>
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-8 mt-8 max-w-5xl mx-auto px-4">
         {directorBoardMembers.map((member, index) => (
-          <div
-            key={index}
-            className="w-32 sm:w-40 text-center"
-          >
-            <div className="group relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
-              <Image
-                src={member.src}
-                alt={`${member.name} - ${member.position}`}
-                fill
-                sizes="(max-width: 640px) 128px, 160px"
-                quality={90}
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              {member.linkedin && (
-                <a
-                  href={member.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute inset-0"
-                  aria-label={`${member.name} LinkedIn profile`}
-                
-              />
-              )}
-            </div>
-            <div className="mt-2">{member.name}</div>
-            <div className="text-sm text-gray-400">{member.position}</div>
-          </div>
+          <MemberCard key={index} member={member} />
         ))}
       </div>
 
@@ -370,32 +318,7 @@ const Brother = () => {
       </div>
       <div className="flex flex-wrap justify-center gap-x-4 gap-y-8 mt-8 max-w-5xl mx-auto px-4">
         {activeMembers.map((member, index) => (
-          <div
-            key={index}
-            className="w-32 sm:w-40 text-center"
-          >
-            <div className="group relative w-32 h-40 sm:w-40 sm:h-52 mx-auto bg-gray-400 rounded-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
-              <Image
-                src={member.src}
-                alt={`${member.name}`}
-                fill
-                sizes="(max-width: 640px) 128px, 160px"
-                quality={90}
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              {member.linkedin && (
-                <a
-                  href={member.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute inset-0"
-                  aria-label={`${member.name} LinkedIn profile`}
-                
-              />
-              )}
-            </div>
-            <div className="mt-2">{member.name}</div>
-          </div>
+          <MemberCard key={index} member={member} />
         ))}
       </div>
 
