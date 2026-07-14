@@ -1,5 +1,4 @@
 import Image from "next/image";
-import BirthdayBadge from "./BirthdayBadge";
 
 // One member's photo card, shared by the Brothers and Alumni pages so the
 // markup lives in a single place. Pass a `member` with { name, src, linkedin }
@@ -25,8 +24,6 @@ export default function MemberCard({ member }) {
             aria-label={`${member.name} LinkedIn profile`}
           />
         )}
-        {/* Shows only on this member's birthday. */}
-        <BirthdayBadge name={member.name} />
       </div>
       <div className="mt-2">{member.name}</div>
       {member.position && (
