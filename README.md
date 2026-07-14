@@ -54,6 +54,17 @@ The Recruitment page shows an "Upcoming Events" section that is managed entirely
 - These events also feed the AI chatbot, so it can answer "what events are coming up?" from the same live list (updates within about 5 minutes).
 
 
+## Birthdays
+
+The home page shows a "Happy Birthday" banner on days when a brother has a birthday. Like events, birthdays are managed entirely from Supabase, so no code change or redeploy is needed.
+
+- **Code:** UI in `components/BirthdayBanner.jsx`; server route in `app/api/birthdays/route.js`. Birthdays live in a `birthdays` table in the **KTP Blog** Supabase project.
+- **Privacy:** only the month and day are stored (no birth year), so nobody's age is shown.
+- **Add a birthday:** Supabase dashboard → KTP Blog project → Table Editor → `birthdays` → Insert row. Set `name`, `birth_month` (1-12), and `birth_day` (1-31).
+- **Remove / hide a birthday:** set `is_active` to `false` to hide it (reversible), or Delete the row.
+- The banner only appears on someone's actual birthday and hides itself otherwise. See [`docs/BIRTHDAYS.md`](docs/BIRTHDAYS.md) for full details and the one-time setup SQL.
+
+
 ## Chatbot (AI Assistant)
 
 The site has a floating AI chat assistant (bottom-right, on every page) powered by the Google Gemini API.

@@ -2,6 +2,7 @@ import Hero from "../components/home/hero";
 import WhoWeIs from "../components/home/who-we-is";
 import Pillars from "../components/home/pillars";
 import CompanyCollage from "../components/CompanyCollage";
+import BirthdayBanner from "../components/BirthdayBanner";
 
 
 export const metadata = {
@@ -13,6 +14,8 @@ export const metadata = {
 export default function Home() {
   return (
     <div className="relative w-full">
+      {/* Shows only on a brother's birthday; hidden otherwise. */}
+      <BirthdayBanner />
       <Hero />
       <WhoWeIs />
       <Pillars />
