@@ -101,3 +101,20 @@ Beyond its built-in KTP facts and the live board roster (`lib/roster.js`), the c
 
 Google Analytics 4 is wired in via `components/GoogleAnalytics.jsx`. The Measurement ID (`G-…`, which is public by design) is set as a default in code and can be overridden per-environment with the `NEXT_PUBLIC_GA_ID` env var.
 
+## Security and local setup
+
+Copy `.env.example` to `.env` for local development. The real `.env` file is
+ignored by Git and must never be committed.
+
+The Cloudinary upload helper reads `CLOUDINARY_CLOUD_NAME`,
+`CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` from `.env`:
+
+```powershell
+npm run upload-headshots -- "C:\Users\YourName\Downloads" --dry-run
+npm run upload-headshots -- "C:\Users\YourName\Downloads"
+```
+
+The Cloudinary secret was historically committed before the environment-based
+configuration was added. Rotate it in Cloudinary even though the current source
+file no longer contains it. See [`docs/SECURITY.md`](docs/SECURITY.md) for the
+access-handoff, credential-rotation, member-data, and incident-response rules.

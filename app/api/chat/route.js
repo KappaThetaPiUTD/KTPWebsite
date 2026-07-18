@@ -3,7 +3,7 @@ import { getKnowledge } from "../../../lib/knowledge";
 import { getEvents } from "../../../lib/events";
 
 const LEADERSHIP = [
-  "Current KTP Mu Chapter leadership (Spring 2026):",
+  "Current KTP Mu Chapter leadership (Fall 2026):",
   "Executive Board:",
   ...executiveBoardMembers.map((m) => `- ${m.position}: ${m.name}`),
   "Director Board:",
