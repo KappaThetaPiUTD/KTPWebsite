@@ -1,21 +1,15 @@
-import { ascending } from "d3-array";
-import { createClient } from "@supabase/supabase-js";
 import React, { useState, useEffect } from "react";
-
-const supabaseURL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-export const supabase = createClient(supabaseURL, supabaseAnonKey);
+import { getSupabaseClient } from "../../lib/supabase";
 
 export const fetchPosts = async () => {
+    const supabase = getSupabaseClient();
+    if (!supabase) return [];
+
     const { data, error } = await supabase
     .from("blog_posts")
     .select("*")
     .eq("is_approved", true)
     .order("created_at", { ascending: false });
-
-    console.log("SUPABASE FETCH DATA:", data);
-    
     if(error){
         console.error("Error fetching posts:", error);
         return[];
@@ -25,6 +19,9 @@ export const fetchPosts = async () => {
 };
 
 export const addPost = async(title, content, author) => {
+    const supabase = getSupabaseClient();
+    if (!supabase) return null;
+
     const { data, error } = await supabase
     .from("blog_posts")
     .insert([{ title, content, author, is_approved: false }]);
@@ -38,6 +35,9 @@ export const addPost = async(title, content, author) => {
 };
 
 export const approvePost = async (postID) => {
+    const supabase = getSupabaseClient();
+    if (!supabase) return null;
+
     const { data, error } = await supabase
         .from("blog_posts")
         .update({is_approved: true })
@@ -55,16 +55,27 @@ export default function LikeButton({ postID }) {
     const [likes, setLikes] = useState(0);
     const [isUpdating, setIsUpdating] = useState(false);
 
-    const fetchLikes = async () => {
-        const { data, error } = await supabase
-            .from('blog_posts')
-            .select('likes')
-            .eq('id', postID)
-            .single();
-        if (!error && data) setLikes(data.likes || 0);
-    };
+    useEffect(() => {
+        let active = true;
 
-    useEffect(() => { fetchLikes(); }, [postID]);
+        const fetchLikes = async () => {
+            try {
+                const res = await fetch(`/api/blog/likes?postID=${encodeURIComponent(postID)}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                if (active && typeof data.likes === 'number') {
+                    setLikes(data.likes);
+                }
+            } catch (error) {
+                console.error('Fetching likes failed', error);
+            }
+        };
+
+        fetchLikes();
+        return () => {
+            active = false;
+        };
+    }, [postID]);
 
     const handleLike = async () => {
         if (isUpdating) return;

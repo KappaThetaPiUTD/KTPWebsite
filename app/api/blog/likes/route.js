@@ -1,12 +1,17 @@
-import { createClient } from "@supabase/supabase-js";
+import { getSupabaseClient } from "../../../../lib/supabase";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+function unavailableResponse() {
+  return Response.json(
+    { error: "Blog database is not configured." },
+    { status: 503 }
+  );
+}
 
 // Fetch current likes for a post: /api/blog/likes?postID=123
 export async function GET(req) {
+  const supabase = getSupabaseClient();
+  if (!supabase) return unavailableResponse();
+
   const { searchParams } = new URL(req.url);
   const postID = searchParams.get('postID');
   if (!postID) return new Response(JSON.stringify({ error: 'postID required'}), { status: 400 });
@@ -20,6 +25,9 @@ export async function GET(req) {
 }
 
 export async function PATCH(req) {
+  const supabase = getSupabaseClient();
+  if (!supabase) return unavailableResponse();
+
   try {
     const { postID, increment = 1 } = await req.json();
     if (!postID) {
@@ -51,7 +59,6 @@ export async function PATCH(req) {
       return new Response(JSON.stringify({ error: updateError.message }), { status: 500 });
     }
 
-    console.log('[likes API] Updated likes (no select)', { postID, newLikes });
     return new Response(JSON.stringify({ likes: newLikes, postID }), { status: 200 });
   } catch (e) {
     console.error('[likes API] Exception', e);

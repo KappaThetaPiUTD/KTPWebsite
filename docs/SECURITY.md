@@ -28,6 +28,9 @@ CLOUDINARY_API_SECRET=...
 
 - `.env` and `.env.*` are ignored by Git.
 - `.env.example` contains variable names and safe defaults only.
+- `.env.production` is the one exception. It may contain only browser-public
+  `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` values as a
+  deployment fallback. Never add a private value to it.
 - Production variables belong in Vercel: Project Settings > Environment
   Variables.
 - Public browser-safe values may start with `NEXT_PUBLIC_`.

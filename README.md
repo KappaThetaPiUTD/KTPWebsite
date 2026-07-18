@@ -106,6 +106,11 @@ Google Analytics 4 is wired in via `components/GoogleAnalytics.jsx`. The Measure
 Copy `.env.example` to `.env` for local development. The real `.env` file is
 ignored by Git and must never be committed.
 
+`.env.production` contains only the Supabase URL and anonymous browser key,
+which are public by design and already shipped to every visitor. It exists as a
+deployment fallback so Vercel builds do not depend on a previously committed
+private `.env`. Private keys must never be added to `.env.production`.
+
 The Cloudinary upload helper reads `CLOUDINARY_CLOUD_NAME`,
 `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` from `.env`:
 

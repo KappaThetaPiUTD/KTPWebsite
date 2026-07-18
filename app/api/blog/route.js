@@ -1,28 +1,33 @@
-import { createClient } from "@supabase/supabase-js";
+import { getSupabaseClient } from "../../../lib/supabase";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+function unavailableResponse() {
+  return Response.json(
+    { error: "Blog database is not configured." },
+    { status: 503 }
+  );
+}
 
 // GET: fetch approved blog posts
 export async function GET() {
+  const supabase = getSupabaseClient();
+  if (!supabase) return unavailableResponse();
+
   const { data, error } = await supabase
     .from("blog_posts")
     .select("*")
     .eq("is_approved", true)
     .order("created_at", { ascending: false });
-    console.log("Fetched from Supabase:", data, error);
 
-
-  return new Response(
-    JSON.stringify(error ? { error: error.message } : data),
-    { status: error ? 500 : 200 }
-  );
+  return Response.json(error ? { error: error.message } : data, {
+    status: error ? 500 : 200,
+  });
 }
 
 // POST: add blog post
 export async function POST(request) {
+  const supabase = getSupabaseClient();
+  if (!supabase) return unavailableResponse();
+
   const body = await request.json();
   const { title, content, author, tags, slug, category, readTime } = body;
 
@@ -39,15 +44,17 @@ export async function POST(request) {
       is_approved: false,
     }]);
 
-  return new Response(
-    JSON.stringify(error ? { error: error.message } : data),
-    { status: error ? 500 : 201 }
-  );
+  return Response.json(error ? { error: error.message } : data, {
+    status: error ? 500 : 201,
+  });
 }
 
 
 // PUT: approve a blog post
 export async function PUT(request) {
+  const supabase = getSupabaseClient();
+  if (!supabase) return unavailableResponse();
+
   const body = await request.json();
   const { postID } = body;
 
@@ -56,11 +63,7 @@ export async function PUT(request) {
     .update({ is_approved: true })
     .eq("id", postID);
 
-  return new Response(
-    JSON.stringify(error ? { error: error.message } : data),
-    { status: error ? 500 : 200 }
-  );
-  
+  return Response.json(error ? { error: error.message } : data, {
+    status: error ? 500 : 200,
+  });
 }
-
-
