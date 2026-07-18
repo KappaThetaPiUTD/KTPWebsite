@@ -5,6 +5,7 @@ Start here when maintaining the public website.
 | Guide | Use it for |
 | --- | --- |
 | [SECURITY.md](SECURITY.md) | Credential rotation, access handoff, member-data rules, and incident response |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Vercel, Node 24, environment files, deploy verification, and the July 2026 incident |
 | [EVENTS.md](EVENTS.md) | Adding, viewing, hiding, and deleting recruitment events |
 | [BIRTHDAYS.md](BIRTHDAYS.md) | Managing the home-page birthday banner |
 | [CHATBOT.md](CHATBOT.md) | Gemini key, roster grounding, Supabase knowledge, and chatbot troubleshooting |
