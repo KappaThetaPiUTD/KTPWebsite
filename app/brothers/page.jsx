@@ -32,11 +32,6 @@ const activeMembers = [
     linkedin: "http://linkedin.com/in/itbaanalam",
   },
   {
-    name: "Meghana Pula",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683113/image_20_ijskwh.png",
-    linkedin: "http://www.linkedin.com/in/sai-meghana-pula",
-  },
-  {
     name: "Aadhav Manimurugan",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1740683127/image_9_cmr6km.png",
     linkedin: "http://linkedin.com/in/aadhav-",
@@ -50,31 +45,6 @@ const activeMembers = [
     name: "Mohammed Faadil Khan",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190962/Brother%20Page/Actives/IMG_5452_issyik.jpg",
     linkedin: "https://www.linkedin.com/in/mohammed-faadil-khan-6a196b287/",
-  },
-  {
-    name: "Joel Philipose",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771193096/Brother%20Page/Actives/IMG_5558_ajgu8v.jpg",
-    linkedin: "",
-  },
-  {
-    name: "Nihita Soma",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
-    linkedin: "",
-  },
-  {
-    name: "Rahil Islam",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207516/Brother%20Page/Actives/rahil_islam.jpg",
-    linkedin: "",
-  },
-  {
-    name: "Sachin Selvakumar",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190965/Brother%20Page/Actives/IMG_5451_ubtsje.jpg", // Add Sachin's image URL
-    linkedin: "https://www.linkedin.com/in/sachinselvakumar24/",
-  },
-  {
-    name: "Rishi Ramesh",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190974/Brother%20Page/Actives/IMG_5440_miludq.jpg", // Add Rishi's image URL
-    linkedin: "https://www.linkedin.com/in/seyyonrishiramesh/",
   },
   {
     name: "Ayush Velhal",
