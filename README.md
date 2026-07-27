@@ -101,6 +101,44 @@ Beyond its built-in KTP facts and the live board roster (`lib/roster.js`), the c
 
 Google Analytics 4 is wired in via `components/GoogleAnalytics.jsx`. The Measurement ID (`G-…`, which is public by design) is set as a default in code and can be overridden per-environment with the `NEXT_PUBLIC_GA_ID` env var.
 
+## Member Portal
+
+The archived `dash-and-static-DO-NOT-CODE` branch contains useful portal UI and
+data-model ideas, but it is not safe to merge directly. Its dashboard was only
+guarded in the browser, its access-code cookies were writable by client code, a
+profile endpoint accepted any user ID while using a service-role key, and its QR
+flow used a fake token and a localhost-only Express server.
+
+The reusable foundation now lives under `/portal` on `main`:
+
+- Supabase SSR authentication with protected server-side routes
+- Email/password login, password reset, and sign-out
+- Invite/whitelist membership binding and required first-login onboarding
+- A responsive dashboard shell based on the archived portal layout
+- Member profile editing in an RLS-protected `portal_profiles` table
+- Admin/exec strike logging with server-attributed audit records
+- A separate Portal Supabase configuration, so the public Blog database is not
+  reused for private member data
+- No public self-signup and no client-editable role field
+
+The navbar only shows **PORTAL** when both Portal environment variables are set:
+
+```text
+NEXT_PUBLIC_PORTAL_SUPABASE_URL=
+NEXT_PUBLIC_PORTAL_SUPABASE_ANON_KEY=
+```
+
+Resume the **KTP Portal** Supabase project before adding these values in Vercel.
+Run `supabase/portal-schema.sql`, then in Supabase Auth settings add
+`https://ktp-website.vercel.app/portal/auth/callback` as an allowed redirect
+URL and disable open user signups. Provision member accounts through Supabase
+invites after adding each lower-case email to `portal_members`.
+
+Events, RSVP, attendance, QR check-in, and admin filters from the archived
+branch still require their own schema and row-level security review. They are
+intentionally not copied as direct browser database writes. See
+[`docs/PORTAL.md`](docs/PORTAL.md).
+
 ## Security and local setup
 
 Copy `.env.example` to `.env` for local development. The real `.env` file is

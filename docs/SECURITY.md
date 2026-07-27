@@ -57,6 +57,22 @@ Do not upload phone numbers, personal email addresses, emergency contacts,
 medication details, allergies, resumes, transcripts, schedules, or birth years.
 The birthday feature stores month and day only.
 
+## Member portal
+
+- Keep the KTP Portal Supabase project separate from the public KTP Blog
+  project.
+- Browser anon keys may use `NEXT_PUBLIC_`; service-role keys never may.
+- Protect portal pages with server-verified sessions. A client-side redirect is
+  not an authorization control.
+- Enforce event visibility, attendance edits, strikes, and admin access through
+  Supabase row-level security or trusted server routes.
+- Store official roles in a protected database table or custom claims. Never
+  authorize from user-editable Auth metadata.
+- Disable open signups in Supabase Auth. Add members through invitations or a
+  trusted officer-only provisioning flow.
+- Do not restore the archived access-code cookies, arbitrary profile-update
+  endpoint, fake QR token, or localhost-only Express API.
+
 ## Incident response
 
 If a credential is exposed:
