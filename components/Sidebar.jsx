@@ -14,6 +14,7 @@ export default function Sidebar() {
     { label: "MERCH", path: "/dashboard/merch" },
     { label: "EVENTS AND RSVP", path: "/dashboard/rsvp" },
     { label: "PROFILE", path: "/dashboard/profile" },
+    { label: "KTPILOT", path: "/dashboard/chatbot" },
   ];
 
   const adminItems = useMemo(
