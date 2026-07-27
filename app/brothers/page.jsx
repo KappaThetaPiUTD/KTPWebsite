@@ -206,7 +206,6 @@ const deltaClassMembers = [
   "Ayush Velhal",
   "Joel Philipose",
   "Krish Patel",
-  "Nihita Soma",
   "Praneel Sreepada",
   "Rahil Islam",
   "Rishi Ramesh",
