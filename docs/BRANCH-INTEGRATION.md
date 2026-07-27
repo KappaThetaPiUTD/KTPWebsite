@@ -157,11 +157,19 @@ See `docs/PORTAL.md`.
 
 ## Final branch status
 
-After the secure replacement commits are pushed and Vercel is green, the three
-legacy branches can be marked merged/superseded and removed from the remote:
+Completed July 26, 2026:
 
-```text
-aashay-auth
-mansi-login-update
-mekha-new-new-branch
-```
+| Branch | Secure replacement | Merge record |
+| --- | --- | --- |
+| `mekha-new-new-branch` | Current-tree dependency refresh | `535cfb5` |
+| `aashay-auth` | Invited membership and RLS onboarding | `f8c0312` |
+| `mansi-login-update` | Server/RLS strike management | `29683eb` |
+
+All three branch tips are ancestors of `main`. Production deployment for
+`29683eb` completed successfully, then all three remote branches were deleted.
+
+Primary implementation commits:
+
+- `0d8a370` - portal auth, onboarding, profile, strikes, schema, and dependency
+  refresh
+- `fe05d02` - AI maintenance prompt library and this integration report
