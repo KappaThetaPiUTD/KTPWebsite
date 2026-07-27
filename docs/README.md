@@ -6,6 +6,9 @@ Start here when maintaining the public website.
 | --- | --- |
 | [SECURITY.md](SECURITY.md) | Credential rotation, access handoff, member-data rules, and incident response |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Vercel, Node 24, environment files, deploy verification, and the July 2026 incident |
+| [PORTAL.md](PORTAL.md) | Separate Portal Supabase setup, invited onboarding, roles, RLS, and admin strike logging |
+| [AI-MAINTENANCE.md](AI-MAINTENANCE.md) | Page/file map, safe AI context packets, copy-ready prompts, and validation checklist |
+| [BRANCH-INTEGRATION.md](BRANCH-INTEGRATION.md) | Aashay/Mansi/Mekha audit, secure replacements, dependency decisions, and branch cleanup |
 | [EVENTS.md](EVENTS.md) | Adding, viewing, hiding, and deleting recruitment events |
 | [BIRTHDAYS.md](BIRTHDAYS.md) | Managing the home-page birthday banner |
 | [CHATBOT.md](CHATBOT.md) | Gemini key, roster grounding, Supabase knowledge, and chatbot troubleshooting |
