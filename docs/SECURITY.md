@@ -24,6 +24,21 @@ CLOUDINARY_API_SECRET=...
    URLs.
 5. Test the headshot uploader with `--dry-run` before performing a real upload.
 
+## Immediate action required: rotate KTP Portal Supabase keys
+
+The legacy KTP Portal `service_role` and related JWT secrets were committed in
+Git history. A July 2026 read-only audit confirmed that the historical
+service-role key remained active. Because service-role bypasses RLS:
+
+1. Run `supabase/portal-emergency-lockdown.sql` in the KTP Portal project.
+2. Rotate the legacy JWT secret/API keys in Supabase Project Settings.
+3. Do not copy the old keys from Git history into Vercel or local files.
+4. Install the replacement `portal_*` schema from `supabase/portal-schema.sql`.
+5. Use only the new Portal anon/publishable value in
+   `NEXT_PUBLIC_PORTAL_SUPABASE_ANON_KEY`.
+6. Keep secret/service-role values server-only, and only add one if a reviewed
+   server operation truly requires it.
+
 ## Environment files
 
 - `.env` and `.env.*` are ignored by Git.

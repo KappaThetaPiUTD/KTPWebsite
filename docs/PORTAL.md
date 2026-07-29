@@ -18,28 +18,54 @@ authorization and direct browser admin writes.
 ## One-time setup
 
 1. Resume the **KTP Portal** Supabase project.
-2. Open its SQL Editor and run `supabase/portal-schema.sql`.
-3. In Auth settings:
+2. If any legacy tables still exist, run
+   `supabase/portal-emergency-lockdown.sql` first.
+3. Rotate the historically exposed legacy JWT/API keys in Supabase.
+4. Open the SQL Editor and run `supabase/portal-schema.sql`.
+5. In Auth settings:
    - Disable open user signups.
    - Add
      `https://ktp-website.vercel.app/portal/auth/callback`
      as an allowed redirect URL.
-4. Bootstrap the first admin in SQL:
+6. Bootstrap the first admin in SQL:
 
 ```sql
 insert into public.portal_members (email, role, status)
 values ('officer@example.com', 'admin', 'active');
 ```
 
-5. Invite that same email through Supabase Auth.
-6. Set these Vercel environment variables:
+7. Invite that same email through Supabase Auth.
+8. Set these Vercel environment variables:
 
 ```text
 NEXT_PUBLIC_PORTAL_SUPABASE_URL=
 NEXT_PUBLIC_PORTAL_SUPABASE_ANON_KEY=
 ```
 
-7. Redeploy after adding the variables.
+9. Redeploy after adding the variables.
+
+## Emergency security finding (July 2026)
+
+Supabase reported `rls_disabled_in_public` for the KTP Portal project. A
+read-only audit found 12 legacy PostgREST tables:
+
+- `access_code`
+- `applications`
+- `attendance`
+- `attendance_logs`
+- `events`
+- `password_resets`
+- `profiles`
+- `rsvps`
+- `rsvps_admin`
+- `strikes_log`
+- `users`
+- `whitelist`
+
+The historical service-role key committed to Git was also still active. That
+key bypasses RLS, so enabling policies alone is not sufficient. Run
+`supabase/portal-emergency-lockdown.sql`, then rotate the legacy JWT secret/API
+keys in Project Settings. Do not reuse any key recovered from Git history.
 
 ## Adding a member
 
