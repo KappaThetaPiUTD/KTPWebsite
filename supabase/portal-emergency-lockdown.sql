@@ -10,69 +10,55 @@
 
 begin;
 
--- Lock every legacy table exposed by the current Portal PostgREST schema.
-alter table if exists public.access_code enable row level security;
-alter table if exists public.access_code force row level security;
+-- Lock every legacy relation exposed by the current Portal PostgREST schema.
+-- Base/partitioned tables receive RLS. Views cannot have RLS, so their API
+-- privileges are revoked instead.
+do $$
+declare
+  legacy_relation record;
+begin
+  for legacy_relation in
+    select
+      relation.oid::regclass as qualified_name,
+      relation.relkind
+    from pg_class as relation
+    join pg_namespace as namespace
+      on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'public'
+      and relation.relname in (
+        'access_code',
+        'applications',
+        'attendance',
+        'attendance_logs',
+        'events',
+        'password_resets',
+        'profiles',
+        'rsvps',
+        'rsvps_admin',
+        'strikes_log',
+        'users',
+        'whitelist'
+      )
+  loop
+    if legacy_relation.relkind in ('r', 'p') then
+      execute format(
+        'alter table %s enable row level security',
+        legacy_relation.qualified_name
+      );
+      execute format(
+        'alter table %s force row level security',
+        legacy_relation.qualified_name
+      );
+    end if;
 
-alter table if exists public.applications enable row level security;
-alter table if exists public.applications force row level security;
-
-alter table if exists public.attendance enable row level security;
-alter table if exists public.attendance force row level security;
-
-alter table if exists public.attendance_logs enable row level security;
-alter table if exists public.attendance_logs force row level security;
-
-alter table if exists public.events enable row level security;
-alter table if exists public.events force row level security;
-
-alter table if exists public.password_resets enable row level security;
-alter table if exists public.password_resets force row level security;
-
-alter table if exists public.profiles enable row level security;
-alter table if exists public.profiles force row level security;
-
-alter table if exists public.rsvps enable row level security;
-alter table if exists public.rsvps force row level security;
-
-alter table if exists public.rsvps_admin enable row level security;
-alter table if exists public.rsvps_admin force row level security;
-
-alter table if exists public.strikes_log enable row level security;
-alter table if exists public.strikes_log force row level security;
-
-alter table if exists public.users enable row level security;
-alter table if exists public.users force row level security;
-
-alter table if exists public.whitelist enable row level security;
-alter table if exists public.whitelist force row level security;
-
--- No legacy Portal feature is currently enabled on the website. Revoke all API
--- access until each feature is rebuilt with reviewed policies.
-revoke all on table public.access_code
-  from public, anon, authenticated, service_role;
-revoke all on table public.applications
-  from public, anon, authenticated, service_role;
-revoke all on table public.attendance
-  from public, anon, authenticated, service_role;
-revoke all on table public.attendance_logs
-  from public, anon, authenticated, service_role;
-revoke all on table public.events
-  from public, anon, authenticated, service_role;
-revoke all on table public.password_resets
-  from public, anon, authenticated, service_role;
-revoke all on table public.profiles
-  from public, anon, authenticated, service_role;
-revoke all on table public.rsvps
-  from public, anon, authenticated, service_role;
-revoke all on table public.rsvps_admin
-  from public, anon, authenticated, service_role;
-revoke all on table public.strikes_log
-  from public, anon, authenticated, service_role;
-revoke all on table public.users
-  from public, anon, authenticated, service_role;
-revoke all on table public.whitelist
-  from public, anon, authenticated, service_role;
+    -- PostgreSQL's GRANT/REVOKE TABLE syntax also applies to views.
+    execute format(
+      'revoke all on table %s from public, anon, authenticated, service_role',
+      legacy_relation.qualified_name
+    );
+  end loop;
+end
+$$;
 
 revoke all on all sequences in schema public
   from public, anon, authenticated, service_role;
@@ -108,17 +94,45 @@ $$;
 
 commit;
 
--- Verification: every legacy table must show RLS enabled and forced.
+-- Verification:
+-- - Every base/partitioned table must show rls_enabled=true and rls_forced=true.
+-- - The rsvps_admin view shows relation_type=view and cannot have RLS; its
+--   anon/authenticated/service-role access columns must all be false.
 select
   namespace.nspname as schema_name,
-  table_class.relname as table_name,
+  table_class.relname as relation_name,
+  case table_class.relkind
+    when 'r' then 'table'
+    when 'p' then 'partitioned table'
+    when 'v' then 'view'
+    when 'm' then 'materialized view'
+    else table_class.relkind::text
+  end as relation_type,
   table_class.relrowsecurity as rls_enabled,
-  table_class.relforcerowsecurity as rls_forced
+  table_class.relforcerowsecurity as rls_forced,
+  has_table_privilege('anon', table_class.oid, 'select') as anon_can_select,
+  has_table_privilege('authenticated', table_class.oid, 'select')
+    as authenticated_can_select,
+  has_table_privilege('service_role', table_class.oid, 'select')
+    as service_role_can_select
 from pg_class as table_class
 join pg_namespace as namespace
   on namespace.oid = table_class.relnamespace
 where namespace.nspname = 'public'
-  and table_class.relkind = 'r'
+  and table_class.relname in (
+    'access_code',
+    'applications',
+    'attendance',
+    'attendance_logs',
+    'events',
+    'password_resets',
+    'profiles',
+    'rsvps',
+    'rsvps_admin',
+    'strikes_log',
+    'users',
+    'whitelist'
+  )
 order by table_class.relname;
 
 -- Verification: no policy is intentionally created for legacy tables, so they
