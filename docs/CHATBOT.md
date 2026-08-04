@@ -11,11 +11,11 @@ architecture and the common maintenance flows.
 | Chat widget (UI) | `components/Chatbot.jsx` | Floating button + chat panel. Client component. Lifts above the footer so it never covers the social icons. |
 | Chat API route | `app/api/chat/route.js` | Server-side proxy to the Google Gemini API. Holds the API key (never exposed to the browser), builds the system prompt, and returns the reply. |
 | Leadership roster | `lib/roster.js` | Shared source of truth for the exec + director boards. Imported by both the Brothers page and the chat route. |
-| Knowledge base | `lib/knowledge.js` | Fetches extra knowledge rows from Supabase and injects the most relevant ones into the AI's context. |
+| Knowledge base | `lib/knowledge.js` | Fetches public-safe knowledge rows from Supabase, ranks them against the question, and returns context plus source titles. |
 | Upcoming events | `lib/events.js` | Fetches active, upcoming rows from the Supabase `events` table and injects them so the bot can answer "what events are coming up?" (see `docs/EVENTS.md`). |
 
 **Request flow:** user types -> `POST /api/chat` -> route builds context
-(`system prompt` + `live roster` + `upcoming events` + `retrieved knowledge`) -> calls Gemini -> returns reply.
+(`system prompt` + `live roster` + `upcoming events` + `retrieved knowledge`) -> calls Gemini -> returns the reply and public context labels.
 
 ## The Gemini API key
 
@@ -80,9 +80,29 @@ Because knowledge content should **not** be committed to GitHub, the flow is:
 
 `lib/knowledge.js` injects knowledge into the AI's context with a character budget
 (~6000 chars). If the whole base is small, it includes everything; once it's large
-(e.g. after adding the constitution), it keyword-ranks rows against the user's
-question and includes only the most relevant ones. This keeps requests fast and
-within free-tier limits while supporting large documents.
+(e.g. after adding the constitution), it ranks rows using title matches, content
+matches, complete phrase matches, and query coverage. It includes only what fits
+the budget and returns up to five relevant row titles for the UI's Context chips.
+This keeps requests fast and within free-tier limits while making the answer's
+public knowledge sources visible.
+
+## Safe integration of PR #172
+
+PR #172 proposed a separate RAG dashboard. The useful source-transparency and
+ranking ideas were ported into the existing chatbot instead of merging the
+branch directly.
+
+The following branch content must not be restored:
+
+- Internal PDFs committed to the public repository
+- Member contact documents or extracted email/phone data
+- Public routes that list documents, return full document text, or expose raw
+  search chunks
+- A second chatbot UI or a localhost API base
+- Experimental embedding fallbacks that silently replace failed retrieval
+- The branch's obsolete dependency tree and deleted legacy sidebar
+
+Only public-safe rows belong in the existing Supabase `knowledge` table.
 
 ## Analytics
 

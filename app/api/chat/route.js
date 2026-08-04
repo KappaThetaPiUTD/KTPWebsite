@@ -1,6 +1,8 @@
 import { executiveBoardMembers, directorBoardMembers } from "../../../lib/roster";
-import { getKnowledge } from "../../../lib/knowledge";
+import { getKnowledgeWithSources } from "../../../lib/knowledge";
 import { getEvents } from "../../../lib/events";
+import { getContextSourceLabels } from "../../../lib/chatSources";
+import { prepareChatMessages } from "../../../lib/chatPayload";
 
 const LEADERSHIP = [
   "Current KTP Mu Chapter leadership (Fall 2026):",
@@ -51,30 +53,26 @@ export async function POST(request) {
     return Response.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const messages = Array.isArray(body?.messages) ? body.messages : [];
-  if (messages.length === 0) {
-    return Response.json({ error: "No messages provided." }, { status: 400 });
+  const prepared = prepareChatMessages(body?.messages);
+  if (prepared.error) {
+    return Response.json({ error: prepared.error }, { status: 400 });
   }
+  const { messages, question } = prepared;
 
   // Map the client conversation to Gemini's expected format, keeping only recent turns.
-  const contents = messages
-    .filter((m) => m && typeof m.text === "string" && m.text.trim())
-    .slice(-12)
-    .map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.text }],
-    }));
+  const contents = messages.map((m) => ({
+    role: m.role === "assistant" ? "model" : "user",
+    parts: [{ text: m.text }],
+  }));
 
   const model = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
   try {
-    const lastUser = [...messages].reverse().find((m) => m.role !== "assistant");
     const [knowledge, events] = await Promise.all([
-      getKnowledge(lastUser?.text || ""),
+      getKnowledgeWithSources(question),
       getEvents(),
     ]);
-    const systemText = [SYSTEM_PROMPT, LEADERSHIP, events, knowledge]
+    const systemText = [SYSTEM_PROMPT, LEADERSHIP, events, knowledge.context]
       .filter(Boolean)
       .join("\n\n");
 
@@ -88,7 +86,7 @@ export async function POST(request) {
       },
     };
 
-    let res = await fetch(url, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -117,7 +115,15 @@ export async function POST(request) {
         .join("") ||
       "Sorry, I didn't catch that. Could you rephrase, or email kappathetapiutd@gmail.com?";
 
-    return Response.json({ reply }, { status: 200 });
+    const sources = getContextSourceLabels(question, {
+      hasEvents: Boolean(events),
+      knowledgeSources: knowledge.sources,
+    });
+
+    return Response.json(
+      { reply, sources },
+      { status: 200 }
+    );
   } catch (err) {
     console.error("Chat route error:", err);
     return Response.json(
