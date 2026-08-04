@@ -3,15 +3,46 @@
 ## Normal deployment
 
 Every push to `main` triggers a production deployment in Vercel. Pull requests
-receive preview deployments.
+receive preview deployments. GitHub Actions also runs tests, lint, and a
+production build on every pull request and every push to `main`.
 
-Before pushing:
+The standard path is:
+
+1. Start from current `main`.
+2. Create one feature or fix branch.
+3. Open a pull request into `main`.
+4. Review the Vercel preview.
+5. Wait for the `validate` and `Vercel` checks.
+6. Resolve review conversations and obtain one approval.
+7. Squash merge and delete the branch.
+8. Verify the production deployment.
+
+`main` is protected. Direct pushes, force pushes, deletion, and merging without
+the required checks and review are blocked.
+
+Before opening the pull request:
 
 ```powershell
-npm install
+npm ci
+npm test
 npm run lint
 npm run build
 ```
+
+## Why there is no permanent stage branch
+
+Vercel already creates an isolated preview deployment for every pull request.
+A permanent `stage` branch would require merging each change twice, can drift
+away from `main`, and creates additional conflict and rollback paths.
+
+Add a permanent staging branch only if KTP later has all three of these:
+
+1. A separate staging domain.
+2. Separate staging databases and third-party credentials.
+3. Scheduled release batches that must be tested together before production.
+
+Until then, pull request previews plus protected `main` provide the safer and
+simpler workflow.
 
 The project pins Node.js `24.x` in `package.json`. Vercel announced that Node 20
 deployments created on or after October 1, 2026 will fail, so do not remove the
