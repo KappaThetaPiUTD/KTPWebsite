@@ -173,3 +173,39 @@ Primary implementation commits:
 - `0d8a370` - portal auth, onboarding, profile, strikes, schema, and dependency
   refresh
 - `fe05d02` - AI maintenance prompt library and this integration report
+
+## Pranay PR #172: RAG bot
+
+Source branch:
+
+```text
+February-Changes-DO-NOT-CODE
+```
+
+Useful intent:
+
+- Rank chapter knowledge against the user's question.
+- Show which public context informed an answer.
+- Provide a clearer complete-state chatbot experience.
+
+Why the pull request was not merged directly:
+
+- It committed internal chapter PDFs to the public repository.
+- The active-brother contact document contained dozens of email addresses and
+  phone numbers.
+- Unauthenticated routes returned the document list, raw document content, and
+  raw search chunks.
+- The separate dashboard depended on a deleted legacy sidebar and a localhost
+  API fallback.
+- It duplicated the production chatbot and conflicted with the current
+  dependency tree.
+- Its Vercel deployment failed and GitHub reported merge conflicts.
+
+Safe current-tree replacement:
+
+- Keep the existing floating chatbot and server-only Gemini key.
+- Improve dependency-free public knowledge ranking in `lib/knowledge.js`.
+- Return only public source titles, never full document text, to the client.
+- Show those titles as Context chips under chatbot answers.
+- Keep private member data out of Git and out of the public knowledge table.
+- Add built-in Node tests for ranking, budgets, and source selection.

@@ -3,6 +3,10 @@
 import { useState, useRef, useEffect } from "react";
 import { FaCommentDots, FaTimes, FaPaperPlane } from "react-icons/fa";
 import { trackEvent } from "../lib/analytics";
+import {
+  getApiChatHistory,
+  MAX_MESSAGE_LENGTH,
+} from "../lib/chatPayload";
 
 const INITIAL_MESSAGE = {
   role: "assistant",
@@ -69,12 +73,30 @@ const Chatbot = () => {
     });
   };
 
+  const resetChat = () => {
+    setMessages([INITIAL_MESSAGE]);
+    setInput("");
+    inputRef.current?.focus();
+  };
+
   const send = async (preset) => {
     const text = (typeof preset === "string" ? preset : input).trim();
     if (!text || loading) return;
+    if (text.length > MAX_MESSAGE_LENGTH) {
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          text: `Please keep each message under ${MAX_MESSAGE_LENGTH.toLocaleString()} characters.`,
+          localOnly: true,
+        },
+      ]);
+      return;
+    }
 
     trackEvent("chatbot_message");
     const next = [...messages, { role: "user", text }];
+    const apiMessages = getApiChatHistory(next);
     setMessages(next);
     setInput("");
     setLoading(true);
@@ -83,25 +105,47 @@ const Chatbot = () => {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({ messages: apiMessages }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setInput(text);
+        setMessages([
+          ...messages,
+          {
+            role: "assistant",
+            text:
+              data.error ||
+              "Sorry, please shorten your question and try again.",
+            localOnly: true,
+          },
+        ]);
+        return;
+      }
       setMessages((m) => [
         ...m,
         {
           role: "assistant",
           text:
             data.reply ||
+            data.error ||
             "Sorry, please try again, or email kappathetapiutd@gmail.com.",
+          sources: Array.isArray(data.sources)
+            ? data.sources.filter(
+                (source) => typeof source === "string" && source.trim()
+              )
+            : [],
         },
       ]);
     } catch {
-      setMessages((m) => [
-        ...m,
+      setInput(text);
+      setMessages([
+        ...messages,
         {
           role: "assistant",
           text:
             "Sorry, I couldn't connect. Please email kappathetapiutd@gmail.com.",
+          localOnly: true,
         },
       ]);
     } finally {
@@ -137,14 +181,24 @@ const Chatbot = () => {
         >
           <div className="flex items-center justify-between bg-primary px-4 py-3 font-poppins font-semibold text-white">
             <span>KTP Assistant</span>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close chat"
-              className="transition-opacity hover:opacity-80"
-            >
-              <FaTimes size={18} />
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={resetChat}
+                disabled={loading}
+                className="text-xs font-medium transition-opacity hover:opacity-80 disabled:opacity-50"
+              >
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close chat"
+                className="transition-opacity hover:opacity-80"
+              >
+                <FaTimes size={18} />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto bg-gray-50 p-4">
@@ -162,7 +216,27 @@ const Chatbot = () => {
                       : "rounded-bl-sm border border-gray-200 bg-white text-black"
                   }`}
                 >
-                  {m.text}
+                  <div>{m.text}</div>
+                  {m.role === "assistant" && m.sources?.length > 0 && (
+                    <div
+                      className="mt-2 border-t border-gray-200 pt-2"
+                      aria-label="Context used for this answer"
+                    >
+                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-gray-500">
+                        Context
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {m.sources.map((source) => (
+                          <span
+                            key={source}
+                            className="rounded-full bg-primary/5 px-2 py-1 text-[10px] text-primary"
+                          >
+                            {source}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
