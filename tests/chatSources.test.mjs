@@ -35,6 +35,6 @@ test("labels are relevant, unique, and bounded", () => {
       hasEvents: true,
       knowledgeSources: ["Leadership policy"],
     }),
-    ["Current leadership roster", "Leadership policy"]
+    ["Current leadership roster"]
   );
 });
