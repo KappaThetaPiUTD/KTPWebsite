@@ -8,6 +8,7 @@ import { getPortalBrowserClient } from "../../lib/portal/client";
 const navItems = [
   { label: "Overview", href: "/portal/dashboard" },
   { label: "Profile", href: "/portal/dashboard/profile" },
+  { label: "Events", href: "/portal/dashboard/events" },
 ];
 
 export default function PortalNav({ displayName, email, isAdmin }) {
@@ -21,6 +22,10 @@ export default function PortalNav({ displayName, email, isAdmin }) {
         {
           label: "Strikes",
           href: "/portal/dashboard/admin/strikes",
+        },
+        {
+        label: "Event Management",
+        href: "/portal/dashboard/admin/events",
         },
       ]
     : navItems;
