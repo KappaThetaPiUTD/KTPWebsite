@@ -31,6 +31,11 @@ const Footer = () => {
           </a>
         </div>
       </div>
+      <div className="sm:mt-4 text-center">
+        <span className="text-gray-300 font-poppins text-sm">
+          800 W. Campbell Road, Richardson, Texas 75080-3021
+        </span>
+      </div>
       
       
     </footer>
