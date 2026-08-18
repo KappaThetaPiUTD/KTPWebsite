@@ -99,13 +99,6 @@ export default function AdminEventsPage() {
               Create Event
             </h2>
 
-            <button
-              type="button"
-              onClick={() => setShowCreateForm(false)}
-              className="text-sm font-semibold text-gray-500 hover:text-gray-950"
-            >
-              Cancel
-            </button>
           </div>
 
           <form className="mt-6 space-y-5">
