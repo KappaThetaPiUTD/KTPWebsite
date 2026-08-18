@@ -11,6 +11,9 @@ const Footer = () => {
         <div className="text-[20px] sm:text-[25px] font-bold mb-1 font-poppins">
           Kappa Theta Pi - Mu Chapter
         </div>
+        <div className="text-gray-300 font-poppins text-sm mt-1">
+          800 W. Campbell Road, Richardson, Texas 75080-3021
+        </div>
       </div>
       <div className="flex flex-col sm:flex-row items-center w-full sm:w-auto">
         <div className="flex items-center">
@@ -33,6 +36,7 @@ const Footer = () => {
           800 W. Campbell Road, Richardson, Texas 75080-3021
         </span>
       </div>
+      
       
     </footer>
   );
