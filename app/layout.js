@@ -6,7 +6,6 @@ import PageTransition from "../components/PageTransition";
 import GoogleAnalytics from "../components/GoogleAnalytics";
 import Chatbot from "../components/Chatbot";
 import { ToastContainer } from "react-toastify";
-import "react-big-calendar/lib/css/react-big-calendar.css";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./globals.css";
