@@ -22,6 +22,10 @@ export default function PortalNav({ displayName, email, isAdmin }) {
           label: "Strikes",
           href: "/portal/dashboard/admin/strikes",
         },
+        {
+          label: "Members",
+          href: "/portal/dashboard/admin/members",
+        },
       ]
     : navItems;
 
