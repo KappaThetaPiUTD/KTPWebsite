@@ -14,6 +14,9 @@ const Footer = () => {
         <div className="text-gray-300 font-poppins text-sm mt-1">
           800 W. Campbell Road, Richardson, Texas 75080-3021
         </div>
+        <div className="text-gray-300 font-poppins text-sm mt-1">
+          Charity ID: 33-1294470
+        </div>
       </div>
       <div className="flex items-center mt-5 sm:mt-0">
         <a href="https://www.linkedin.com/company/ktputd" target="_blank" rel="noopener noreferrer" aria-label="KTP on LinkedIn">
