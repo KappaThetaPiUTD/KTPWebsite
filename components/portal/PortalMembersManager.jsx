@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const ROLES = ["admin", "exec", "director", "brother", "pledge"];
 
 export default function PortalMembersManager({ members, error }) {
   const router = useRouter();
+  const [memberList, setMemberList] = useState(members);
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [rowError, setRowError] = useState("");
@@ -19,11 +20,11 @@ export default function PortalMembersManager({ members, error }) {
 
   const filteredMembers = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return members;
-    return members.filter((member) =>
+    if (!normalized) return memberList;
+    return memberList.filter((member) =>
       member.email.toLowerCase().includes(normalized)
     );
-  }, [members, query]);
+  }, [memberList, query]);
 
   const patchMember = async (memberId, updates) => {
     setBusyId(memberId);
@@ -41,6 +42,13 @@ export default function PortalMembersManager({ members, error }) {
         return;
       }
 
+      setMemberList((previousMembers) =>
+        previousMembers.map((member) =>
+          member.id === memberId
+            ? { ...member, ...(result.member || updates) }
+            : member
+        )
+      );
       router.refresh();
     } catch {
       setRowError("Unable to update member right now.");
@@ -66,10 +74,23 @@ export default function PortalMembersManager({ members, error }) {
     setShowAddModal(true);
   };
 
-  const closeAddModal = () => {
+  const closeAddModal = useCallback(() => {
     if (adding) return;
     setShowAddModal(false);
-  };
+  }, [adding]);
+
+  useEffect(() => {
+    if (!showAddModal) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        closeAddModal();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showAddModal, closeAddModal]);
 
   const submitAdd = async () => {
     const email = newEmail.trim().toLowerCase();
@@ -93,6 +114,7 @@ export default function PortalMembersManager({ members, error }) {
         return;
       }
 
+      setMemberList((previousMembers) => [result.member, ...previousMembers]);
       setShowAddModal(false);
       router.refresh();
     } catch {
