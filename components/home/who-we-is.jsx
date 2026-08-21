@@ -13,7 +13,6 @@ const WhoWeIs = () => {
         <Image
           src="https://res.cloudinary.com/dha44tosd/image/upload/v1783200474/Assets%20for%20website/who_we_are_spring26.jpg"
           alt="KTP Members"
-          layout="responsive"
           width={1600}
           height={900}
           className="rounded-lg object-cover"

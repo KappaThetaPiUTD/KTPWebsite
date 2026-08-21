@@ -8,6 +8,7 @@ import { getPortalBrowserClient } from "../../lib/portal/client";
 const navItems = [
   { label: "Overview", href: "/portal/dashboard" },
   { label: "Profile", href: "/portal/dashboard/profile" },
+  { label: "Events", href: "/portal/dashboard/events" },
 ];
 
 export default function PortalNav({ displayName, email, isAdmin }) {
@@ -15,6 +16,7 @@ export default function PortalNav({ displayName, email, isAdmin }) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
+  
   const visibleNavItems = isAdmin
     ? [
         ...navItems,
@@ -25,6 +27,10 @@ export default function PortalNav({ displayName, email, isAdmin }) {
         {
           label: "Members",
           href: "/portal/dashboard/admin/members",
+        },
+        {
+        label: "Event Management",
+        href: "/portal/dashboard/admin/events",
         },
       ]
     : navItems;
