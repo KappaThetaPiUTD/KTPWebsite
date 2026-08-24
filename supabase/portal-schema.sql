@@ -221,10 +221,179 @@ create policy "Admins can log strikes"
     )
   );
 
+create table if not exists public.portal_events (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (char_length(title) between 2 and 200),
+  description text not null check (char_length(description) between 5 and 5000),
+  location text check (location is null or char_length(location) between 2 and 200),
+  start_time timestamptz not null,
+  end_time timestamptz not null,
+  qr_code_secret text not null default encode(gen_random_bytes(32), 'base64'),
+  created_by uuid not null references auth.users(id) on delete restrict,
+  created_at timestamptz not null default now(),
+  check (end_time > start_time)
+);
+
+create table if not exists public.portal_rsvps (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.portal_events(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  status text not null default 'maybe'
+    check (status in ('going', 'maybe', 'not_going')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (event_id, user_id)
+);
+
+create table if not exists public.portal_attendance (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.portal_events(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  checked_in_at timestamptz not null default now(),
+  method text not null default 'qr'
+    check (method in ('qr', 'manual')),
+  checked_in_by uuid not null references auth.users(id) on delete restrict,
+  unique (event_id, user_id)
+);
+
+create or replace function public.is_event_creator(event_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.portal_events
+    where id = $1
+      and created_by = auth.uid()
+  );
+$$;
+
+alter table public.portal_events enable row level security;
+alter table public.portal_rsvps enable row level security;
+alter table public.portal_attendance enable row level security;
+
+drop policy if exists "Members can read events" on public.portal_events;
+create policy "Members can read events"
+  on public.portal_events
+  for select
+  to authenticated
+  using (public.is_active_portal_member());
+
+drop policy if exists "Admins can create events" on public.portal_events;
+create policy "Admins can create events"
+  on public.portal_events
+  for insert
+  to authenticated
+  with check (
+    public.is_portal_admin()
+    and created_by = auth.uid()
+  );
+
+drop policy if exists "Admins can update events" on public.portal_events;
+create policy "Admins can update events"
+  on public.portal_events
+  for update
+  to authenticated
+  using (public.is_portal_admin() or public.is_event_creator(id))
+  with check (public.is_portal_admin() or public.is_event_creator(id));
+
+drop policy if exists "Admins can delete events" on public.portal_events;
+create policy "Admins can delete events"
+  on public.portal_events
+  for delete
+  to authenticated
+  using (public.is_portal_admin() or public.is_event_creator(id));
+
+drop policy if exists "Members can read RSVPs" on public.portal_rsvps;
+create policy "Members can read RSVPs"
+  on public.portal_rsvps
+  for select
+  to authenticated
+  using (
+    user_id = auth.uid()
+    or public.is_portal_admin()
+  );
+
+drop policy if exists "Members can create RSVP" on public.portal_rsvps;
+create policy "Members can create RSVP"
+  on public.portal_rsvps
+  for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and public.is_active_portal_member()
+  );
+
+drop policy if exists "Members can update own RSVP" on public.portal_rsvps;
+create policy "Members can update own RSVP"
+  on public.portal_rsvps
+  for update
+  to authenticated
+  using (user_id = auth.uid() or public.is_portal_admin())
+  with check (user_id = auth.uid() or public.is_portal_admin());
+
+drop policy if exists "Members can delete own RSVP" on public.portal_rsvps;
+create policy "Members can delete own RSVP"
+  on public.portal_rsvps
+  for delete
+  to authenticated
+  using (user_id = auth.uid() or public.is_portal_admin());
+
+drop policy if exists "Members can read attendance" on public.portal_attendance;
+create policy "Members can read attendance"
+  on public.portal_attendance
+  for select
+  to authenticated
+  using (
+    user_id = auth.uid()
+    or public.is_portal_admin()
+  );
+
+drop policy if exists "Members can check in" on public.portal_attendance;
+create policy "Members can check in"
+  on public.portal_attendance
+  for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and public.is_active_portal_member()
+  );
+
+drop policy if exists "Admins can manual check in" on public.portal_attendance;
+create policy "Admins can manual check in"
+  on public.portal_attendance
+  for insert
+  to authenticated
+  with check (
+    public.is_portal_admin()
+    and method = 'manual'
+    and checked_in_by = auth.uid()
+  );
+
+drop policy if exists "Admins can update attendance" on public.portal_attendance;
+create policy "Admins can update attendance"
+  on public.portal_attendance
+  for update
+  to authenticated
+  using (public.is_portal_admin())
+  with check (public.is_portal_admin());
+
+drop policy if exists "Admins can delete attendance" on public.portal_attendance;
+create policy "Admins can delete attendance"
+  on public.portal_attendance
+  for delete
+  to authenticated
+  using (public.is_portal_admin());
+
+revoke all on function public.is_event_creator(uuid) from public;
 revoke all on function public.claim_portal_membership() from public;
 revoke all on function public.is_active_portal_member() from public;
 revoke all on function public.is_portal_admin() from public;
 revoke all on function public.portal_strike_counts() from public;
+grant execute on function public.is_event_creator(uuid) to authenticated;
 grant execute on function public.claim_portal_membership() to authenticated;
 grant execute on function public.is_active_portal_member() to authenticated;
 grant execute on function public.is_portal_admin() to authenticated;
