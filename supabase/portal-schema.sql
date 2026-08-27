@@ -252,6 +252,8 @@ create table if not exists public.portal_attendance (
   checked_in_at timestamptz not null default now(),
   method text not null default 'qr'
     check (method in ('qr', 'manual')),
+  status text not null default 'present'
+    check (status in ('present', 'excused', 'unexcused', 'late')),
   checked_in_by uuid not null references auth.users(id) on delete restrict,
   unique (event_id, user_id)
 );
