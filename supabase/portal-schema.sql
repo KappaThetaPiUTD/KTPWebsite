@@ -228,7 +228,20 @@ create table if not exists public.portal_events (
   location text check (location is null or char_length(location) between 2 and 200),
   start_time timestamptz not null,
   end_time timestamptz not null,
+  -- scheduling & visibility: event_type drives filters; target_roles null = all members
+  event_type text not null default 'chapter'
+    check (event_type in ('chapter', 'social', 'professional', 'workshop', 'other')),
+  target_roles text[],
+  -- rsvp rules: capacity null = unlimited; rsvp_deadline null = open until event start
+  capacity integer check (capacity is null or capacity > 0),
+  rsvp_deadline timestamptz,
+  -- check-in config: passcode is the typeable fallback; qr_code_secret drives the QR image
+  late_threshold_minutes integer not null default 15
+    check (late_threshold_minutes between 0 and 120),
+  check_in_passcode char(6) not null
+    default lpad((floor(random() * 1000000))::int::text, 6, '0'),
   qr_code_secret text not null default encode(gen_random_bytes(32), 'base64'),
+  is_check_in_open boolean not null default false,
   created_by uuid not null references auth.users(id) on delete restrict,
   created_at timestamptz not null default now(),
   check (end_time > start_time)
@@ -250,9 +263,15 @@ create table if not exists public.portal_attendance (
   event_id uuid not null references public.portal_events(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   checked_in_at timestamptz not null default now(),
+  -- server auto-sets present/late; admin can override to excused/unexcused
+  status text not null default 'present'
+    check (status in ('present', 'late', 'excused', 'unexcused')),
   method text not null default 'qr'
     check (method in ('qr', 'manual')),
   checked_in_by uuid not null references auth.users(id) on delete restrict,
+  -- audit fields: verified_by is set on any admin override, null = machine-determined
+  verified_by uuid references auth.users(id) on delete set null,
+  updated_at timestamptz not null default now(),
   unique (event_id, user_id)
 );
 
@@ -398,6 +417,26 @@ grant execute on function public.claim_portal_membership() to authenticated;
 grant execute on function public.is_active_portal_member() to authenticated;
 grant execute on function public.is_portal_admin() to authenticated;
 grant execute on function public.portal_strike_counts() to authenticated;
+
+-- MIGRATION: patch the already-deployed tables. Fresh installs get these from CREATE TABLE above.
+
+alter table public.portal_events
+  add column if not exists event_type text not null default 'chapter'
+    check (event_type in ('chapter', 'social', 'professional', 'workshop', 'other')),
+  add column if not exists target_roles text[],
+  add column if not exists capacity integer check (capacity is null or capacity > 0),
+  add column if not exists rsvp_deadline timestamptz,
+  add column if not exists late_threshold_minutes integer not null default 15
+    check (late_threshold_minutes between 0 and 120),
+  add column if not exists check_in_passcode char(6) not null
+    default lpad((floor(random() * 1000000))::int::text, 6, '0'),
+  add column if not exists is_check_in_open boolean not null default false;
+
+alter table public.portal_attendance
+  add column if not exists status text not null default 'present'
+    check (status in ('present', 'late', 'excused', 'unexcused')),
+  add column if not exists verified_by uuid references auth.users(id) on delete set null,
+  add column if not exists updated_at timestamptz not null default now();
 
 -- Bootstrap the first admin in the SQL Editor before sending the Auth invite.
 -- Replace the email, then run:
