@@ -41,7 +41,7 @@ async function requireAdmin() {
 }
 
 export async function PATCH(request) {
-  const { error } = await requireAdmin();
+  const { context, error } = await requireAdmin();
   if (error) return error;
 
   let body;
@@ -83,10 +83,10 @@ export async function PATCH(request) {
 
   const { data, error: updateError } = await supabase
     .from("portal_attendance")
-    .update({ status })
+    .update({ status, verified_by: context.user.id })
     .eq("id", attendanceId)
     .select(
-      "id, event_id, user_id, checked_in_at, method, status, checked_in_by"
+      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by"
     )
     .single();
 
