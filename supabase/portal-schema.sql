@@ -265,7 +265,7 @@ create table if not exists public.portal_attendance (
   checked_in_at timestamptz not null default now(),
   -- server auto-sets present/late; admin can override to excused/unexcused
   status text not null default 'present'
-    check (status in ('present', 'late', 'excused', 'unexcused')),
+    check (status in ('present', 'excused', 'unexcused', 'late')),
   method text not null default 'qr'
     check (method in ('qr', 'manual')),
   checked_in_by uuid not null references auth.users(id) on delete restrict,
@@ -434,9 +434,27 @@ alter table public.portal_events
 
 alter table public.portal_attendance
   add column if not exists status text not null default 'present'
-    check (status in ('present', 'late', 'excused', 'unexcused')),
+    check (status in ('present', 'excused', 'unexcused', 'late')),
   add column if not exists verified_by uuid references auth.users(id) on delete set null,
   add column if not exists updated_at timestamptz not null default now();
+
+-- `ADD COLUMN IF NOT EXISTS` does not add the inline constraint when `status`
+-- already exists, so ensure deployed databases receive the same enum guard.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.portal_attendance'::regclass
+      and contype = 'c'
+      and conname = 'portal_attendance_status_check'
+  ) then
+    alter table public.portal_attendance
+      add constraint portal_attendance_status_check
+      check (status in ('present', 'excused', 'unexcused', 'late'));
+  end if;
+end;
+$$;
 
 -- Bootstrap the first admin in the SQL Editor before sending the Auth invite.
 -- Replace the email, then run:
