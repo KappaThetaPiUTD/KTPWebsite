@@ -25,46 +25,65 @@ const events = [
   },
 ];
 
-const attendance = {
-  1: [
-    {
-      id: 1,
-      name: "Jiya Khurana",
-      status: "Checked In",
-    },
-    {
-      id: 2,
-      name: "Pranay Chintakunta",
-      status: "Checked In",
-    },
-    {
-      id: 3,
-      name: "Siri Kishore-Dola",
-      status: "Not Checked In",
-    },
-  ],
-  2: [
-    {
-      id: 1,
-      name: "Jiya Khurana",
-      status: "Not Checked In",
-    },
-    {
-      id: 2,
-      name: "Pranay Chintakunta",
-      status: "Not Checked In",
-    },
-    {
-      id: 3,
-      name: "Siri Kishore-Dola",
-      status: "Not Checked In",
-    },
-  ],
-};
-
 export default function AdminEventsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceError, setAttendanceError] = useState(null);
+
+  async function loadAttendance(eventId) {
+    setAttendanceLoading(true);
+    setAttendanceError(null);
+
+    try {
+      const response = await fetch(
+        `/api/portal/admin/attendance?eventId=${eventId}`
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to load attendance.");
+      }
+
+      setAttendanceRecords(data.attendance || []);
+    } catch (error) {
+      setAttendanceError(error.message);
+      setAttendanceRecords([]);
+    } finally {
+      setAttendanceLoading(false);
+    }
+  }
+
+  async function updateAttendanceStatus(attendanceId, status) {
+    try {
+      const response = await fetch("/api/portal/admin/attendance", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          attendanceId,
+          status,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to update attendance.");
+      }
+
+      setAttendanceRecords((current) =>
+        current.map((record) =>
+          record.id === attendanceId ? data.attendance : record
+        )
+      );
+    } catch (error) {
+      setAttendanceError(error.message);
+    }
+  }
 
   return (
     <div>
@@ -98,7 +117,6 @@ export default function AdminEventsPage() {
             <h2 className="text-xl font-bold text-gray-950">
               Create Event
             </h2>
-
           </div>
 
           <form className="mt-6 space-y-5">
@@ -285,7 +303,10 @@ export default function AdminEventsPage() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
-                      onClick={() => setSelectedEvent(event)}
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        loadAttendance(event.id);
+                      }}
                       className="rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-semibold text-gray-800 hover:border-primary hover:text-primary"
                     >
                       View Attendance
@@ -342,43 +363,65 @@ export default function AdminEventsPage() {
               </p>
 
               <p className="mt-1 text-2xl font-bold text-gray-950">
-                {selectedEvent.checkedIn} checked in
+                {attendanceRecords.length} checked in
               </p>
             </div>
 
             <div className="mt-5 space-y-3">
-              {attendance[selectedEvent.id].map((member) => (
-                <div
-                  key={member.id}
-                  className="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold ${
-                        member.status === "Checked In"
-                          ? "bg-green-50 text-primary"
-                          : "bg-gray-100 text-gray-500"
-                      }`}
-                    >
-                      {member.status === "Checked In" ? "✓" : "○"}
+              {attendanceLoading && (
+                <p className="py-6 text-center text-sm text-gray-500">
+                  Loading attendance...
+                </p>
+              )}
+
+              {attendanceError && (
+                <div className="rounded-xl bg-red-50 p-4 text-sm text-red-700">
+                  {attendanceError}
+                </div>
+              )}
+
+              {!attendanceLoading &&
+                !attendanceError &&
+                attendanceRecords.length === 0 && (
+                  <p className="py-6 text-center text-sm text-gray-500">
+                    No attendance records yet.
+                  </p>
+                )}
+
+              {!attendanceLoading &&
+                attendanceRecords.map((record) => (
+                  <div
+                    key={record.id}
+                    className="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3"
+                  >
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {record.user_id}
+                      </p>
+
+                      <p className="mt-1 text-xs text-gray-500">
+                        Checked in at{" "}
+                        {new Date(record.checked_in_at).toLocaleString()}
+                      </p>
                     </div>
 
-                    <p className="text-sm font-semibold text-gray-900">
-                      {member.name}
-                    </p>
+                    <select
+                      value={record.status}
+                      onChange={(event) =>
+                        updateAttendanceStatus(
+                          record.id,
+                          event.target.value
+                        )
+                      }
+                      className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold outline-none focus:border-primary"
+                    >
+                      <option value="present">Present</option>
+                      <option value="late">Late</option>
+                      <option value="excused">Excused</option>
+                      <option value="unexcused">Unexcused</option>
+                    </select>
                   </div>
-
-                  <span
-                    className={`text-xs font-semibold ${
-                      member.status === "Checked In"
-                        ? "text-primary"
-                        : "text-gray-500"
-                    }`}
-                  >
-                    {member.status}
-                  </span>
-                </div>
-              ))}
+                ))}
             </div>
 
             <div className="mt-6 flex justify-end">

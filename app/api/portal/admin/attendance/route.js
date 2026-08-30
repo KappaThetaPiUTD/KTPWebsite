@@ -40,6 +40,48 @@ async function requireAdmin() {
   return { context };
 }
 
+export async function GET(request) {
+  const { context, error } = await requireAdmin();
+  if (error) return error;
+
+  const { searchParams } = new URL(request.url);
+  const eventId = searchParams.get("eventId")?.trim() || "";
+
+  if (!UUID_PATTERN.test(eventId)) {
+    return NextResponse.json(
+      { error: "Invalid event." },
+      { status: 400 }
+    );
+  }
+
+  const supabase = getPortalServerClient();
+
+  const { data, error: attendanceError } = await supabase
+    .from("portal_attendance")
+    .select(
+      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by, updated_at"
+    )
+    .eq("event_id", eventId)
+    .order("checked_in_at", { ascending: true });
+
+  if (attendanceError) {
+    console.error(
+      "Portal attendance fetch failed:",
+      attendanceError
+    );
+
+    return NextResponse.json(
+      { error: "Unable to fetch attendance." },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json(
+    { attendance: data },
+    { status: 200 }
+  );
+}
+
 export async function PATCH(request) {
   const { context, error } = await requireAdmin();
   if (error) return error;
@@ -83,10 +125,14 @@ export async function PATCH(request) {
 
   const { data, error: updateError } = await supabase
     .from("portal_attendance")
-    .update({ status, verified_by: context.user.id })
+    .update({
+      status,
+      verified_by: context.user.id,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", attendanceId)
     .select(
-      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by"
+      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by, updated_at"
     )
     .single();
 
