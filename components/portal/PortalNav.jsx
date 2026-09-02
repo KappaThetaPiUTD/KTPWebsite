@@ -23,6 +23,10 @@ export default function PortalNav({ displayName, email, isAdmin }) {
           href: "/portal/dashboard/admin/strikes",
         },
         {
+          label: "Attendance",
+          href: "/portal/dashboard/admin/attendance",
+        },
+        {
           label: "Members",
           href: "/portal/dashboard/admin/members",
         },
