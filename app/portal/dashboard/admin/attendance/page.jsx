@@ -9,7 +9,7 @@ export default async function PortalAdminAttendancePage({ searchParams }) {
     redirect("/portal/dashboard");
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
 
   const eventsResult = await supabase
     .from("portal_events")

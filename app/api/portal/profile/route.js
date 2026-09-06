@@ -82,7 +82,7 @@ export async function POST(request) {
     return NextResponse.json({ error: validated.error }, { status: 400 });
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
   const { data, error } = await supabase
     .from("portal_profiles")
     .upsert(

@@ -98,7 +98,7 @@ export async function POST(request) {
     );
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
   const { data, error: insertError } = await supabase
     .from("portal_events")
     .insert({
