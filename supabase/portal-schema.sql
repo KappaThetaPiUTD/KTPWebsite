@@ -709,6 +709,180 @@ begin
 end;
 $$;
 
+-- Activity hours: semesters and photo-backed submissions.
+create table if not exists public.portal_semesters (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  start_date date not null,
+  end_date date not null,
+  required_hours numeric not null default 10,
+  is_active boolean not null default false,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.portal_hour_submissions (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.portal_events(id),
+  -- Match portal_attendance.user_id: this is the authenticated user's UUID.
+  user_id uuid not null references auth.users(id),
+  semester_id uuid not null references public.portal_semesters(id),
+  start_photo_url text not null,
+  end_photo_url text,
+  status text not null default 'pending'
+    check (status in ('pending', 'approved', 'rejected')),
+  -- Set by an admin/exec reviewer after checking the photo timestamps.
+  hours_awarded numeric,
+  reviewed_by uuid references public.portal_members(id),
+  reviewed_at timestamptz,
+  rejection_reason text,
+  submitted_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique (event_id, user_id)
+);
+
+-- An hours submission is valid only after the event has ended and the member
+-- RSVP'd "going" (the attending status used by portal_rsvps).
+create or replace function public.validate_portal_hour_submission()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  submission_event_end_time timestamptz;
+begin
+  select end_time
+  into submission_event_end_time
+  from public.portal_events
+  where id = new.event_id;
+
+  if submission_event_end_time is null then
+    raise exception 'Event % does not exist', new.event_id;
+  end if;
+
+  if submission_event_end_time > now() then
+    raise exception 'Hours cannot be submitted until the event has ended';
+  end if;
+
+  if not exists (
+    select 1
+    from public.portal_rsvps
+    where event_id = new.event_id
+      and user_id = new.user_id
+      and status = 'going'
+  ) then
+    raise exception 'A going RSVP is required before submitting activity hours';
+  end if;
+
+  return new;
+end;
+$$;
+
+-- Photo evidence remains immutable once a submission has been approved.
+-- Only active admin/exec reviewers may assign or change awarded hours.
+create or replace function public.enforce_portal_hour_submission_review_rules()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if tg_op = 'UPDATE'
+    and old.status = 'approved'
+    and (
+      new.start_photo_url is distinct from old.start_photo_url
+      or new.end_photo_url is distinct from old.end_photo_url
+    ) then
+    raise exception 'Photo URLs cannot be changed after approval';
+  end if;
+
+  if not public.is_portal_admin()
+    and (
+      (tg_op = 'INSERT' and new.hours_awarded is not null)
+      or (tg_op = 'UPDATE' and new.hours_awarded is distinct from old.hours_awarded)
+    ) then
+    raise exception 'Only admin or exec reviewers may set hours_awarded';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists validate_portal_hour_submission on public.portal_hour_submissions;
+create trigger validate_portal_hour_submission
+  before insert on public.portal_hour_submissions
+  for each row execute function public.validate_portal_hour_submission();
+
+drop trigger if exists enforce_portal_hour_submission_review_rules on public.portal_hour_submissions;
+create trigger enforce_portal_hour_submission_review_rules
+  before insert or update on public.portal_hour_submissions
+  for each row execute function public.enforce_portal_hour_submission_review_rules();
+
+alter table public.portal_semesters enable row level security;
+alter table public.portal_hour_submissions enable row level security;
+
+drop policy if exists "Members can read semesters" on public.portal_semesters;
+create policy "Members can read semesters"
+  on public.portal_semesters
+  for select
+  to authenticated
+  using (public.is_active_portal_member());
+
+drop policy if exists "Admins can create semesters" on public.portal_semesters;
+create policy "Admins can create semesters"
+  on public.portal_semesters
+  for insert
+  to authenticated
+  with check (public.is_portal_admin());
+
+drop policy if exists "Admins can update semesters" on public.portal_semesters;
+create policy "Admins can update semesters"
+  on public.portal_semesters
+  for update
+  to authenticated
+  using (public.is_portal_admin())
+  with check (public.is_portal_admin());
+
+drop policy if exists "Admins can delete semesters" on public.portal_semesters;
+create policy "Admins can delete semesters"
+  on public.portal_semesters
+  for delete
+  to authenticated
+  using (public.is_portal_admin());
+
+drop policy if exists "Members can read own hour submissions" on public.portal_hour_submissions;
+create policy "Members can read own hour submissions"
+  on public.portal_hour_submissions
+  for select
+  to authenticated
+  using (user_id = auth.uid() or public.is_portal_admin());
+
+drop policy if exists "Members can submit own activity hours" on public.portal_hour_submissions;
+create policy "Members can submit own activity hours"
+  on public.portal_hour_submissions
+  for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and public.is_active_portal_member()
+    and status = 'pending'
+    and hours_awarded is null
+    and reviewed_by is null
+    and reviewed_at is null
+    and rejection_reason is null
+  );
+
+drop policy if exists "Admins can update hour submissions" on public.portal_hour_submissions;
+create policy "Admins can update hour submissions"
+  on public.portal_hour_submissions
+  for update
+  to authenticated
+  using (public.is_portal_admin())
+  with check (public.is_portal_admin());
+
+revoke all on function public.validate_portal_hour_submission() from public;
+revoke all on function public.enforce_portal_hour_submission_review_rules() from public;
+
 -- Bootstrap the first admin in the SQL Editor before sending the Auth invite.
 -- Replace the email, then run:
 --
