@@ -26,9 +26,12 @@ export default function PortalNav({ displayName, email, isAdmin }) {
           href: "/portal/dashboard/admin/strikes",
         },
         {
-<<<<<<<<< Temporary merge branch 1
         label: "Event Management",
         href: "/portal/dashboard/admin/events",
+        },
+                {
+        label: "Attendance",
+        href: "/portal/dashboard/admin/attendance",
         },
       ]
     : navItems;
