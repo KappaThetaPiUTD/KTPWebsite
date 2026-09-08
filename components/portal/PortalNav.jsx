@@ -18,6 +18,7 @@ const adminNavItems = [
   { label: "Members", href: "/portal/dashboard/admin/members" },
   { label: "Event Management", href: "/portal/dashboard/admin/events" },
   { label: "Activity Hours", href: "/portal/dashboard/admin/activity-hours" },
+  { label: "Semesters", href: "/portal/dashboard/admin/semesters" },
 ];
 
 export default function PortalNav({ displayName, email, isAdmin }) {
