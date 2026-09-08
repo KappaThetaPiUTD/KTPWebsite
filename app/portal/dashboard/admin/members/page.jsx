@@ -9,7 +9,7 @@ export default async function PortalAdminMembersPage() {
     redirect("/portal/dashboard");
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
   const { data, error } = await supabase
     .from("portal_members")
     .select("id, email, role, status, user_id, created_at")
