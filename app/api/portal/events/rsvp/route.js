@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { loadPortalMemberContext } from '../../../../lib/portal/member';
-import { getPortalConfig } from '../../../../lib/portal/config';
+import { loadPortalMemberContext } from '../../../../../lib/portal/member';
+import { getPortalConfig } from '../../../../../lib/portal/config';
 
 const TO_EMAIL = 'kappathetapiutd@gmail.com';
 
