@@ -430,7 +430,15 @@ alter table public.portal_events
     check (late_threshold_minutes between 0 and 120),
   add column if not exists check_in_passcode char(6) not null
     default lpad((floor(random() * 1000000))::int::text, 6, '0'),
+  add column if not exists qr_code_secret text not null
+    default encode(gen_random_bytes(32), 'base64'),
   add column if not exists is_check_in_open boolean not null default false;
+
+-- Earlier versions required these fields; the event model now permits an
+-- unlimited capacity and RSVP availability through the event start time.
+alter table public.portal_events
+  alter column capacity drop not null,
+  alter column rsvp_deadline drop not null;
 
 alter table public.portal_attendance
   add column if not exists status text not null default 'present'
