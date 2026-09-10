@@ -322,33 +322,33 @@ export default function AdminEventsPage() {
                   </div>
 
                   <div className="mt-8 grid grid-cols-3 gap-3">
-                    <div className="rounded-xl bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <div className="rounded-xl bg-gray-50 p-4 text-center">
+                      <p className="flex min-h-[48px] items-center justify-center text-xs font-semibold uppercase tracking-wide text-gray-500">
                         Going
                       </p>
 
                       <p className="mt-2 text-2xl font-bold text-gray-950">
-                        -
+                        {event.goingCount}
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <div className="rounded-xl bg-gray-50 p-4 text-center">
+                      <p className="flex min-h-[48px] items-center justify-center text-xs font-semibold uppercase tracking-wide text-gray-500">
                         Not Going
                       </p>
 
                       <p className="mt-2 text-2xl font-bold text-gray-950">
-                        -
+                        {event.notGoingCount}
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-gray-50 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <div className="rounded-xl bg-gray-50 p-4 text-center">
+                      <p className="flex min-h-[48px] items-center justify-center text-xs font-semibold uppercase tracking-wide text-gray-500">
                         Checked In
                       </p>
 
                       <p className="mt-2 text-2xl font-bold text-gray-950">
-                        -
+                        {event.checkedInCount}
                       </p>
                     </div>
                   </div>
