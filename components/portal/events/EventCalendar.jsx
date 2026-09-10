@@ -23,12 +23,8 @@ export default function EventCalendar({ events, rsvps }) {
   const [currentView, setCurrentView] = useState("month");
 
   const calendarEvents = events.map((event) => {
-    const start = parse(
-      `${event.date} ${event.time}`,
-      "MMMM d, yyyy h:mm a",
-      new Date(),
-    );
-    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    const start = new Date(event.start_time);
+    const end = new Date(event.end_time);
 
     return {
       id: event.id,

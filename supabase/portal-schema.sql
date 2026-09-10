@@ -290,6 +290,93 @@ as $$
   );
 $$;
 
+create or replace function public.can_rsvp_to_portal_event(event_target_roles text[])
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select public.is_active_portal_member()
+    and (
+      event_target_roles is null
+      or exists (
+        select 1
+        from public.portal_members
+        where user_id = auth.uid()
+          and status = 'active'
+          and role = any(event_target_roles)
+      )
+    );
+$$;
+
+-- All RSVP validation is performed in one database transaction. This prevents
+-- a capacity race and ensures direct PostgREST/RPC callers cannot RSVP to an
+-- event that has changed audience since it was displayed.
+create or replace function public.submit_portal_rsvp(
+  requested_event_id uuid,
+  requested_status text
+)
+returns public.portal_rsvps
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  current_event public.portal_events%rowtype;
+  existing_status text;
+  going_count integer;
+  saved_rsvp public.portal_rsvps%rowtype;
+begin
+  if auth.uid() is null then
+    raise exception 'Sign in required.' using errcode = '28000';
+  end if;
+  if requested_status not in ('going', 'maybe', 'not_going') then
+    raise exception 'Invalid RSVP status.' using errcode = '22023';
+  end if;
+
+  -- Serialize attendance-changing requests for this event.
+  perform pg_advisory_xact_lock(hashtextextended(requested_event_id::text, 0));
+
+  select * into current_event
+  from public.portal_events
+  where id = requested_event_id;
+
+  if not found then
+    raise exception 'Event not found.' using errcode = 'P0002';
+  end if;
+  if not public.can_rsvp_to_portal_event(current_event.target_roles) then
+    raise exception 'You are not eligible to RSVP to this event.' using errcode = '42501';
+  end if;
+  if now() > coalesce(current_event.rsvp_deadline, current_event.start_time) then
+    raise exception 'RSVP deadline has passed.' using errcode = '22023';
+  end if;
+
+  select status into existing_status
+  from public.portal_rsvps
+  where event_id = requested_event_id and user_id = auth.uid();
+
+  if requested_status = 'going' and coalesce(existing_status, '') <> 'going'
+    and current_event.capacity is not null then
+    select count(*)::integer into going_count
+    from public.portal_rsvps
+    where event_id = requested_event_id and status = 'going';
+
+    if going_count >= current_event.capacity then
+      raise exception 'Event is at maximum capacity.' using errcode = '22023';
+    end if;
+  end if;
+
+  insert into public.portal_rsvps (event_id, user_id, status, updated_at)
+  values (requested_event_id, auth.uid(), requested_status, now())
+  on conflict (event_id, user_id) do update
+    set status = excluded.status, updated_at = now()
+  returning * into saved_rsvp;
+
+  return saved_rsvp;
+end;
+$$;
+
 alter table public.portal_events enable row level security;
 alter table public.portal_rsvps enable row level security;
 alter table public.portal_attendance enable row level security;
@@ -299,7 +386,7 @@ create policy "Members can read events"
   on public.portal_events
   for select
   to authenticated
-  using (public.is_active_portal_member());
+  using (public.can_rsvp_to_portal_event(target_roles));
 
 drop policy if exists "Admins can create events" on public.portal_events;
 create policy "Admins can create events"
@@ -344,6 +431,12 @@ create policy "Members can create RSVP"
   with check (
     user_id = auth.uid()
     and public.is_active_portal_member()
+    and exists (
+      select 1
+      from public.portal_events
+      where id = event_id
+        and public.can_rsvp_to_portal_event(target_roles)
+    )
   );
 
 drop policy if exists "Members can update own RSVP" on public.portal_rsvps;
@@ -352,7 +445,15 @@ create policy "Members can update own RSVP"
   for update
   to authenticated
   using (user_id = auth.uid() or public.is_portal_admin())
-  with check (user_id = auth.uid() or public.is_portal_admin());
+  with check (
+    (user_id = auth.uid() or public.is_portal_admin())
+    and exists (
+      select 1
+      from public.portal_events
+      where id = event_id
+        and public.can_rsvp_to_portal_event(target_roles)
+    )
+  );
 
 drop policy if exists "Members can delete own RSVP" on public.portal_rsvps;
 create policy "Members can delete own RSVP"
@@ -408,11 +509,15 @@ create policy "Admins can delete attendance"
   using (public.is_portal_admin());
 
 revoke all on function public.is_event_creator(uuid) from public;
+revoke all on function public.can_rsvp_to_portal_event(text[]) from public;
+revoke all on function public.submit_portal_rsvp(uuid, text) from public;
 revoke all on function public.claim_portal_membership() from public;
 revoke all on function public.is_active_portal_member() from public;
 revoke all on function public.is_portal_admin() from public;
 revoke all on function public.portal_strike_counts() from public;
 grant execute on function public.is_event_creator(uuid) to authenticated;
+grant execute on function public.can_rsvp_to_portal_event(text[]) to authenticated;
+grant execute on function public.submit_portal_rsvp(uuid, text) to authenticated;
 grant execute on function public.claim_portal_membership() to authenticated;
 grant execute on function public.is_active_portal_member() to authenticated;
 grant execute on function public.is_portal_admin() to authenticated;

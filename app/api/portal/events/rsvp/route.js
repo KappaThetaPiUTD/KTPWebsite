@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { loadPortalMemberContext } from '../../../../../lib/portal/member';
 import { getPortalConfig } from '../../../../../lib/portal/config';
+import { getPortalServerClient } from '../../../../../lib/portal/server';
 
-const TO_EMAIL = 'kappathetapiutd@gmail.com';
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export async function POST(request) {
   const context = await loadPortalMemberContext();
@@ -30,9 +32,9 @@ export async function POST(request) {
     const body = await request.json();
     const { eventId, status } = body;
 
-    if (!eventId || !status) {
+    if (!UUID_PATTERN.test(eventId) || !status) {
       return NextResponse.json(
-        { error: 'Missing required fields: eventId and status.' },
+        { error: 'A valid eventId and RSVP status are required.' },
         { status: 400 }
       );
     }
@@ -44,33 +46,21 @@ export async function POST(request) {
       );
     }
 
-    const config = getPortalConfig();
-    if (!config) {
+    if (!getPortalConfig()) {
       return NextResponse.json(
         { error: 'Portal configuration is unavailable.' },
         { status: 503 }
       );
     }
 
-    const { url, anonKey } = config;
-    const cookieStore = new (await import('next/headers')).cookies();
-    const createServerClient = (await import('@supabase/ssr')).createServerClient;
-    const supabase = createServerClient(url, anonKey, {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll() {
-          // Server Components cannot write cookies. Portal middleware refreshes
-          // the session before rendering, while Route Handlers can persist them.
-        },
-      },
-    });
+    const supabase = getPortalServerClient();
 
-    // Check if event exists and get event details
+    // RLS hides events outside the member's audience. The RPC below repeats
+    // that check inside the write transaction, so a crafted request cannot
+    // bypass it.
     const { data: event, error: eventError } = await supabase
       .from('portal_events')
-      .select('*')
+      .select('id, title, start_time, rsvp_deadline, target_roles')
       .eq('id', eventId)
       .single();
 
@@ -81,83 +71,23 @@ export async function POST(request) {
       );
     }
 
-    // Check RSVP deadline
-    const now = new Date();
-    const rsvpDeadline = new Date(event.rsvp_deadline);
-    if (now > rsvpDeadline) {
+    const { data: rsvpData, error: rsvpError } = await supabase
+      .rpc('submit_portal_rsvp', {
+        requested_event_id: eventId,
+        requested_status: status,
+      })
+      .single();
+
+    if (rsvpError) {
+      const knownError = [
+        'RSVP deadline has passed.',
+        'You are not eligible to RSVP to this event.',
+        'Event is at maximum capacity.',
+      ].includes(rsvpError.message);
       return NextResponse.json(
-        { error: 'RSVP deadline has passed for this event.' },
-        { status: 400 }
+        { error: knownError ? rsvpError.message : 'Unable to save RSVP.' },
+        { status: knownError ? 400 : 500 }
       );
-    }
-
-    // Check event capacity
-    const { count, error: countError } = await supabase
-      .from('portal_rsvps')
-      .select('*', { count: 'exact', head: true })
-      .eq('event_id', eventId)
-      .eq('status', 'going');
-
-    if (countError) {
-      return NextResponse.json(
-        { error: 'Unable to check RSVP count.' },
-        { status: 500 }
-      );
-    }
-
-    if (event.capacity && (count || 0) >= event.capacity) {
-      return NextResponse.json(
-        { error: 'Event at maximum capacity. RSVP unavailable.' },
-        { status: 400 }
-      );
-    }
-
-    // Insert or update the RSVP
-    const { data: existingRSVP, error: findError } = await supabase
-      .from('portal_rsvps')
-      .select('*')
-      .eq('event_id', eventId)
-      .eq('user_id', context.user.id)
-      .maybeSingle();
-
-    let rsvpData;
-
-    if (existingRSVP) {
-      // Update existing RSVP
-      const { data, error: updateError } = await supabase
-        .from('portal_rsvps')
-        .update({ status })
-        .eq('event_id', eventId)
-        .eq('user_id', context.user.id)
-        .select()
-        .single();
-
-      if (updateError) {
-        return NextResponse.json(
-          { error: 'Unable to update RSVP.' },
-          { status: 500 }
-        );
-      }
-      rsvpData = data;
-    } else {
-      // Create new RSVP
-      const { data, error: insertError } = await supabase
-        .from('portal_rsvps')
-        .insert({
-          event_id: eventId,
-          status,
-          user_id: context.user.id,
-        })
-        .select()
-        .single();
-
-      if (insertError) {
-        return NextResponse.json(
-          { error: 'Unable to save RSVP.' },
-          { status: 500 }
-        );
-      }
-      rsvpData = data;
     }
 
     // Send confirmation email
@@ -188,7 +118,7 @@ export async function POST(request) {
       }
     }
 
-    return NextResponse.json({ rsvp: rsvpData, success: true }, { status: 201 });
+    return NextResponse.json({ rsvp: rsvpData, success: true });
   } catch (error) {
     console.error('RSVP API error:', error);
     return NextResponse.json(
