@@ -452,7 +452,7 @@ export default function AdminEventsPage() {
                   >
                     <div>
                       <p className="text-sm font-semibold text-gray-900">
-                        {record.user_id}
+                        {record.full_name || record.user_id}
                       </p>
 
                       <p className="mt-1 text-xs text-gray-500">
