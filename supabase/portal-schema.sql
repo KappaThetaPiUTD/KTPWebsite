@@ -377,6 +377,82 @@ begin
 end;
 $$;
 
+-- Check-in is also performed in one transaction so the open state, audience,
+-- passcode, duplicate check, and attendance write cannot be separated by a
+-- crafted client request or a concurrent submission.
+create or replace function public.check_in_to_portal_event(
+  requested_event_id uuid,
+  requested_passcode text
+)
+returns table (
+  checked_in_at timestamptz,
+  status text,
+  already_checked_in boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  current_event public.portal_events%rowtype;
+  saved_attendance public.portal_attendance%rowtype;
+begin
+  if auth.uid() is null then
+    raise exception 'Sign in required.' using errcode = '28000';
+  end if;
+  if requested_passcode is null or requested_passcode !~ '^[0-9]{6}$' then
+    raise exception 'Invalid check-in code.' using errcode = '22023';
+  end if;
+
+  -- Prevent an event's check-in settings changing while they are validated.
+  select * into current_event
+  from public.portal_events
+  where id = requested_event_id
+  for update;
+
+  if not found then
+    raise exception 'Event not found.' using errcode = 'P0002';
+  end if;
+  if not public.can_rsvp_to_portal_event(current_event.target_roles) then
+    raise exception 'You are not eligible to check in to this event.' using errcode = '42501';
+  end if;
+
+  select * into saved_attendance
+  from public.portal_attendance
+  where event_id = requested_event_id and user_id = auth.uid();
+
+  if found then
+    return query select saved_attendance.checked_in_at, saved_attendance.status, true;
+    return;
+  end if;
+  if not current_event.is_check_in_open then
+    raise exception 'Check-in is not open for this event.' using errcode = '22023';
+  end if;
+  if requested_passcode <> current_event.check_in_passcode then
+    raise exception 'Invalid check-in code.' using errcode = '22023';
+  end if;
+
+  insert into public.portal_attendance (
+    event_id, user_id, checked_in_at, status, method, checked_in_by
+  )
+  values (
+    requested_event_id,
+    auth.uid(),
+    now(),
+    case
+      when now() > current_event.start_time
+        + make_interval(mins => current_event.late_threshold_minutes) then 'late'
+      else 'present'
+    end,
+    'qr',
+    auth.uid()
+  )
+  returning * into saved_attendance;
+
+  return query select saved_attendance.checked_in_at, saved_attendance.status, false;
+end;
+$$;
+
 alter table public.portal_events enable row level security;
 alter table public.portal_rsvps enable row level security;
 alter table public.portal_attendance enable row level security;
@@ -477,10 +553,7 @@ create policy "Members can check in"
   on public.portal_attendance
   for insert
   to authenticated
-  with check (
-    user_id = auth.uid()
-    and public.is_active_portal_member()
-  );
+  with check (false);
 
 drop policy if exists "Admins can manual check in" on public.portal_attendance;
 create policy "Admins can manual check in"
@@ -511,6 +584,7 @@ create policy "Admins can delete attendance"
 revoke all on function public.is_event_creator(uuid) from public;
 revoke all on function public.can_rsvp_to_portal_event(text[]) from public;
 revoke all on function public.submit_portal_rsvp(uuid, text) from public;
+revoke all on function public.check_in_to_portal_event(uuid, text) from public;
 revoke all on function public.claim_portal_membership() from public;
 revoke all on function public.is_active_portal_member() from public;
 revoke all on function public.is_portal_admin() from public;
@@ -518,6 +592,7 @@ revoke all on function public.portal_strike_counts() from public;
 grant execute on function public.is_event_creator(uuid) to authenticated;
 grant execute on function public.can_rsvp_to_portal_event(text[]) to authenticated;
 grant execute on function public.submit_portal_rsvp(uuid, text) to authenticated;
+grant execute on function public.check_in_to_portal_event(uuid, text) to authenticated;
 grant execute on function public.claim_portal_membership() to authenticated;
 grant execute on function public.is_active_portal_member() to authenticated;
 grant execute on function public.is_portal_admin() to authenticated;

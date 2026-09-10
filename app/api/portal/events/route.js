@@ -28,7 +28,7 @@ export async function GET() {
   const { data: events, error: eventsError } = await supabase
     .from("portal_events")
     .select(
-      "id, title, description, location, start_time, end_time, event_type, capacity, rsvp_deadline"
+      "id, title, description, location, start_time, end_time, event_type, capacity, rsvp_deadline, is_check_in_open"
     )
     .order("start_time", { ascending: true });
 
@@ -53,5 +53,22 @@ export async function GET() {
     );
   }
 
-  return NextResponse.json({ events: events ?? [], rsvps: rsvps ?? [] });
+  const { data: attendance, error: attendanceError } = await supabase
+    .from("portal_attendance")
+    .select("event_id, checked_in_at, status")
+    .eq("user_id", context.user.id);
+
+  if (attendanceError) {
+    console.error("Portal attendance fetch failed:", attendanceError);
+    return NextResponse.json(
+      { error: "Unable to load check-in status." },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    events: events ?? [],
+    rsvps: rsvps ?? [],
+    attendance: attendance ?? [],
+  });
 }
