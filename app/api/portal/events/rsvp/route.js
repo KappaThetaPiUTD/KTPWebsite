@@ -53,7 +53,7 @@ export async function POST(request) {
       );
     }
 
-    const supabase = getPortalServerClient();
+    const supabase = await getPortalServerClient();
 
     // RLS hides events outside the member's audience. The RPC below repeats
     // that check inside the write transaction, so a crafted request cannot

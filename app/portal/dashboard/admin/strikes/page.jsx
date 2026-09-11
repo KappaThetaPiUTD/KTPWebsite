@@ -9,7 +9,7 @@ export default async function PortalAdminStrikesPage() {
     redirect("/portal/dashboard");
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
   const [membersResult, profilesResult, countsResult, strikesResult] =
     await Promise.all([
     supabase

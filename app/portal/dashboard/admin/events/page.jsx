@@ -11,6 +11,14 @@ export default function AdminEventsPage() {
   const [events, setEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [eventsError, setEventsError] = useState(null);
+  const [eventTitle, setEventTitle] = useState("");
+  const [eventDescription, setEventDescription] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
+  const [eventType, setEventType] = useState("chapter");
+  const [eventStart, setEventStart] = useState("");
+  const [eventEnd, setEventEnd] = useState("");
+  const [creatingEvent, setCreatingEvent] = useState(false);
+  const [createEventError, setCreateEventError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -120,6 +128,69 @@ export default function AdminEventsPage() {
       minute: "2-digit",
     }).format(new Date(value));
 
+  const closeCreateForm = () => {
+    if (creatingEvent) return;
+    setShowCreateForm(false);
+    setCreateEventError("");
+  };
+
+  const createEvent = async (event) => {
+    event.preventDefault();
+    const title = eventTitle.trim();
+    const description = eventDescription.trim();
+    const location = eventLocation.trim();
+
+    if (
+      title.length < 2 ||
+      description.length < 5 ||
+      location.length < 2 ||
+      !eventStart ||
+      !eventEnd
+    ) {
+      setCreateEventError(
+        "Fill in a title, description (5+ characters), location, and start/end time."
+      );
+      return;
+    }
+
+    setCreatingEvent(true);
+    setCreateEventError("");
+    try {
+      const response = await fetch("/api/portal/admin/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description,
+          location,
+          startTime: eventStart,
+          endTime: eventEnd,
+          eventType,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Unable to create event.");
+      }
+
+      setEvents((current) => [
+        { ...result.event, goingCount: 0, notGoingCount: 0, checkedInCount: 0 },
+        ...current,
+      ]);
+      setShowCreateForm(false);
+      setEventTitle("");
+      setEventDescription("");
+      setEventLocation("");
+      setEventType("chapter");
+      setEventStart("");
+      setEventEnd("");
+    } catch (error) {
+      setCreateEventError(error.message || "Unable to create event right now.");
+    } finally {
+      setCreatingEvent(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -154,7 +225,7 @@ export default function AdminEventsPage() {
             </h2>
           </div>
 
-          <form className="mt-6 space-y-5">
+          <form className="mt-6 space-y-5" onSubmit={createEvent}>
             <div>
               <label
                 htmlFor="event-title"
@@ -167,6 +238,9 @@ export default function AdminEventsPage() {
                 id="event-title"
                 type="text"
                 placeholder="Chapter Meeting"
+                value={eventTitle}
+                onChange={(event) => setEventTitle(event.target.value)}
+                disabled={creatingEvent}
                 className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
               />
             </div>
@@ -174,30 +248,36 @@ export default function AdminEventsPage() {
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
                 <label
-                  htmlFor="event-date"
+                  htmlFor="event-start"
                   className="text-sm font-semibold text-gray-800"
                 >
-                  Date
+                  Start time
                 </label>
 
                 <input
-                  id="event-date"
-                  type="date"
+                  id="event-start"
+                  type="datetime-local"
+                  value={eventStart}
+                  onChange={(event) => setEventStart(event.target.value)}
+                  disabled={creatingEvent}
                   className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
                 />
               </div>
 
               <div>
                 <label
-                  htmlFor="event-time"
+                  htmlFor="event-end"
                   className="text-sm font-semibold text-gray-800"
                 >
-                  Time
+                  End time
                 </label>
 
                 <input
-                  id="event-time"
-                  type="time"
+                  id="event-end"
+                  type="datetime-local"
+                  value={eventEnd}
+                  onChange={(event) => setEventEnd(event.target.value)}
+                  disabled={creatingEvent}
                   className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
                 />
               </div>
@@ -215,6 +295,9 @@ export default function AdminEventsPage() {
                 id="event-location"
                 type="text"
                 placeholder="KTP Chapter Room"
+                value={eventLocation}
+                onChange={(event) => setEventLocation(event.target.value)}
+                disabled={creatingEvent}
                 className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
               />
             </div>
@@ -231,14 +314,43 @@ export default function AdminEventsPage() {
                 id="event-description"
                 rows={4}
                 placeholder="Describe the event..."
+                value={eventDescription}
+                onChange={(event) => setEventDescription(event.target.value)}
+                disabled={creatingEvent}
                 className="mt-2 w-full resize-none rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
               />
             </div>
 
+            <div>
+              <label htmlFor="event-type" className="text-sm font-semibold text-gray-800">
+                Event type
+              </label>
+              <select
+                id="event-type"
+                value={eventType}
+                onChange={(event) => setEventType(event.target.value)}
+                disabled={creatingEvent}
+                className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
+              >
+                <option value="chapter">Chapter</option>
+                <option value="professional">Professional Development</option>
+                <option value="fundraiser">Fundraiser</option>
+                <option value="social">Social</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            {createEventError && (
+              <p className="text-sm font-medium text-red-700" role="alert">
+                {createEventError}
+              </p>
+            )}
+
             <div className="flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() => setShowCreateForm(false)}
+                onClick={closeCreateForm}
+                disabled={creatingEvent}
                 className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-800 hover:border-primary hover:text-primary"
               >
                 Cancel
@@ -246,9 +358,10 @@ export default function AdminEventsPage() {
 
               <button
                 type="submit"
+                disabled={creatingEvent}
                 className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90"
               >
-                Create Event
+                {creatingEvent ? "Creating..." : "Create Event"}
               </button>
             </div>
           </form>

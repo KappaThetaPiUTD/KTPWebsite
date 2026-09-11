@@ -17,6 +17,7 @@ export default function PortalNav({ displayName, email, isAdmin }) {
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
   
+  
   const visibleNavItems = isAdmin
     ? [
         ...navItems,
@@ -25,12 +26,12 @@ export default function PortalNav({ displayName, email, isAdmin }) {
           href: "/portal/dashboard/admin/strikes",
         },
         {
-          label: "Members",
-          href: "/portal/dashboard/admin/members",
-        },
-        {
         label: "Event Management",
         href: "/portal/dashboard/admin/events",
+        },
+                {
+        label: "Attendance",
+        href: "/portal/dashboard/admin/attendance",
         },
       ]
     : navItems;

@@ -61,7 +61,7 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid role." }, { status: 400 });
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
   const { data, error: insertError } = await supabase
     .from("portal_members")
     .insert({ email, role, created_by: context.user.id })
@@ -115,7 +115,7 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
   const { data, error: updateError } = await supabase
     .from("portal_members")
     .update(updates)
