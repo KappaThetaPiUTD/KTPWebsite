@@ -40,6 +40,88 @@ async function requireAdmin() {
   return { context };
 }
 
+async function attachProfileNames(supabase, attendance) {
+  if (!attendance || attendance.length === 0) {
+    return attendance || [];
+  }
+
+  const userIds = [...new Set(attendance.map((record) => record.user_id))];
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from("portal_profiles")
+    .select("user_id, full_name")
+    .in("user_id", userIds);
+
+  if (profilesError) {
+    throw profilesError;
+  }
+
+  const profileMap = Object.fromEntries(
+    (profiles || []).map((profile) => [profile.user_id, profile.full_name])
+  );
+
+  return attendance.map((record) => ({
+    ...record,
+    full_name: profileMap[record.user_id] || null,
+  }));
+}
+
+export async function GET(request) {
+  const { context, error } = await requireAdmin();
+  if (error) return error;
+
+  const { searchParams } = new URL(request.url);
+  const eventId = searchParams.get("eventId")?.trim() || "";
+
+  if (!UUID_PATTERN.test(eventId)) {
+    return NextResponse.json(
+      { error: "Invalid event." },
+      { status: 400 }
+    );
+  }
+
+  const supabase = getPortalServerClient();
+
+  const { data, error: attendanceError } = await supabase
+    .from("portal_attendance")
+    .select(
+      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by, updated_at"
+    )
+    .eq("event_id", eventId)
+    .order("checked_in_at", { ascending: true });
+
+  if (attendanceError) {
+    console.error(
+      "Portal attendance fetch failed:",
+      attendanceError
+    );
+
+    return NextResponse.json(
+      { error: "Unable to fetch attendance." },
+      { status: 500 }
+    );
+  }
+
+  try {
+    const attendance = await attachProfileNames(supabase, data);
+
+    return NextResponse.json(
+      { attendance },
+      { status: 200 }
+    );
+  } catch (profilesError) {
+    console.error(
+      "Portal profile fetch failed:",
+      profilesError
+    );
+
+    return NextResponse.json(
+      { error: "Unable to fetch member names." },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(request) {
   const { context, error } = await requireAdmin();
   if (error) return error;
@@ -83,10 +165,14 @@ export async function PATCH(request) {
 
   const { data, error: updateError } = await supabase
     .from("portal_attendance")
-    .update({ status, verified_by: context.user.id })
+    .update({
+      status,
+      verified_by: context.user.id,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", attendanceId)
     .select(
-      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by"
+      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by, updated_at"
     )
     .single();
 
@@ -99,8 +185,24 @@ export async function PATCH(request) {
     );
   }
 
+  let attendance = data;
+
+  try {
+    const [attendanceWithProfile] = await attachProfileNames(
+      supabase,
+      [data]
+    );
+
+    attendance = attendanceWithProfile;
+  } catch (profilesError) {
+    console.error(
+      "Portal profile fetch failed:",
+      profilesError
+    );
+  }
+
   return NextResponse.json(
-    { attendance: data },
+    { attendance },
     { status: 200 }
   );
 }
