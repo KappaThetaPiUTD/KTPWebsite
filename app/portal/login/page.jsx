@@ -25,11 +25,12 @@ function getSafeNextPath(value) {
   return "/portal/dashboard";
 }
 
-export default function PortalLoginPage({ searchParams }) {
+export default async function PortalLoginPage({ searchParams }) {
+  const resolvedSearchParams = await searchParams;
   const configured = isPortalConfigured();
-  const nextPath = getSafeNextPath(searchParams?.next);
+  const nextPath = getSafeNextPath(resolvedSearchParams?.next);
   const reason =
-    typeof searchParams?.reason === "string" ? searchParams.reason : "";
+    typeof resolvedSearchParams?.reason === "string" ? resolvedSearchParams.reason : "";
   const notice =
     (Object.hasOwn(notices, reason) ? notices[reason] : "") ||
     (!configured ? notices["not-configured"] : "");

@@ -59,7 +59,7 @@ export async function POST(request) {
     );
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
 
   const { data: event, error: eventError } = await supabase
     .from("portal_events")

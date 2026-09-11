@@ -4,6 +4,7 @@ import { getPortalMemberContext } from "../../../../../lib/portal/member";
 import { getPortalServerClient } from "../../../../../lib/portal/server";
 
 export default async function PortalAdminAttendancePage({ searchParams }) {
+  const resolvedSearchParams = await searchParams;
   const context = await getPortalMemberContext();
   if (!context.isAdmin) {
     redirect("/portal/dashboard");
@@ -18,7 +19,9 @@ export default async function PortalAdminAttendancePage({ searchParams }) {
 
   const events = eventsResult.data || [];
   const requestedEventId =
-    typeof searchParams?.eventId === "string" ? searchParams.eventId : "";
+    typeof resolvedSearchParams?.eventId === "string"
+      ? resolvedSearchParams.eventId
+      : "";
   const selectedEventId =
     events.find((event) => event.id === requestedEventId)?.id ||
     events[0]?.id ||

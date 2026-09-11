@@ -53,7 +53,7 @@ export async function POST(request) {
     );
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
   const { data, error } = await supabase
     .rpc("check_in_to_portal_event", {
       requested_event_id: eventId,

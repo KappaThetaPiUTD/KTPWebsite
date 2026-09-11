@@ -79,7 +79,7 @@ export async function GET(request) {
     );
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
 
   const { data, error: attendanceError } = await supabase
     .from("portal_attendance")
