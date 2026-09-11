@@ -70,16 +70,6 @@ export default function PortalAttendanceManager({
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState("");
 
-  const [showAddEvent, setShowAddEvent] = useState(false);
-  const [eventTitle, setEventTitle] = useState("");
-  const [eventDescription, setEventDescription] = useState("");
-  const [eventStart, setEventStart] = useState("");
-  const [eventEnd, setEventEnd] = useState("");
-  const [eventLocation, setEventLocation] = useState("");
-  const [eventType, setEventType] = useState("chapter");
-  const [addingEvent, setAddingEvent] = useState(false);
-  const [addEventError, setAddEventError] = useState("");
-
   const filteredRoster = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return roster.filter((member) => {
@@ -161,70 +151,6 @@ export default function PortalAttendanceManager({
     }
   };
 
-  const openAddEvent = () => {
-    setEventTitle("");
-    setEventDescription("");
-    setEventStart("");
-    setEventEnd("");
-    setEventLocation("");
-    setEventType("chapter");
-    setAddEventError("");
-    setShowAddEvent(true);
-  };
-
-  const closeAddEvent = () => {
-    if (addingEvent) return;
-    setShowAddEvent(false);
-  };
-
-  const submitAddEvent = async () => {
-    const title = eventTitle.trim();
-    const description = eventDescription.trim();
-    const location = eventLocation.trim();
-    if (
-      title.length < 2 ||
-      description.length < 5 ||
-      location.length < 2 ||
-      !eventStart ||
-      !eventEnd
-    ) {
-      setAddEventError(
-        "Fill in a title, description (5+ characters), location, and start/end time."
-      );
-      return;
-    }
-
-    setAddingEvent(true);
-    setAddEventError("");
-    try {
-      const response = await fetch("/api/portal/admin/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          description,
-          location,
-          startTime: eventStart,
-          endTime: eventEnd,
-          eventType,
-        }),
-      });
-      const result = await response.json();
-
-      if (!response.ok) {
-        setAddEventError(result.error || "Unable to create event.");
-        return;
-      }
-
-      setShowAddEvent(false);
-      router.push(`/portal/dashboard/admin/attendance?eventId=${result.event.id}`);
-    } catch {
-      setAddEventError("Unable to create event right now.");
-    } finally {
-      setAddingEvent(false);
-    }
-  };
-
   return (
     <div className="mt-7 space-y-8">
       {error && (
@@ -287,13 +213,6 @@ export default function PortalAttendanceManager({
               </select>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={openAddEvent}
-            className="h-fit rounded-lg bg-primary px-4 py-2.5 font-semibold text-white hover:bg-primary/90"
-          >
-            Add event
-          </button>
         </div>
       </section>
 
@@ -401,7 +320,7 @@ export default function PortalAttendanceManager({
       ) : (
         <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
           <p className="text-sm text-gray-600">
-            Add an event to start recording attendance.
+            No events are available. Create one from Event Management to start recording attendance.
           </p>
         </section>
       )}
@@ -538,147 +457,6 @@ export default function PortalAttendanceManager({
         </div>
       )}
 
-      {showAddEvent && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-4"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) closeAddEvent();
-          }}
-        >
-          <div
-            className="w-full max-w-lg rounded-2xl bg-white p-6 text-black shadow-2xl"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="add-event-dialog-title"
-          >
-            <h2 id="add-event-dialog-title" className="text-2xl font-bold text-gray-950">
-              Add event
-            </h2>
-
-            <label
-              className="mb-2 mt-5 block text-sm font-semibold text-gray-900"
-              htmlFor="new-event-title"
-            >
-              Title
-            </label>
-            <input
-              id="new-event-title"
-              type="text"
-              value={eventTitle}
-              onChange={(event) => setEventTitle(event.target.value)}
-              disabled={addingEvent}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-
-            <label
-              className="mb-2 mt-4 block text-sm font-semibold text-gray-900"
-              htmlFor="new-event-description"
-            >
-              Description
-            </label>
-            <textarea
-              id="new-event-description"
-              rows={3}
-              maxLength={5000}
-              value={eventDescription}
-              onChange={(event) => setEventDescription(event.target.value)}
-              disabled={addingEvent}
-              className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-
-            <label
-              className="mb-2 mt-4 block text-sm font-semibold text-gray-900"
-              htmlFor="new-event-location"
-            >
-              Location
-            </label>
-            <input
-              id="new-event-location"
-              type="text"
-              value={eventLocation}
-              onChange={(event) => setEventLocation(event.target.value)}
-              disabled={addingEvent}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-
-            <label
-              className="mb-2 mt-4 block text-sm font-semibold text-gray-900"
-              htmlFor="new-event-type"
-            >
-              Event type
-            </label>
-            <select
-              id="new-event-type"
-              value={eventType}
-              onChange={(event) => setEventType(event.target.value)}
-              disabled={addingEvent}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-              {EVENT_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {EVENT_TYPE_LABELS[type]}
-                </option>
-              ))}
-            </select>
-
-            <label
-              className="mb-2 mt-4 block text-sm font-semibold text-gray-900"
-              htmlFor="new-event-start"
-            >
-              Start time
-            </label>
-            <input
-              id="new-event-start"
-              type="datetime-local"
-              value={eventStart}
-              onChange={(event) => setEventStart(event.target.value)}
-              disabled={addingEvent}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-
-            <label
-              className="mb-2 mt-4 block text-sm font-semibold text-gray-900"
-              htmlFor="new-event-end"
-            >
-              End time
-            </label>
-            <input
-              id="new-event-end"
-              type="datetime-local"
-              value={eventEnd}
-              onChange={(event) => setEventEnd(event.target.value)}
-              disabled={addingEvent}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-
-            {addEventError && (
-              <p className="mt-3 text-sm font-medium text-red-700" role="alert">
-                {addEventError}
-              </p>
-            )}
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={closeAddEvent}
-                disabled={addingEvent}
-                className="rounded-lg border border-gray-300 px-4 py-2.5 font-semibold text-gray-800 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={submitAddEvent}
-                disabled={addingEvent}
-                className="rounded-lg bg-primary px-4 py-2.5 font-semibold text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-gray-400"
-              >
-                {addingEvent ? "Adding..." : "Add event"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
