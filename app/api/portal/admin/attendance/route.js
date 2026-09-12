@@ -98,7 +98,7 @@ export async function GET(request) {
   const { data, error: attendanceError } = await supabase
     .from("portal_attendance")
     .select(
-      "id, event_id, user_id, checked_in_at, method, status, checked_in_by"
+      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by, flagged, updated_at"
     )
     .eq("event_id", eventId)
     .order("checked_in_at", { ascending: true });
@@ -136,7 +136,7 @@ export async function GET(request) {
 }
 
 export async function PATCH(request) {
-  const { error } = await requireAdmin();
+  const { context, error } = await requireAdmin();
 
   if (error) return error;
 
@@ -161,6 +161,11 @@ export async function PATCH(request) {
       ? body.status.trim()
       : "";
 
+  const reason =
+    typeof body.reason === "string"
+      ? body.reason.trim()
+      : "";
+
   if (!UUID_PATTERN.test(attendanceId)) {
     return NextResponse.json(
       { error: "Invalid attendance record." },
@@ -171,6 +176,13 @@ export async function PATCH(request) {
   if (!VALID_STATUSES.includes(status)) {
     return NextResponse.json(
       { error: "Invalid attendance status." },
+      { status: 400 }
+    );
+  }
+
+  if (reason.length < 5 || reason.length > 500) {
+    return NextResponse.json(
+      { error: "Use a reason between 5 and 500 characters." },
       { status: 400 }
     );
   }
@@ -208,10 +220,13 @@ export async function PATCH(request) {
     .from("portal_attendance")
     .update({
       status,
+      flagged: true,
+      verified_by: context.user.id,
+      updated_at: new Date().toISOString(),
     })
     .eq("id", attendanceId)
     .select(
-      "id, event_id, user_id, checked_in_at, method, status, checked_in_by"
+      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by, flagged, updated_at"
     )
     .single();
 
@@ -223,6 +238,25 @@ export async function PATCH(request) {
 
     return NextResponse.json(
       { error: "Unable to update attendance." },
+      { status: 500 }
+    );
+  }
+
+  const { error: logError } = await supabase
+    .from("portal_attendance_logs")
+    .insert({
+      attendance_id: attendance.id,
+      previous_status: existing.status,
+      new_status: status,
+      reason,
+      edited_by: context.user.id,
+    });
+
+  if (logError) {
+    console.error("Portal attendance log insert failed:", logError);
+
+    return NextResponse.json(
+      { error: "Attendance saved, but the audit log entry failed." },
       { status: 500 }
     );
   }

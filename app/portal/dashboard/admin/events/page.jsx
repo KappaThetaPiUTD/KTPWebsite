@@ -1,5 +1,6 @@
 "use client";
 
+import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react";
 
 export default function AdminEventsPage() {
@@ -101,8 +102,14 @@ export default function AdminEventsPage() {
 
       const attendance = data.attendance || [];
 
-      const escapeCsvValue = (value) =>
-        `"${String(value).replace(/"/g, '""')}"`;
+      const escapeCsvValue = (value) => {
+        const stringValue = String(value);
+        const safeValue = /^[=+\-@]/.test(stringValue)
+          ? `'${stringValue}`
+          : stringValue;
+
+        return `"${safeValue.replace(/"/g, '""')}"`;
+      };
 
       const headers = ["Name", "User ID", "Status", "Checked In At"];
 
@@ -143,6 +150,14 @@ export default function AdminEventsPage() {
   }
 
   async function updateAttendanceStatus(attendanceId, status) {
+    const reason = window.prompt(
+      "Why are you changing this attendance status? (5–500 characters)"
+    );
+
+    if (reason === null) {
+      return;
+    }
+
     try {
       const response = await fetch("/api/portal/admin/attendance", {
         method: "PATCH",
@@ -152,6 +167,7 @@ export default function AdminEventsPage() {
         body: JSON.stringify({
           attendanceId,
           status,
+          reason,
         }),
       });
 
@@ -772,12 +788,11 @@ export default function AdminEventsPage() {
               {qrEvent.title}
             </h2>
 
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
-                qrEvent.id
-              )}`}
-              alt={`QR code for ${qrEvent.title}`}
+            <QRCodeSVG
+              value={qrEvent.id}
+              title={`QR code for ${qrEvent.title}`}
               className="mx-auto mt-6 h-60 w-60"
+              size={240}
             />
 
             <button
