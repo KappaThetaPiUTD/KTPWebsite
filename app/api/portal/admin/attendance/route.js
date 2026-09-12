@@ -2,7 +2,14 @@ import { NextResponse } from "next/server";
 import { loadPortalMemberContext } from "../../../../../lib/portal/member";
 import { getPortalServerClient } from "../../../../../lib/portal/server";
 
-const VALID_STATUSES = ["present", "absent", "excused", "unexcused", "late"];
+const VALID_STATUSES = [
+  "present",
+  "absent",
+  "excused",
+  "unexcused",
+  "late",
+];
+
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -11,9 +18,13 @@ async function requireAdmin() {
 
   if (!context.user) {
     return {
-      error: NextResponse.json({ error: "Sign in required." }, { status: 401 }),
+      error: NextResponse.json(
+        { error: "Sign in required." },
+        { status: 401 }
+      ),
     };
   }
+
   if (context.error || context.memberError) {
     return {
       error: NextResponse.json(
@@ -22,6 +33,7 @@ async function requireAdmin() {
       ),
     };
   }
+
   if (!context.isAdmin) {
     return {
       error: NextResponse.json(
@@ -34,11 +46,9 @@ async function requireAdmin() {
   return { context };
 }
 
-// Attendance rows are created by check-in (QR or manual, see portal_events /
-// portal_attendance). This endpoint only handles an admin correcting the
-// status afterward. Every correction is flagged on the row and appended to
-// portal_attendance_logs with the previous/new status, the reason, and the
-// editing admin.
+// Attendance rows are created by check-in (QR or manual).
+// This endpoint allows an admin to view attendance and correct
+// an attendance status afterward.
 async function attachProfileNames(supabase, attendance) {
   if (!attendance || attendance.length === 0) {
     return attendance || [];
@@ -56,7 +66,10 @@ async function attachProfileNames(supabase, attendance) {
   }
 
   const profileMap = Object.fromEntries(
-    (profiles || []).map((profile) => [profile.user_id, profile.full_name])
+    (profiles || []).map((profile) => [
+      profile.user_id,
+      profile.full_name,
+    ])
   );
 
   return attendance.map((record) => ({
@@ -66,7 +79,8 @@ async function attachProfileNames(supabase, attendance) {
 }
 
 export async function GET(request) {
-  const { context, error } = await requireAdmin();
+  const { error } = await requireAdmin();
+
   if (error) return error;
 
   const { searchParams } = new URL(request.url);
@@ -84,7 +98,7 @@ export async function GET(request) {
   const { data, error: attendanceError } = await supabase
     .from("portal_attendance")
     .select(
-      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by, updated_at"
+      "id, event_id, user_id, checked_in_at, method, status, checked_in_by"
     )
     .eq("event_id", eventId)
     .order("checked_in_at", { ascending: true });
@@ -122,20 +136,30 @@ export async function GET(request) {
 }
 
 export async function PATCH(request) {
-  const { context, error } = await requireAdmin();
+  const { error } = await requireAdmin();
+
   if (error) return error;
 
   let body;
+
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request body." },
+      { status: 400 }
+    );
   }
 
   const attendanceId =
-    typeof body.attendanceId === "string" ? body.attendanceId.trim() : "";
-  const status = typeof body.status === "string" ? body.status.trim() : "";
-  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+    typeof body.attendanceId === "string"
+      ? body.attendanceId.trim()
+      : "";
+
+  const status =
+    typeof body.status === "string"
+      ? body.status.trim()
+      : "";
 
   if (!UUID_PATTERN.test(attendanceId)) {
     return NextResponse.json(
@@ -143,15 +167,10 @@ export async function PATCH(request) {
       { status: 400 }
     );
   }
+
   if (!VALID_STATUSES.includes(status)) {
     return NextResponse.json(
       { error: "Invalid attendance status." },
-      { status: 400 }
-    );
-  }
-  if (reason.length < 5 || reason.length > 500) {
-    return NextResponse.json(
-      { error: "Use a reason between 5 and 500 characters." },
       { status: 400 }
     );
   }
@@ -163,18 +182,21 @@ export async function PATCH(request) {
     .select("id, status")
     .eq("id", attendanceId)
     .maybeSingle();
+
   if (existingError) {
     return NextResponse.json(
       { error: "Unable to load the current attendance record." },
       { status: 500 }
     );
   }
+
   if (!existing) {
     return NextResponse.json(
       { error: "The selected attendance record was not found." },
       { status: 404 }
     );
   }
+
   if (existing.status === status) {
     return NextResponse.json(
       { error: "That member already has this attendance status." },
@@ -186,40 +208,21 @@ export async function PATCH(request) {
     .from("portal_attendance")
     .update({
       status,
-      flagged: true,
-      verified_by: context.user.id,
-      updated_at: new Date().toISOString(),
     })
     .eq("id", attendanceId)
     .select(
-      "id, event_id, user_id, checked_in_at, method, status, checked_in_by, verified_by, flagged, updated_at"
+      "id, event_id, user_id, checked_in_at, method, status, checked_in_by"
     )
     .single();
 
   if (updateError) {
-    console.error("Portal attendance update failed:", updateError);
+    console.error(
+      "Portal attendance update failed:",
+      updateError
+    );
+
     return NextResponse.json(
       { error: "Unable to update attendance." },
-      { status: 500 }
-    );
-  }
-
-  const { data: log, error: logError } = await supabase
-    .from("portal_attendance_logs")
-    .insert({
-      attendance_id: attendance.id,
-      previous_status: existing.status,
-      new_status: status,
-      reason,
-      edited_by: context.user.id,
-    })
-    .select("id, previous_status, new_status, reason, edited_by, created_at")
-    .single();
-
-  if (logError) {
-    console.error("Portal attendance log insert failed:", logError);
-    return NextResponse.json(
-      { error: "Attendance saved, but the audit log entry failed." },
       { status: 500 }
     );
   }
@@ -230,7 +233,10 @@ export async function PATCH(request) {
       [attendance]
     );
 
-    return NextResponse.json({ attendance: attendanceWithProfile }, { status: 200 });
+    return NextResponse.json(
+      { attendance: attendanceWithProfile },
+      { status: 200 }
+    );
   } catch (profilesError) {
     console.error(
       "Portal profile fetch failed:",

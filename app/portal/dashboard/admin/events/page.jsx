@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export default function AdminEventsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [qrEvent, setQrEvent] = useState(null);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [attendanceError, setAttendanceError] = useState(null);
@@ -15,6 +16,8 @@ export default function AdminEventsPage() {
   const [eventDescription, setEventDescription] = useState("");
   const [eventLocation, setEventLocation] = useState("");
   const [eventType, setEventType] = useState("chapter");
+  const [eventCapacity, setEventCapacity] = useState("");
+  const [eventCheckInPasscode, setEventCheckInPasscode] = useState("");
   const [eventStart, setEventStart] = useState("");
   const [eventEnd, setEventEnd] = useState("");
   const [creatingEvent, setCreatingEvent] = useState(false);
@@ -84,6 +87,61 @@ export default function AdminEventsPage() {
     }
   }
 
+  async function exportAttendance(eventId, eventTitle) {
+    try {
+      const response = await fetch(
+        `/api/portal/admin/attendance?eventId=${eventId}`
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to export attendance.");
+      }
+
+      const attendance = data.attendance || [];
+
+      const escapeCsvValue = (value) =>
+        `"${String(value).replace(/"/g, '""')}"`;
+
+      const headers = ["Name", "User ID", "Status", "Checked In At"];
+
+      const rows = attendance.map((record) => [
+        record.full_name || "",
+        record.user_id || "",
+        record.status || "",
+        record.checked_in_at
+          ? new Date(record.checked_in_at).toLocaleString()
+          : "",
+      ]);
+
+      const csv = [headers, ...rows]
+        .map((row) => row.map(escapeCsvValue).join(","))
+        .join("\n");
+
+      const blob = new Blob([csv], {
+        type: "text/csv;charset=utf-8;",
+      });
+
+      const url = URL.createObjectURL(blob);
+
+      const safeTitle = eventTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `${safeTitle || "event"}-attendance.csv`;
+      link.click();
+
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setEventsError(error.message || "Unable to export attendance.");
+    }
+  }
+
   async function updateAttendanceStatus(attendanceId, status) {
     try {
       const response = await fetch("/api/portal/admin/attendance", {
@@ -130,15 +188,19 @@ export default function AdminEventsPage() {
 
   const closeCreateForm = () => {
     if (creatingEvent) return;
+
     setShowCreateForm(false);
     setCreateEventError("");
   };
 
   const createEvent = async (event) => {
     event.preventDefault();
+
     const title = eventTitle.trim();
     const description = eventDescription.trim();
     const location = eventLocation.trim();
+    const capacity = eventCapacity === "" ? null : Number(eventCapacity);
+    const checkInPasscode = eventCheckInPasscode.trim();
 
     if (
       title.length < 2 ||
@@ -153,12 +215,32 @@ export default function AdminEventsPage() {
       return;
     }
 
+    if (
+      capacity !== null &&
+      (!Number.isInteger(capacity) || capacity <= 0)
+    ) {
+      setCreateEventError(
+        "Capacity must be a positive whole number."
+      );
+      return;
+    }
+
+    if (!/^\d{6}$/.test(checkInPasscode)) {
+      setCreateEventError(
+        "Check-in passcode must be exactly 6 digits."
+      );
+      return;
+    }
+
     setCreatingEvent(true);
     setCreateEventError("");
+
     try {
       const response = await fetch("/api/portal/admin/events", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           title,
           description,
@@ -166,26 +248,40 @@ export default function AdminEventsPage() {
           startTime: eventStart,
           endTime: eventEnd,
           eventType,
+          capacity,
+          checkInPasscode,
         }),
       });
+
       const result = await response.json();
+
       if (!response.ok) {
         throw new Error(result.error || "Unable to create event.");
       }
 
       setEvents((current) => [
-        { ...result.event, goingCount: 0, notGoingCount: 0, checkedInCount: 0 },
+        {
+          ...result.event,
+          goingCount: 0,
+          notGoingCount: 0,
+          checkedInCount: 0,
+        },
         ...current,
       ]);
+
       setShowCreateForm(false);
       setEventTitle("");
       setEventDescription("");
       setEventLocation("");
       setEventType("chapter");
+      setEventCapacity("");
+      setEventCheckInPasscode("");
       setEventStart("");
       setEventEnd("");
     } catch (error) {
-      setCreateEventError(error.message || "Unable to create event right now.");
+      setCreateEventError(
+        error.message || "Unable to create event right now."
+      );
     } finally {
       setCreatingEvent(false);
     }
@@ -322,9 +418,13 @@ export default function AdminEventsPage() {
             </div>
 
             <div>
-              <label htmlFor="event-type" className="text-sm font-semibold text-gray-800">
+              <label
+                htmlFor="event-type"
+                className="text-sm font-semibold text-gray-800"
+              >
                 Event type
               </label>
+
               <select
                 id="event-type"
                 value={eventType}
@@ -333,11 +433,65 @@ export default function AdminEventsPage() {
                 className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
               >
                 <option value="chapter">Chapter</option>
-                <option value="professional">Professional Development</option>
+                <option value="professional">
+                  Professional Development
+                </option>
                 <option value="fundraiser">Fundraiser</option>
                 <option value="social">Social</option>
+                <option value="workshop">Workshop</option>
                 <option value="other">Other</option>
               </select>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="event-capacity"
+                  className="text-sm font-semibold text-gray-800"
+                >
+                  Capacity Limit
+                </label>
+
+                <input
+                  id="event-capacity"
+                  type="number"
+                  min="1"
+                  placeholder="Unlimited"
+                  value={eventCapacity}
+                  onChange={(event) => setEventCapacity(event.target.value)}
+                  disabled={creatingEvent}
+                  className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
+                />
+
+                <p className="mt-1 text-xs text-gray-500">
+                  Leave blank for unlimited capacity.
+                </p>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="event-passcode"
+                  className="text-sm font-semibold text-gray-800"
+                >
+                  6-Digit Check-In Passcode
+                </label>
+
+                <input
+                  id="event-passcode"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="123456"
+                  value={eventCheckInPasscode}
+                  onChange={(event) =>
+                    setEventCheckInPasscode(
+                      event.target.value.replace(/\D/g, "").slice(0, 6)
+                    )
+                  }
+                  disabled={creatingEvent}
+                  className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
+                />
+              </div>
             </div>
 
             {createEventError && (
@@ -481,6 +635,7 @@ export default function AdminEventsPage() {
 
                       <button
                         type="button"
+                        onClick={() => setQrEvent(event)}
                         className="rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-semibold text-gray-800 hover:border-primary hover:text-primary"
                       >
                         Generate QR
@@ -488,6 +643,9 @@ export default function AdminEventsPage() {
 
                       <button
                         type="button"
+                        onClick={() =>
+                          exportAttendance(event.id, event.title)
+                        }
                         className="rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-semibold text-gray-800 hover:border-primary hover:text-primary"
                       >
                         Export Attendance
@@ -585,6 +743,7 @@ export default function AdminEventsPage() {
                       className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold outline-none focus:border-primary"
                     >
                       <option value="present">Present</option>
+                      <option value="absent">Absent</option>
                       <option value="late">Late</option>
                       <option value="excused">Excused</option>
                       <option value="unexcused">Unexcused</option>
@@ -602,6 +761,32 @@ export default function AdminEventsPage() {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {qrEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
+            <h2 className="text-xl font-bold text-gray-950">
+              {qrEvent.title}
+            </h2>
+
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(
+                qrEvent.id
+              )}`}
+              alt={`QR code for ${qrEvent.title}`}
+              className="mx-auto mt-6 h-60 w-60"
+            />
+
+            <button
+              type="button"
+              onClick={() => setQrEvent(null)}
+              className="mt-6 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
