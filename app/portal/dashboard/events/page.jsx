@@ -1,80 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import EventCalendar from "../../../../components/portal/events/EventCalendar";
 
-const events = [
-  {
-    id: 1,
-    title: "Brother Chapter",
-    eventDate: "2026-08-26T19:00:00",
-    date: "August 26, 2026",
-    time: "7:00 PM",
-    location: "ECSW 1.315",
-    description:
-      "Join us for our chapter meeting, announcements, and upcoming plans.",
-  },
-  {
-    id: 2,
-    title: "Game Night Social",
-    eventDate: "2026-09-02T19:00:00",
-    date: "September 2, 2026",
-    time: "7:00 PM",
-    location: "ECSW 2.315",
-    description:
-      "Come hang out with the brothers for a casual evening of food and games.",
-  },
-  {
-    id: 3,
-    title: "LeetCode Workshop",
-    eventDate: "2026-09-09T18:00:00",
-    date: "September 9, 2026",
-    time: "6:00 PM",
-    location: "ECSW 1.320",
-    description:
-      "Practice coding problems together and prepare for technical interviews.",
-  },
-  {
-    id: 4,
-    title: "Professional Development Workshop",
-    eventDate: "2026-09-16T19:00:00",
-    date: "September 16, 2026",
-    time: "7:00 PM",
-    location: "ECSW 2.110",
-    description:
-      "Learn about resumes, technical interviews, networking, and career preparation.",
-  },
-  {
-    id: 5,
-    title: "Brotherhood Social",
-    eventDate: "2026-09-23T18:30:00",
-    date: "September 23, 2026",
-    time: "6:30 PM",
-    location: "SSA 14.244",
-    description:
-      "Take a break from classes and spend some time hanging out with the chapter.",
-  },
-  {
-    id: 6,
-    title: "Chapter Game Tournament",
-    eventDate: "2026-09-30T19:00:00",
-    date: "September 30, 2026",
-    time: "7:00 PM",
-    location: "ECSW 1.315",
-    description:
-      "Compete with your brothers in a friendly game tournament and win prizes.",
-  },
-];
-
 export default function EventsPage() {
+  const [events, setEvents] = useState([]);
   const [rsvps, setRsvps] = useState({});
+  const [loading, setLoading] = useState(true);
 
-  const handleRsvp = (eventId, status) => {
-    setRsvps((current) => ({
-      ...current,
-      [eventId]: status,
-    }));
+  useEffect(() => {
+    fetch("/api/portal/events")
+      .then((res) => res.json())
+      .then((data) => {
+        setEvents(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const handleRsvp = async (eventId, status) => {
+    try {
+      const res = await fetch("/api/portal/events/rsvp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ eventId, status }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setRsvps((current) => ({
+          ...current,
+          [eventId]: status,
+        }));
+      }
+    } catch (error) {
+      console.error("RSVP error:", error);
+    }
   };
+
+  if (loading) {
+    return <p>Loading events...</p>;
+  }
 
   return (
     <div>
@@ -142,7 +109,7 @@ export default function EventsPage() {
 
                     {rsvp && (
                       <span className="shrink-0 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-primary">
-                        {rsvp === "going" ? "Going" : "Not Going"}
+                        {rsvp === "yes" ? "Going" : rsvp === "no" ? "Not Going" : "Maybe"}
                       </span>
                     )}
                   </div>
@@ -152,27 +119,52 @@ export default function EventsPage() {
                       Will you be attending?
                     </p>
 
+                    {/* RSVP counts */}
+                    <div className="mt-2 text-xs text-gray-500">
+                      {event.rsvpCount &&
+                        `
+                        <span>${event.rsvpCount.yes} going</span>
+                        <span>${event.rsvpCount.maybe} maybe</span>
+                        <span>${event.rsvpCount.no} not going</span>
+                        `}
+                    </div>
+
                     <div className="mt-3 flex flex-wrap gap-3">
                       <button
                         type="button"
-                        onClick={() => handleRsvp(event.id, "going")}
+                        onClick={() => handleRsvp(event.id, "yes")}
                         className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
-                          rsvp === "going"
+                          rsvp === "yes"
                             ? "bg-primary text-white"
                             : "border border-gray-300 text-gray-800 hover:border-primary hover:text-primary"
                         }`}
+                        disabled={event.rsvp_deadline && new Date() > new Date(event.rsvp_deadline)}
                       >
                         Going
                       </button>
 
                       <button
                         type="button"
-                        onClick={() => handleRsvp(event.id, "not-going")}
+                        onClick={() => handleRsvp(event.id, "maybe")}
                         className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
-                          rsvp === "not-going"
+                          rsvp === "maybe"
                             ? "bg-primary text-white"
                             : "border border-gray-300 text-gray-800 hover:border-primary hover:text-primary"
                         }`}
+                        disabled={event.rsvp_deadline && new Date() > new Date(event.rsvp_deadline)}
+                      >
+                        Maybe
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRsvp(event.id, "no")}
+                        className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+                          rsvp === "no"
+                            ? "bg-primary text-white"
+                            : "border border-gray-300 text-gray-800 hover:border-primary hover:text-primary"
+                        }`}
+                        disabled={event.rsvp_deadline && new Date() > new Date(event.rsvp_deadline)}
                       >
                         Not Going
                       </button>
