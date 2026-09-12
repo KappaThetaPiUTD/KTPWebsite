@@ -115,6 +115,7 @@ export async function GET() {
     for (const event of events ?? []) {
       eventStats[event.id] = {
         goingCount: 0,
+        maybeCount: 0,
         notGoingCount: 0,
         checkedInCount: 0,
       };
@@ -125,6 +126,10 @@ export async function GET() {
 
       if (rsvp.status === "going") {
         eventStats[rsvp.event_id].goingCount += 1;
+      }
+
+      if (rsvp.status === "maybe") {
+        eventStats[rsvp.event_id].maybeCount += 1;
       }
 
       if (rsvp.status === "not_going") {
@@ -143,6 +148,7 @@ export async function GET() {
     ...event,
     ...(eventStats[event.id] || {
       goingCount: 0,
+      maybeCount: 0,
       notGoingCount: 0,
       checkedInCount: 0,
     }),
