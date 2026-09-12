@@ -123,6 +123,11 @@
   color: white !important;
 }
 
+.rbc-event.ktp-calendar-maybe {
+  background: #f59e0b !important;
+  color: white !important;
+}
+
 .rbc-show-more {
   color: #00542c;
   font-weight: 600;

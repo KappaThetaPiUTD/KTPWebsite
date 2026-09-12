@@ -168,6 +168,10 @@ export default function EventsPage() {
             const attendanceRecord = attendance[event.id];
             const feedback = checkInFeedback[event.id];
             const isSubmitting = submittingEventId === event.id;
+            const rsvpClosed = Boolean(
+              event.rsvp_deadline && new Date() > new Date(event.rsvp_deadline)
+            );
+            const hasStats = typeof event.goingCount === "number";
 
             return (
               <article
@@ -211,7 +215,7 @@ export default function EventsPage() {
 
                     {rsvp && (
                       <span className="shrink-0 rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-primary">
-                        {rsvp === "going" ? "Going" : "Not Going"}
+                        {rsvp === "going" ? "Going" : rsvp === "not_going" ? "Not Going" : "Maybe"}
                       </span>
                     )}
                   </div>
@@ -221,11 +225,21 @@ export default function EventsPage() {
                       Will you be attending?
                     </p>
 
+                    {/* RSVP counts (admins only; other members get zeros from the API) */}
+                    {hasStats && (
+                      <div className="mt-2 flex flex-wrap gap-x-3 text-xs text-gray-500">
+                        <span>{event.goingCount} going</span>
+                        <span>{event.maybeCount} maybe</span>
+                        <span>{event.notGoingCount} not going</span>
+                        <span>{event.checkedInCount} checked in</span>
+                      </div>
+                    )}
+
                     <div className="mt-3 flex flex-wrap gap-3">
                       <button
                         type="button"
                         onClick={() => handleRsvp(event.id, "going")}
-                        disabled={submittingEventId === event.id}
+                        disabled={isSubmitting || rsvpClosed}
                         className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
                           rsvp === "going"
                             ? "bg-primary text-white"
@@ -238,7 +252,7 @@ export default function EventsPage() {
                       <button
                         type="button"
                         onClick={() => handleRsvp(event.id, "not_going")}
-                        disabled={submittingEventId === event.id}
+                        disabled={isSubmitting || rsvpClosed}
                         className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
                           rsvp === "not_going"
                             ? "bg-primary text-white"

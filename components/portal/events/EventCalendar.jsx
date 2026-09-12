@@ -23,18 +23,25 @@ export default function EventCalendar({ events, rsvps }) {
   const [currentView, setCurrentView] = useState("month");
 
   const calendarEvents = events.map((event) => {
+    const rsvpStatus = rsvps[event.id];
+    const isGoing = rsvpStatus === "going";
+    const isMaybe = rsvpStatus === "maybe";
+
     const start = new Date(event.start_time);
     const end = new Date(event.end_time);
 
     return {
       id: event.id,
       title:
-        rsvps[event.id] === "going"
+        isGoing
           ? `✓ ${event.title}`
+          : isMaybe
+          ? `⚑ ${event.title}`
           : event.title,
       start,
       end,
-      isGoing: rsvps[event.id] === "going",
+      isGoing,
+      isMaybe,
     };
   });
 
@@ -63,7 +70,12 @@ export default function EventCalendar({ events, rsvps }) {
           onNavigate={(date) => setCurrentDate(date)}
           popup
           eventPropGetter={(event) => ({
-            className: event.isGoing ? "ktp-calendar-going" : "",
+            className:
+              event.isGoing
+                ? "ktp-calendar-going"
+                : event.isMaybe
+                ? "ktp-calendar-maybe"
+                : "",
           })}
         />
       </div>
