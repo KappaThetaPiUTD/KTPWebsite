@@ -119,15 +119,16 @@ export default function EventsPage() {
                       Will you be attending?
                     </p>
 
-                    {/* RSVP counts */}
-                    <div className="mt-2 text-xs text-gray-500">
-                      {event.rsvpCount &&
-                        `
-                        <span>${event.rsvpCount.yes} going</span>
-                        <span>${event.rsvpCount.maybe} maybe</span>
-                        <span>${event.rsvpCount.no} not going</span>
-                        `}
-                    </div>
+          {/* RSVP counts */}
+          <div className="mt-2 text-xs text-gray-500">
+            {event.rsvpCount && (
+              <>
+                <span className="mr-2">{event.rsvpCount.yes} going</span>
+                <span className="mr-2">{event.rsvpCount.maybe} maybe</span>
+                <span>{event.rsvpCount.no} not going</span>
+              </>
+            )}
+          </div>
 
                     <div className="mt-3 flex flex-wrap gap-3">
                       <button
