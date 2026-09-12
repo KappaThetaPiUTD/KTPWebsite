@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { loadPortalMemberContext } from "../../../../../lib/portal/member";
 import { getPortalServerClient } from "../../../../../lib/portal/server";
 
-const EVENT_TYPES = ["chapter", "professional", "fundraiser", "social", "other"];
+const EVENT_TYPES = ["chapter", "professional", "fundraiser", "social", "workshop", "other"];
 
 async function requireAdmin() {
   const context = await loadPortalMemberContext();
@@ -51,6 +51,15 @@ export async function POST(request) {
   const startTime =
     typeof body.startTime === "string" ? body.startTime.trim() : "";
   const endTime = typeof body.endTime === "string" ? body.endTime.trim() : "";
+  const capacity =
+    body.capacity === null || body.capacity === undefined || body.capacity === ""
+    ? null
+    : Number(body.capacity);
+
+  const checkInPasscode =
+    typeof body.checkInPasscode === "string"
+    ? body.checkInPasscode.trim()
+    : "";
   const eventType =
     typeof body.eventType === "string" && body.eventType.trim()
       ? body.eventType.trim()
@@ -58,6 +67,22 @@ export async function POST(request) {
 
   if (!EVENT_TYPES.includes(eventType)) {
     return NextResponse.json({ error: "Invalid event type." }, { status: 400 });
+  }
+  if (
+    capacity !== null &&
+    (!Number.isInteger(capacity) || capacity <= 0)
+  ) {
+    return NextResponse.json(
+      { error: "Capacity must be a positive whole number." },
+      { status: 400 }
+    );
+  }
+
+  if (!/^\d{6}$/.test(checkInPasscode)) {
+    return NextResponse.json(
+      { error: "Check-in passcode must be exactly 6 digits." },
+      { status: 400 }
+    );
   }
   if (title.length < 2 || title.length > 200) {
     return NextResponse.json(
@@ -108,9 +133,14 @@ export async function POST(request) {
       start_time: parsedStart.toISOString(),
       end_time: parsedEnd.toISOString(),
       event_type: eventType,
+      capacity,
+      check_in_passcode: checkInPasscode,
       created_by: context.user.id,
     })
-    .select("id, title, location, start_time, end_time, event_type, created_at")
+    .select(
+      "id, title, location, start_time, end_time, event_type, capacity, check_in_passcode, created_at"
+    )
+
     .single();
 
   if (insertError) {
