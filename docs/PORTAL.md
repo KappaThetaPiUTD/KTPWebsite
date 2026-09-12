@@ -115,6 +115,40 @@ The server uses the authenticated admin ID as `issued_by`; the client cannot
 choose or forge it. RLS independently rejects non-admin inserts. Strike rows are
 append-only in the initial schema to preserve audit history.
 
+## Attendance
+
+Admin/exec users can:
+
+1. Open `/portal/dashboard/admin/attendance`.
+2. Add an event (title, description, location, start/end time, event type) or
+   select an existing one. Use the "Event type" filter to narrow the event
+   picker to one category.
+3. Search for an active member, or use the "Role" filter, and choose "Edit
+   attendance."
+4. Pick a status (`present`, `absent`, `excused`, `unexcused`) and enter a
+   factual reason between 5 and 500 characters.
+5. Confirm the change.
+
+Valid `event_type` values are:
+
+- `chapter`
+- `professional`
+- `fundraiser`
+- `social`
+- `other`
+
+There is no automated check-in source yet, so every attendance record is
+created and edited by an admin. Each write is flagged (`flagged = true`) on
+the `portal_attendance` row and appended to `portal_attendance_logs` with the
+previous status, new status, reason, and the authenticated admin ID as
+`edited_by` — the client cannot choose or forge it. RLS independently rejects
+non-admin writes. Attendance logs are append-only to preserve audit history.
+
+This feature uses a brand-new schema (`portal_events`, `portal_attendance`,
+`portal_attendance_logs`). It does not read from or write to the legacy
+`attendance`/`attendance_logs`/`events` tables, which remain locked per the
+emergency security finding below.
+
 ## Security boundaries
 
 - Public self-signup remains disabled.
@@ -127,6 +161,7 @@ append-only in the initial schema to preserve audit history.
 
 ## Before adding more features
 
-Events, RSVP, attendance, QR check-in, and admin filters need their own schema
-and RLS review. Do not restore the archived direct browser writes or the
-localhost Express API.
+RSVP, QR check-in, and admin filters still need their own schema and RLS
+review. Events and attendance now have a reviewed schema (see "Attendance"
+above). Do not restore the archived direct browser writes or the localhost
+Express API.

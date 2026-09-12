@@ -42,7 +42,7 @@ export async function POST(request) {
     );
   }
 
-  const supabase = getPortalServerClient();
+  const supabase = await getPortalServerClient();
   const { data: target, error: targetError } = await supabase
     .from("portal_members")
     .select("user_id")

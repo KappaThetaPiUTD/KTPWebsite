@@ -42,6 +42,75 @@ create table if not exists public.portal_strikes (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.portal_events (
+  id uuid primary key default gen_random_uuid(),
+  title text not null check (char_length(title) between 2 and 200),
+  description text not null check (char_length(description) between 5 and 5000),
+  location text check (location is null or char_length(location) between 2 and 200),
+  start_time timestamptz not null,
+  end_time timestamptz not null,
+  -- scheduling & visibility: event_type drives filters; target_roles null = all members
+  event_type text not null default 'chapter'
+    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'other')),
+  target_roles text[],
+  -- rsvp rules: capacity null = unlimited; rsvp_deadline null = open until event start
+  capacity integer check (capacity is null or capacity > 0),
+  rsvp_deadline timestamptz,
+  -- check-in config: passcode is the typeable fallback; qr_code_secret drives the QR image
+  late_threshold_minutes integer not null default 15
+    check (late_threshold_minutes between 0 and 120),
+  check_in_passcode char(6) not null
+    default lpad((floor(random() * 1000000))::int::text, 6, '0'),
+  qr_code_secret text not null default encode(gen_random_bytes(32), 'base64'),
+  is_check_in_open boolean not null default false,
+  created_by uuid not null references auth.users(id) on delete restrict,
+  created_at timestamptz not null default now(),
+  check (end_time > start_time)
+);
+
+create table if not exists public.portal_rsvps (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.portal_events(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  status text not null default 'maybe'
+    check (status in ('going', 'maybe', 'not_going')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (event_id, user_id)
+);
+
+-- portal_attendance rows are created by check-in (QR scan or an admin manual
+-- check-in), then an admin can correct the status afterward. Every
+-- correction is flagged here and appended to portal_attendance_logs below.
+create table if not exists public.portal_attendance (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.portal_events(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  checked_in_at timestamptz not null default now(),
+  status text not null default 'present'
+    check (status in ('present', 'absent', 'excused', 'unexcused', 'late')),
+  method text not null default 'qr'
+    check (method in ('qr', 'manual')),
+  checked_in_by uuid not null references auth.users(id) on delete restrict,
+  -- verified_by is set on any admin override, null = machine-determined
+  verified_by uuid references auth.users(id) on delete set null,
+  flagged boolean not null default false,
+  updated_at timestamptz not null default now(),
+  unique (event_id, user_id)
+);
+
+create table if not exists public.portal_attendance_logs (
+  id bigint generated always as identity primary key,
+  attendance_id uuid not null references public.portal_attendance(id) on delete cascade,
+  previous_status text
+    check (previous_status in ('present', 'absent', 'excused', 'unexcused', 'late')),
+  new_status text not null
+    check (new_status in ('present', 'absent', 'excused', 'unexcused', 'late')),
+  reason text not null check (char_length(reason) between 5 and 500),
+  edited_by uuid not null references auth.users(id) on delete restrict,
+  created_at timestamptz not null default now()
+);
+
 create or replace function public.is_active_portal_member()
 returns boolean
 language sql
@@ -70,6 +139,21 @@ as $$
     where user_id = auth.uid()
       and status = 'active'
       and role in ('admin', 'exec')
+  );
+$$;
+
+create or replace function public.is_event_creator(event_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.portal_events
+    where id = $1
+      and created_by = auth.uid()
   );
 $$;
 
@@ -137,6 +221,10 @@ create trigger bind_invited_portal_member
 alter table public.portal_members enable row level security;
 alter table public.portal_profiles enable row level security;
 alter table public.portal_strikes enable row level security;
+alter table public.portal_events enable row level security;
+alter table public.portal_rsvps enable row level security;
+alter table public.portal_attendance enable row level security;
+alter table public.portal_attendance_logs enable row level security;
 
 drop policy if exists "Members can read own membership" on public.portal_members;
 create policy "Members can read own membership"
@@ -221,66 +309,175 @@ create policy "Admins can log strikes"
     )
   );
 
-create table if not exists public.portal_events (
-  id uuid primary key default gen_random_uuid(),
-  title text not null check (char_length(title) between 2 and 200),
-  description text not null check (char_length(description) between 5 and 5000),
-  location text check (location is null or char_length(location) between 2 and 200),
-  start_time timestamptz not null,
-  end_time timestamptz not null,
-  qr_code_secret text not null default encode(gen_random_bytes(32), 'base64'),
-  created_by uuid not null references auth.users(id) on delete restrict,
-  created_at timestamptz not null default now(),
-  check (end_time > start_time)
-);
-
-create table if not exists public.portal_rsvps (
-  id uuid primary key default gen_random_uuid(),
-  event_id uuid not null references public.portal_events(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  status text not null default 'maybe'
-    check (status in ('going', 'maybe', 'not_going')),
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (event_id, user_id)
-);
-
-create table if not exists public.portal_attendance (
-  id uuid primary key default gen_random_uuid(),
-  event_id uuid not null references public.portal_events(id) on delete cascade,
-  user_id uuid not null references auth.users(id) on delete cascade,
-  checked_in_at timestamptz not null default now(),
-  method text not null default 'qr'
-    check (method in ('qr', 'manual')),
-  checked_in_by uuid not null references auth.users(id) on delete restrict,
-  unique (event_id, user_id)
-);
-
-create or replace function public.is_event_creator(event_id uuid)
+create or replace function public.can_rsvp_to_portal_event(event_target_roles text[])
 returns boolean
 language sql
 stable
 security definer
 set search_path = public
 as $$
-  select exists (
-    select 1
-    from public.portal_events
-    where id = $1
-      and created_by = auth.uid()
-  );
+  select public.is_active_portal_member()
+    and (
+      event_target_roles is null
+      or exists (
+        select 1
+        from public.portal_members
+        where user_id = auth.uid()
+          and status = 'active'
+          and role = any(event_target_roles)
+      )
+    );
 $$;
 
-alter table public.portal_events enable row level security;
-alter table public.portal_rsvps enable row level security;
-alter table public.portal_attendance enable row level security;
+-- All RSVP validation is performed in one database transaction. This prevents
+-- a capacity race and ensures direct PostgREST/RPC callers cannot RSVP to an
+-- event that has changed audience since it was displayed.
+create or replace function public.submit_portal_rsvp(
+  requested_event_id uuid,
+  requested_status text
+)
+returns public.portal_rsvps
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  current_event public.portal_events%rowtype;
+  existing_status text;
+  going_count integer;
+  saved_rsvp public.portal_rsvps%rowtype;
+begin
+  if auth.uid() is null then
+    raise exception 'Sign in required.' using errcode = '28000';
+  end if;
+  if requested_status not in ('going', 'maybe', 'not_going') then
+    raise exception 'Invalid RSVP status.' using errcode = '22023';
+  end if;
+
+  -- Serialize attendance-changing requests for this event.
+  perform pg_advisory_xact_lock(hashtextextended(requested_event_id::text, 0));
+
+  select * into current_event
+  from public.portal_events
+  where id = requested_event_id;
+
+  if not found then
+    raise exception 'Event not found.' using errcode = 'P0002';
+  end if;
+  if not public.can_rsvp_to_portal_event(current_event.target_roles) then
+    raise exception 'You are not eligible to RSVP to this event.' using errcode = '42501';
+  end if;
+  if now() > coalesce(current_event.rsvp_deadline, current_event.start_time) then
+    raise exception 'RSVP deadline has passed.' using errcode = '22023';
+  end if;
+
+  select status into existing_status
+  from public.portal_rsvps
+  where event_id = requested_event_id and user_id = auth.uid();
+
+  if requested_status = 'going' and coalesce(existing_status, '') <> 'going'
+    and current_event.capacity is not null then
+    select count(*)::integer into going_count
+    from public.portal_rsvps
+    where event_id = requested_event_id and status = 'going';
+
+    if going_count >= current_event.capacity then
+      raise exception 'Event is at maximum capacity.' using errcode = '22023';
+    end if;
+  end if;
+
+  insert into public.portal_rsvps (event_id, user_id, status, updated_at)
+  values (requested_event_id, auth.uid(), requested_status, now())
+  on conflict (event_id, user_id) do update
+    set status = excluded.status, updated_at = now()
+  returning * into saved_rsvp;
+
+  return saved_rsvp;
+end;
+$$;
+
+-- Check-in is also performed in one transaction so the open state, audience,
+-- passcode, duplicate check, and attendance write cannot be separated by a
+-- crafted client request or a concurrent submission.
+create or replace function public.check_in_to_portal_event(
+  requested_event_id uuid,
+  requested_passcode text
+)
+returns table (
+  checked_in_at timestamptz,
+  status text,
+  already_checked_in boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  current_event public.portal_events%rowtype;
+  saved_attendance public.portal_attendance%rowtype;
+begin
+  if auth.uid() is null then
+    raise exception 'Sign in required.' using errcode = '28000';
+  end if;
+  if requested_passcode is null or requested_passcode !~ '^[0-9]{6}$' then
+    raise exception 'Invalid check-in code.' using errcode = '22023';
+  end if;
+
+  -- Prevent an event's check-in settings changing while they are validated.
+  select * into current_event
+  from public.portal_events
+  where id = requested_event_id
+  for update;
+
+  if not found then
+    raise exception 'Event not found.' using errcode = 'P0002';
+  end if;
+  if not public.can_rsvp_to_portal_event(current_event.target_roles) then
+    raise exception 'You are not eligible to check in to this event.' using errcode = '42501';
+  end if;
+
+  select * into saved_attendance
+  from public.portal_attendance
+  where event_id = requested_event_id and user_id = auth.uid();
+
+  if found then
+    return query select saved_attendance.checked_in_at, saved_attendance.status, true;
+    return;
+  end if;
+  if not current_event.is_check_in_open then
+    raise exception 'Check-in is not open for this event.' using errcode = '22023';
+  end if;
+  if requested_passcode <> current_event.check_in_passcode then
+    raise exception 'Invalid check-in code.' using errcode = '22023';
+  end if;
+
+  insert into public.portal_attendance (
+    event_id, user_id, checked_in_at, status, method, checked_in_by
+  )
+  values (
+    requested_event_id,
+    auth.uid(),
+    now(),
+    case
+      when now() > current_event.start_time
+        + make_interval(mins => current_event.late_threshold_minutes) then 'late'
+      else 'present'
+    end,
+    'qr',
+    auth.uid()
+  )
+  returning * into saved_attendance;
+
+  return query select saved_attendance.checked_in_at, saved_attendance.status, false;
+end;
+$$;
 
 drop policy if exists "Members can read events" on public.portal_events;
 create policy "Members can read events"
   on public.portal_events
   for select
   to authenticated
-  using (public.is_active_portal_member());
+  using (public.is_portal_admin() or public.can_rsvp_to_portal_event(target_roles));
 
 drop policy if exists "Admins can create events" on public.portal_events;
 create policy "Admins can create events"
@@ -325,6 +522,12 @@ create policy "Members can create RSVP"
   with check (
     user_id = auth.uid()
     and public.is_active_portal_member()
+    and exists (
+      select 1
+      from public.portal_events
+      where id = event_id
+        and public.can_rsvp_to_portal_event(target_roles)
+    )
   );
 
 drop policy if exists "Members can update own RSVP" on public.portal_rsvps;
@@ -333,7 +536,15 @@ create policy "Members can update own RSVP"
   for update
   to authenticated
   using (user_id = auth.uid() or public.is_portal_admin())
-  with check (user_id = auth.uid() or public.is_portal_admin());
+  with check (
+    (user_id = auth.uid() or public.is_portal_admin())
+    and exists (
+      select 1
+      from public.portal_events
+      where id = event_id
+        and public.can_rsvp_to_portal_event(target_roles)
+    )
+  );
 
 drop policy if exists "Members can delete own RSVP" on public.portal_rsvps;
 create policy "Members can delete own RSVP"
@@ -357,10 +568,7 @@ create policy "Members can check in"
   on public.portal_attendance
   for insert
   to authenticated
-  with check (
-    user_id = auth.uid()
-    and public.is_active_portal_member()
-  );
+  with check (false);
 
 drop policy if exists "Admins can manual check in" on public.portal_attendance;
 create policy "Admins can manual check in"
@@ -388,16 +596,118 @@ create policy "Admins can delete attendance"
   to authenticated
   using (public.is_portal_admin());
 
+drop policy if exists "Members can read authorized attendance logs" on public.portal_attendance_logs;
+create policy "Members can read authorized attendance logs"
+  on public.portal_attendance_logs
+  for select
+  to authenticated
+  using (
+    public.is_portal_admin()
+    or exists (
+      select 1
+      from public.portal_attendance
+      where portal_attendance.id = portal_attendance_logs.attendance_id
+        and portal_attendance.user_id = auth.uid()
+    )
+  );
+
+drop policy if exists "Admins can log attendance edits" on public.portal_attendance_logs;
+create policy "Admins can log attendance edits"
+  on public.portal_attendance_logs
+  for insert
+  to authenticated
+  with check (
+    public.is_portal_admin()
+    and edited_by = auth.uid()
+  );
+
 revoke all on function public.is_event_creator(uuid) from public;
+revoke all on function public.can_rsvp_to_portal_event(text[]) from public;
+revoke all on function public.submit_portal_rsvp(uuid, text) from public;
+revoke all on function public.check_in_to_portal_event(uuid, text) from public;
 revoke all on function public.claim_portal_membership() from public;
 revoke all on function public.is_active_portal_member() from public;
 revoke all on function public.is_portal_admin() from public;
 revoke all on function public.portal_strike_counts() from public;
 grant execute on function public.is_event_creator(uuid) to authenticated;
+grant execute on function public.can_rsvp_to_portal_event(text[]) to authenticated;
+grant execute on function public.submit_portal_rsvp(uuid, text) to authenticated;
+grant execute on function public.check_in_to_portal_event(uuid, text) to authenticated;
 grant execute on function public.claim_portal_membership() to authenticated;
 grant execute on function public.is_active_portal_member() to authenticated;
 grant execute on function public.is_portal_admin() to authenticated;
 grant execute on function public.portal_strike_counts() to authenticated;
+
+-- MIGRATION: patch already-deployed tables that predate the columns/enum
+-- values above. Fresh installs get everything from CREATE TABLE above and
+-- these statements are no-ops.
+
+alter table public.portal_events
+  add column if not exists event_type text not null default 'chapter'
+    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'other')),
+  add column if not exists target_roles text[],
+  add column if not exists capacity integer check (capacity is null or capacity > 0),
+  add column if not exists rsvp_deadline timestamptz,
+  add column if not exists late_threshold_minutes integer not null default 15
+    check (late_threshold_minutes between 0 and 120),
+  add column if not exists check_in_passcode char(6) not null
+    default lpad((floor(random() * 1000000))::int::text, 6, '0'),
+  add column if not exists qr_code_secret text not null
+    default encode(gen_random_bytes(32), 'base64'),
+  add column if not exists is_check_in_open boolean not null default false;
+
+-- `ADD COLUMN IF NOT EXISTS` does not add the inline constraint when
+-- `event_type` already exists with a narrower enum, so make sure deployed
+-- databases pick up the full list.
+do $$
+begin
+  if exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.portal_events'::regclass
+      and contype = 'c'
+      and conname = 'portal_events_event_type_check'
+  ) then
+    alter table public.portal_events
+      drop constraint portal_events_event_type_check;
+  end if;
+
+  alter table public.portal_events
+    add constraint portal_events_event_type_check
+    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'other'));
+end;
+$$;
+
+-- Earlier versions required these fields; the event model now permits an
+-- unlimited capacity and RSVP availability through the event start time.
+alter table public.portal_events
+  alter column capacity drop not null,
+  alter column rsvp_deadline drop not null;
+
+alter table public.portal_attendance
+  add column if not exists status text not null default 'present'
+    check (status in ('present', 'absent', 'excused', 'unexcused', 'late')),
+  add column if not exists verified_by uuid references auth.users(id) on delete set null,
+  add column if not exists flagged boolean not null default false,
+  add column if not exists updated_at timestamptz not null default now();
+
+-- `ADD COLUMN IF NOT EXISTS` does not add the inline constraint when `status`
+-- already exists, so ensure deployed databases receive the same enum guard.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.portal_attendance'::regclass
+      and contype = 'c'
+      and conname = 'portal_attendance_status_check'
+  ) then
+    alter table public.portal_attendance
+      add constraint portal_attendance_status_check
+      check (status in ('present', 'absent', 'excused', 'unexcused', 'late'));
+  end if;
+end;
+$$;
 
 -- Bootstrap the first admin in the SQL Editor before sending the Auth invite.
 -- Replace the email, then run:
