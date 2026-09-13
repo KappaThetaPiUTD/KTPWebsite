@@ -34,6 +34,7 @@ export default function ActivityHoursPage() {
   const [submitError, setSubmitError] = useState("");
   const [success, setSuccess] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [now, setNow] = useState(0);
 
   const load = useCallback(async () => {
     const supabase = getPortalBrowserClient();
@@ -65,12 +66,13 @@ export default function ActivityHoursPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { setNow(Date.now()); }, [semester]);
 
   const selectedEvent = eligibleEvents.find((event) => event.id === eventId);
   const earned = useMemo(() => submissions.filter((submission) => submission.status === "approved").reduce((total, submission) => total + Number(submission.hours_awarded || 0), 0), [submissions]);
   const required = Number(semester?.required_hours || 0);
   const progress = required > 0 ? Math.min((earned / required) * 100, 100) : 0;
-  const semesterEnded = semester && new Date(`${semester.end_date}T23:59:59`).getTime() < Date.now();
+  const semesterEnded = Boolean(semester && new Date(`${semester.end_date}T23:59:59`).getTime() < now);
 
   function chooseEvent({ target }) { setEventId(target.value); setStartPhotoUrl(""); setEndPhotoUrl(""); setSubmitError(""); setSuccess(""); }
 
