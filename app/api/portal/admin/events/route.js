@@ -3,6 +3,8 @@ import { loadPortalMemberContext } from "../../../../../lib/portal/member";
 import { getPortalServerClient } from "../../../../../lib/portal/server";
 
 const EVENT_TYPES = ["chapter", "professional", "fundraiser", "social", "workshop", "other"];
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 async function requireAdmin() {
   const context = await loadPortalMemberContext();
@@ -60,6 +62,8 @@ export async function POST(request) {
     typeof body.checkInPasscode === "string"
     ? body.checkInPasscode.trim()
     : "";
+  const checkInPasscodeEnabled = body.checkInPasscodeEnabled === true;
+  const checkInOpen = body.checkInOpen === true;
   const eventType =
     typeof body.eventType === "string" && body.eventType.trim()
       ? body.eventType.trim()
@@ -78,7 +82,7 @@ export async function POST(request) {
     );
   }
 
-  if (!/^\d{6}$/.test(checkInPasscode)) {
+  if (checkInPasscodeEnabled && !/^\d{6}$/.test(checkInPasscode)) {
     return NextResponse.json(
       { error: "Check-in passcode must be exactly 6 digits." },
       { status: 400 }
@@ -134,11 +138,13 @@ export async function POST(request) {
       end_time: parsedEnd.toISOString(),
       event_type: eventType,
       capacity,
-      check_in_passcode: checkInPasscode,
+      check_in_passcode_enabled: checkInPasscodeEnabled,
+      check_in_passcode: checkInPasscodeEnabled ? checkInPasscode : null,
+      is_check_in_open: checkInOpen,
       created_by: context.user.id,
     })
     .select(
-      "id, title, location, start_time, end_time, event_type, capacity, check_in_passcode, created_at"
+      "id, title, location, start_time, end_time, event_type, capacity, is_check_in_open, created_at"
     )
 
     .single();
@@ -152,4 +158,45 @@ export async function POST(request) {
   }
 
   return NextResponse.json({ event: data }, { status: 201 });
+}
+
+export async function DELETE(request) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  const eventId = typeof body.eventId === "string" ? body.eventId.trim() : "";
+  if (!UUID_PATTERN.test(eventId)) {
+    return NextResponse.json({ error: "Invalid event." }, { status: 400 });
+  }
+
+  const supabase = await getPortalServerClient();
+  const { data, error: deleteError } = await supabase
+    .from("portal_events")
+    .delete()
+    .eq("id", eventId)
+    .select("id")
+    .maybeSingle();
+
+  if (deleteError) {
+    if (deleteError.code === "23503") {
+      return NextResponse.json(
+        { error: "This event has activity-hour submissions and cannot be deleted." },
+        { status: 409 }
+      );
+    }
+    console.error("Portal event deletion failed:", deleteError);
+    return NextResponse.json({ error: "Unable to delete event." }, { status: 500 });
+  }
+  if (!data) {
+    return NextResponse.json({ error: "Event not found." }, { status: 404 });
+  }
+
+  return NextResponse.json({ deletedEventId: data.id });
 }

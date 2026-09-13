@@ -18,10 +18,13 @@ export default function AdminEventsPage() {
   const [eventLocation, setEventLocation] = useState("");
   const [eventType, setEventType] = useState("chapter");
   const [eventCapacity, setEventCapacity] = useState("");
+  const [eventCheckInOpen, setEventCheckInOpen] = useState(false);
+  const [eventCheckInPasscodeEnabled, setEventCheckInPasscodeEnabled] = useState(false);
   const [eventCheckInPasscode, setEventCheckInPasscode] = useState("");
   const [eventStart, setEventStart] = useState("");
   const [eventEnd, setEventEnd] = useState("");
   const [creatingEvent, setCreatingEvent] = useState(false);
+  const [deletingEventId, setDeletingEventId] = useState("");
   const [createEventError, setCreateEventError] = useState("");
 
   useEffect(() => {
@@ -187,6 +190,29 @@ export default function AdminEventsPage() {
     }
   }
 
+  async function deleteEvent(event) {
+    if (!window.confirm(`Delete “${event.title}”? This permanently removes the event and its RSVP and attendance records.`)) {
+      return;
+    }
+
+    setDeletingEventId(event.id);
+    setEventsError(null);
+    try {
+      const response = await fetch("/api/portal/admin/events", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId: event.id }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to delete event.");
+      setEvents((current) => current.filter((currentEvent) => currentEvent.id !== event.id));
+    } catch (error) {
+      setEventsError(error.message || "Unable to delete event.");
+    } finally {
+      setDeletingEventId("");
+    }
+  }
+
   const formatDate = (value) =>
     new Intl.DateTimeFormat("en-US", {
       timeZone: "America/Chicago",
@@ -241,7 +267,7 @@ export default function AdminEventsPage() {
       return;
     }
 
-    if (!/^\d{6}$/.test(checkInPasscode)) {
+    if (eventCheckInPasscodeEnabled && !/^\d{6}$/.test(checkInPasscode)) {
       setCreateEventError(
         "Check-in passcode must be exactly 6 digits."
       );
@@ -265,6 +291,8 @@ export default function AdminEventsPage() {
           endTime: eventEnd,
           eventType,
           capacity,
+          checkInOpen: eventCheckInOpen,
+          checkInPasscodeEnabled: eventCheckInPasscodeEnabled,
           checkInPasscode,
         }),
       });
@@ -291,6 +319,8 @@ export default function AdminEventsPage() {
       setEventLocation("");
       setEventType("chapter");
       setEventCapacity("");
+      setEventCheckInOpen(false);
+      setEventCheckInPasscodeEnabled(false);
       setEventCheckInPasscode("");
       setEventStart("");
       setEventEnd("");
@@ -485,11 +515,23 @@ export default function AdminEventsPage() {
               </div>
 
               <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-800" htmlFor="event-passcode-enabled">
+                  <input
+                    id="event-passcode-enabled"
+                    type="checkbox"
+                    checked={eventCheckInPasscodeEnabled}
+                    onChange={(event) => setEventCheckInPasscodeEnabled(event.target.checked)}
+                    disabled={creatingEvent}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  Enable 6-digit passcode check-in
+                </label>
+
                 <label
                   htmlFor="event-passcode"
-                  className="text-sm font-semibold text-gray-800"
+                  className="mt-3 block text-sm font-semibold text-gray-800"
                 >
-                  6-Digit Check-In Passcode
+                  Passcode
                 </label>
 
                 <input
@@ -504,11 +546,26 @@ export default function AdminEventsPage() {
                       event.target.value.replace(/\D/g, "").slice(0, 6)
                     )
                   }
-                  disabled={creatingEvent}
+                  disabled={creatingEvent || !eventCheckInPasscodeEnabled}
                   className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  QR check-in is always enabled. Turn this on to also allow passcode check-in.
+                </p>
               </div>
             </div>
+
+            <label className="flex items-start gap-3 rounded-lg border border-gray-200 p-4 text-sm text-gray-800" htmlFor="event-check-in-open">
+              <input
+                id="event-check-in-open"
+                type="checkbox"
+                checked={eventCheckInOpen}
+                onChange={(event) => setEventCheckInOpen(event.target.checked)}
+                disabled={creatingEvent}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <span><span className="block font-semibold">Open check-in immediately</span><span className="mt-1 block text-xs text-gray-500">Enable only when members are ready to check in. QR and any enabled passcode are rejected while check-in is closed.</span></span>
+            </label>
 
             {createEventError && (
               <p className="text-sm font-medium text-red-700" role="alert">
@@ -651,7 +708,22 @@ export default function AdminEventsPage() {
 
                       <button
                         type="button"
-                        onClick={() => setQrEvent(event)}
+                        onClick={async () => {
+                          setEventsError(null);
+                          try {
+                            const response = await fetch(
+                              `/api/portal/admin/events/${event.id}/qr`,
+                              { cache: "no-store" }
+                            );
+                            const data = await response.json();
+                            if (!response.ok) {
+                              throw new Error(data.error || "Unable to generate QR code.");
+                            }
+                            setQrEvent({ ...event, qrPayload: data.payload });
+                          } catch (error) {
+                            setEventsError(error.message || "Unable to generate QR code.");
+                          }
+                        }}
                         className="rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-semibold text-gray-800 hover:border-primary hover:text-primary"
                       >
                         Generate QR
@@ -665,6 +737,15 @@ export default function AdminEventsPage() {
                         className="rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-semibold text-gray-800 hover:border-primary hover:text-primary"
                       >
                         Export Attendance
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => deleteEvent(event)}
+                        disabled={deletingEventId === event.id}
+                        className="rounded-lg border border-red-300 px-3 py-2.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {deletingEventId === event.id ? "Deleting…" : "Delete Event"}
                       </button>
                     </div>
                   </div>
@@ -789,7 +870,7 @@ export default function AdminEventsPage() {
             </h2>
 
             <QRCodeSVG
-              value={qrEvent.id}
+              value={qrEvent.qrPayload}
               title={`QR code for ${qrEvent.title}`}
               className="mx-auto mt-6 h-60 w-60"
               size={240}

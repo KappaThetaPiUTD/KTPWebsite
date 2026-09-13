@@ -56,11 +56,11 @@ create table if not exists public.portal_events (
   -- rsvp rules: capacity null = unlimited; rsvp_deadline null = open until event start
   capacity integer check (capacity is null or capacity > 0),
   rsvp_deadline timestamptz,
-  -- check-in config: passcode is the typeable fallback; qr_code_secret drives the QR image
+  -- check-in config: QR is always available; an admin may opt into a passcode fallback.
   late_threshold_minutes integer not null default 15
     check (late_threshold_minutes between 0 and 120),
-  check_in_passcode char(6) not null
-    default lpad((floor(random() * 1000000))::int::text, 6, '0'),
+  check_in_passcode_enabled boolean not null default false,
+  check_in_passcode char(6),
   qr_code_secret text not null default encode(gen_random_bytes(32), 'base64'),
   is_check_in_open boolean not null default false,
   created_by uuid not null references auth.users(id) on delete restrict,
@@ -110,6 +110,13 @@ create table if not exists public.portal_attendance_logs (
   edited_by uuid not null references auth.users(id) on delete restrict,
   created_at timestamptz not null default now()
 );
+
+-- Make the field available before the security-definer check-in functions are
+-- replaced below; this also supports databases created by an older schema.
+alter table public.portal_events
+  add column if not exists check_in_passcode_enabled boolean not null default false,
+  add column if not exists qr_code_secret text not null
+    default encode(gen_random_bytes(32), 'base64');
 
 create or replace function public.is_active_portal_member()
 returns boolean
@@ -447,8 +454,84 @@ begin
   if not current_event.is_check_in_open then
     raise exception 'Check-in is not open for this event.' using errcode = '22023';
   end if;
-  if requested_passcode <> current_event.check_in_passcode then
+  if not current_event.check_in_passcode_enabled
+    or requested_passcode <> current_event.check_in_passcode then
     raise exception 'Invalid check-in code.' using errcode = '22023';
+  end if;
+
+  insert into public.portal_attendance (
+    event_id, user_id, checked_in_at, status, method, checked_in_by
+  )
+  values (
+    requested_event_id,
+    auth.uid(),
+    now(),
+    case
+      when now() > current_event.start_time
+        + make_interval(mins => current_event.late_threshold_minutes) then 'late'
+      else 'present'
+    end,
+    'qr',
+    auth.uid()
+  )
+  returning * into saved_attendance;
+
+  return query select saved_attendance.checked_in_at, saved_attendance.status, false;
+end;
+$$;
+
+-- QR tokens are deliberately separate from the optional passcode. The token
+-- is only returned by an admin-only QR endpoint and is validated with the
+-- same event state, audience, duplicate, and late-arrival checks as passcodes.
+create or replace function public.check_in_to_portal_event_by_qr(
+  requested_event_id uuid,
+  requested_qr_token text
+)
+returns table (
+  checked_in_at timestamptz,
+  status text,
+  already_checked_in boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  current_event public.portal_events%rowtype;
+  saved_attendance public.portal_attendance%rowtype;
+begin
+  if auth.uid() is null then
+    raise exception 'Sign in required.' using errcode = '28000';
+  end if;
+  if requested_qr_token is null or char_length(requested_qr_token) < 32 then
+    raise exception 'Invalid QR code.' using errcode = '22023';
+  end if;
+
+  select * into current_event
+  from public.portal_events
+  where id = requested_event_id
+  for update;
+
+  if not found then
+    raise exception 'Event not found.' using errcode = 'P0002';
+  end if;
+  if not public.can_rsvp_to_portal_event(current_event.target_roles) then
+    raise exception 'You are not eligible to check in to this event.' using errcode = '42501';
+  end if;
+
+  select * into saved_attendance
+  from public.portal_attendance
+  where event_id = requested_event_id and user_id = auth.uid();
+
+  if found then
+    return query select saved_attendance.checked_in_at, saved_attendance.status, true;
+    return;
+  end if;
+  if not current_event.is_check_in_open then
+    raise exception 'Check-in is not open for this event.' using errcode = '22023';
+  end if;
+  if requested_qr_token <> current_event.qr_code_secret then
+    raise exception 'Invalid QR code.' using errcode = '22023';
   end if;
 
   insert into public.portal_attendance (
@@ -625,6 +708,7 @@ revoke all on function public.is_event_creator(uuid) from public;
 revoke all on function public.can_rsvp_to_portal_event(text[]) from public;
 revoke all on function public.submit_portal_rsvp(uuid, text) from public;
 revoke all on function public.check_in_to_portal_event(uuid, text) from public;
+revoke all on function public.check_in_to_portal_event_by_qr(uuid, text) from public;
 revoke all on function public.claim_portal_membership() from public;
 revoke all on function public.is_active_portal_member() from public;
 revoke all on function public.is_portal_admin() from public;
@@ -633,10 +717,28 @@ grant execute on function public.is_event_creator(uuid) to authenticated;
 grant execute on function public.can_rsvp_to_portal_event(text[]) to authenticated;
 grant execute on function public.submit_portal_rsvp(uuid, text) to authenticated;
 grant execute on function public.check_in_to_portal_event(uuid, text) to authenticated;
+grant execute on function public.check_in_to_portal_event_by_qr(uuid, text) to authenticated;
 grant execute on function public.claim_portal_membership() to authenticated;
 grant execute on function public.is_active_portal_member() to authenticated;
 grant execute on function public.is_portal_admin() to authenticated;
 grant execute on function public.portal_strike_counts() to authenticated;
+
+-- Supabase Realtime publishes INSERTs only; the admin dashboard uses these
+-- records for its live check-in ticker under the existing admin RLS policy.
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+    and not exists (
+      select 1
+      from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'portal_attendance'
+    ) then
+    alter publication supabase_realtime add table public.portal_attendance;
+  end if;
+end;
+$$;
 
 -- MIGRATION: patch already-deployed tables that predate the columns/enum
 -- values above. Fresh installs get everything from CREATE TABLE above and
@@ -650,8 +752,8 @@ alter table public.portal_events
   add column if not exists rsvp_deadline timestamptz,
   add column if not exists late_threshold_minutes integer not null default 15
     check (late_threshold_minutes between 0 and 120),
-  add column if not exists check_in_passcode char(6) not null
-    default lpad((floor(random() * 1000000))::int::text, 6, '0'),
+  add column if not exists check_in_passcode_enabled boolean not null default false,
+  add column if not exists check_in_passcode char(6),
   add column if not exists qr_code_secret text not null
     default encode(gen_random_bytes(32), 'base64'),
   add column if not exists is_check_in_open boolean not null default false;
@@ -682,7 +784,14 @@ $$;
 -- unlimited capacity and RSVP availability through the event start time.
 alter table public.portal_events
   alter column capacity drop not null,
-  alter column rsvp_deadline drop not null;
+  alter column rsvp_deadline drop not null,
+  alter column check_in_passcode drop not null;
+
+-- Preserve the behavior of events created before passcodes became optional.
+update public.portal_events
+set check_in_passcode_enabled = true
+where check_in_passcode is not null
+  and check_in_passcode_enabled = false;
 
 alter table public.portal_attendance
   add column if not exists status text not null default 'present'
