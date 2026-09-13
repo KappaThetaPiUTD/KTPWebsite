@@ -2,10 +2,8 @@
 
 import { QRCodeSVG } from "qrcode.react";
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function AdminEventsPage() {
-  const router = useRouter();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [qrEvent, setQrEvent] = useState(null);
   const [events, setEvents] = useState([]);
@@ -769,18 +767,6 @@ export default function AdminEventsPage() {
 
                     <div className="mt-auto border-t border-gray-100 pt-6">
                       <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            router.push(
-                              `/portal/dashboard/admin/attendance?eventId=${event.id}`
-                            )
-                          }
-                          className="rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-semibold text-gray-800 hover:border-primary hover:text-primary"
-                        >
-                          View Attendance
-                        </button>
-
                         <button
                           type="button"
                           onClick={async () => {
