@@ -44,6 +44,8 @@ create table if not exists public.portal_strikes (
 
 create table if not exists public.portal_events (
   id uuid primary key default gen_random_uuid(),
+  -- Occurrences created together share this value. Standalone events leave it null.
+  recurrence_series_id uuid,
   title text not null check (char_length(title) between 2 and 200),
   description text not null check (char_length(description) between 5 and 5000),
   location text check (location is null or char_length(location) between 2 and 200),
@@ -56,17 +58,21 @@ create table if not exists public.portal_events (
   -- rsvp rules: capacity null = unlimited; rsvp_deadline null = open until event start
   capacity integer check (capacity is null or capacity > 0),
   rsvp_deadline timestamptz,
-  -- check-in config: passcode is the typeable fallback; qr_code_secret drives the QR image
+  -- check-in config: QR is always available; an admin may opt into a passcode fallback.
   late_threshold_minutes integer not null default 15
     check (late_threshold_minutes between 0 and 120),
-  check_in_passcode char(6) not null
-    default lpad((floor(random() * 1000000))::int::text, 6, '0'),
+  check_in_passcode_enabled boolean not null default false,
+  check_in_passcode char(6),
   qr_code_secret text not null default encode(gen_random_bytes(32), 'base64'),
   is_check_in_open boolean not null default false,
   created_by uuid not null references auth.users(id) on delete restrict,
   created_at timestamptz not null default now(),
   check (end_time > start_time)
 );
+
+create index if not exists portal_events_recurrence_series_id_idx
+  on public.portal_events (recurrence_series_id)
+  where recurrence_series_id is not null;
 
 create table if not exists public.portal_rsvps (
   id uuid primary key default gen_random_uuid(),
@@ -110,6 +116,13 @@ create table if not exists public.portal_attendance_logs (
   edited_by uuid not null references auth.users(id) on delete restrict,
   created_at timestamptz not null default now()
 );
+
+-- Make the field available before the security-definer check-in functions are
+-- replaced below; this also supports databases created by an older schema.
+alter table public.portal_events
+  add column if not exists check_in_passcode_enabled boolean not null default false,
+  add column if not exists qr_code_secret text not null
+    default encode(gen_random_bytes(32), 'base64');
 
 create or replace function public.is_active_portal_member()
 returns boolean
@@ -367,7 +380,7 @@ begin
   if not public.can_rsvp_to_portal_event(current_event.target_roles) then
     raise exception 'You are not eligible to RSVP to this event.' using errcode = '42501';
   end if;
-  if now() > coalesce(current_event.rsvp_deadline, current_event.start_time) then
+  if now() >= coalesce(current_event.rsvp_deadline, current_event.start_time) then
     raise exception 'RSVP deadline has passed.' using errcode = '22023';
   end if;
 
@@ -447,8 +460,84 @@ begin
   if not current_event.is_check_in_open then
     raise exception 'Check-in is not open for this event.' using errcode = '22023';
   end if;
-  if requested_passcode <> current_event.check_in_passcode then
+  if not current_event.check_in_passcode_enabled
+    or requested_passcode <> current_event.check_in_passcode then
     raise exception 'Invalid check-in code.' using errcode = '22023';
+  end if;
+
+  insert into public.portal_attendance (
+    event_id, user_id, checked_in_at, status, method, checked_in_by
+  )
+  values (
+    requested_event_id,
+    auth.uid(),
+    now(),
+    case
+      when now() > current_event.start_time
+        + make_interval(mins => current_event.late_threshold_minutes) then 'late'
+      else 'present'
+    end,
+    'qr',
+    auth.uid()
+  )
+  returning * into saved_attendance;
+
+  return query select saved_attendance.checked_in_at, saved_attendance.status, false;
+end;
+$$;
+
+-- QR tokens are deliberately separate from the optional passcode. The token
+-- is only returned by an admin-only QR endpoint and is validated with the
+-- same event state, audience, duplicate, and late-arrival checks as passcodes.
+create or replace function public.check_in_to_portal_event_by_qr(
+  requested_event_id uuid,
+  requested_qr_token text
+)
+returns table (
+  checked_in_at timestamptz,
+  status text,
+  already_checked_in boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  current_event public.portal_events%rowtype;
+  saved_attendance public.portal_attendance%rowtype;
+begin
+  if auth.uid() is null then
+    raise exception 'Sign in required.' using errcode = '28000';
+  end if;
+  if requested_qr_token is null or char_length(requested_qr_token) < 32 then
+    raise exception 'Invalid QR code.' using errcode = '22023';
+  end if;
+
+  select * into current_event
+  from public.portal_events
+  where id = requested_event_id
+  for update;
+
+  if not found then
+    raise exception 'Event not found.' using errcode = 'P0002';
+  end if;
+  if not public.can_rsvp_to_portal_event(current_event.target_roles) then
+    raise exception 'You are not eligible to check in to this event.' using errcode = '42501';
+  end if;
+
+  select * into saved_attendance
+  from public.portal_attendance
+  where event_id = requested_event_id and user_id = auth.uid();
+
+  if found then
+    return query select saved_attendance.checked_in_at, saved_attendance.status, true;
+    return;
+  end if;
+  if not current_event.is_check_in_open then
+    raise exception 'Check-in is not open for this event.' using errcode = '22023';
+  end if;
+  if requested_qr_token <> current_event.qr_code_secret then
+    raise exception 'Invalid QR code.' using errcode = '22023';
   end if;
 
   insert into public.portal_attendance (
@@ -625,6 +714,7 @@ revoke all on function public.is_event_creator(uuid) from public;
 revoke all on function public.can_rsvp_to_portal_event(text[]) from public;
 revoke all on function public.submit_portal_rsvp(uuid, text) from public;
 revoke all on function public.check_in_to_portal_event(uuid, text) from public;
+revoke all on function public.check_in_to_portal_event_by_qr(uuid, text) from public;
 revoke all on function public.claim_portal_membership() from public;
 revoke all on function public.is_active_portal_member() from public;
 revoke all on function public.is_portal_admin() from public;
@@ -633,10 +723,28 @@ grant execute on function public.is_event_creator(uuid) to authenticated;
 grant execute on function public.can_rsvp_to_portal_event(text[]) to authenticated;
 grant execute on function public.submit_portal_rsvp(uuid, text) to authenticated;
 grant execute on function public.check_in_to_portal_event(uuid, text) to authenticated;
+grant execute on function public.check_in_to_portal_event_by_qr(uuid, text) to authenticated;
 grant execute on function public.claim_portal_membership() to authenticated;
 grant execute on function public.is_active_portal_member() to authenticated;
 grant execute on function public.is_portal_admin() to authenticated;
 grant execute on function public.portal_strike_counts() to authenticated;
+
+-- Supabase Realtime publishes INSERTs only; the admin dashboard uses these
+-- records for its live check-in ticker under the existing admin RLS policy.
+do $$
+begin
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime')
+    and not exists (
+      select 1
+      from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'portal_attendance'
+    ) then
+    alter publication supabase_realtime add table public.portal_attendance;
+  end if;
+end;
+$$;
 
 -- MIGRATION: patch already-deployed tables that predate the columns/enum
 -- values above. Fresh installs get everything from CREATE TABLE above and
@@ -650,11 +758,16 @@ alter table public.portal_events
   add column if not exists rsvp_deadline timestamptz,
   add column if not exists late_threshold_minutes integer not null default 15
     check (late_threshold_minutes between 0 and 120),
-  add column if not exists check_in_passcode char(6) not null
-    default lpad((floor(random() * 1000000))::int::text, 6, '0'),
+  add column if not exists check_in_passcode_enabled boolean not null default false,
+  add column if not exists check_in_passcode char(6),
   add column if not exists qr_code_secret text not null
     default encode(gen_random_bytes(32), 'base64'),
-  add column if not exists is_check_in_open boolean not null default false;
+  add column if not exists is_check_in_open boolean not null default false,
+  add column if not exists recurrence_series_id uuid;
+
+create index if not exists portal_events_recurrence_series_id_idx
+  on public.portal_events (recurrence_series_id)
+  where recurrence_series_id is not null;
 
 -- `ADD COLUMN IF NOT EXISTS` does not add the inline constraint when
 -- `event_type` already exists with a narrower enum, so make sure deployed
@@ -682,7 +795,14 @@ $$;
 -- unlimited capacity and RSVP availability through the event start time.
 alter table public.portal_events
   alter column capacity drop not null,
-  alter column rsvp_deadline drop not null;
+  alter column rsvp_deadline drop not null,
+  alter column check_in_passcode drop not null;
+
+-- Preserve the behavior of events created before passcodes became optional.
+update public.portal_events
+set check_in_passcode_enabled = true
+where check_in_passcode is not null
+  and check_in_passcode_enabled = false;
 
 alter table public.portal_attendance
   add column if not exists status text not null default 'present'
@@ -708,6 +828,180 @@ begin
   end if;
 end;
 $$;
+
+-- Activity hours: semesters and photo-backed submissions.
+create table if not exists public.portal_semesters (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  start_date date not null,
+  end_date date not null,
+  required_hours numeric not null default 10,
+  is_active boolean not null default false,
+  created_at timestamptz default now()
+);
+
+create table if not exists public.portal_hour_submissions (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.portal_events(id),
+  -- Match portal_attendance.user_id: this is the authenticated user's UUID.
+  user_id uuid not null references auth.users(id),
+  semester_id uuid not null references public.portal_semesters(id),
+  start_photo_url text not null,
+  end_photo_url text,
+  status text not null default 'pending'
+    check (status in ('pending', 'approved', 'rejected')),
+  -- Set by an admin/exec reviewer after checking the photo timestamps.
+  hours_awarded numeric,
+  reviewed_by uuid references public.portal_members(id),
+  reviewed_at timestamptz,
+  rejection_reason text,
+  submitted_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique (event_id, user_id)
+);
+
+-- An hours submission is valid only after the event has ended and the member
+-- RSVP'd "going" (the attending status used by portal_rsvps).
+create or replace function public.validate_portal_hour_submission()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  submission_event_end_time timestamptz;
+begin
+  select end_time
+  into submission_event_end_time
+  from public.portal_events
+  where id = new.event_id;
+
+  if submission_event_end_time is null then
+    raise exception 'Event % does not exist', new.event_id;
+  end if;
+
+  if submission_event_end_time > now() then
+    raise exception 'Hours cannot be submitted until the event has ended';
+  end if;
+
+  if not exists (
+    select 1
+    from public.portal_rsvps
+    where event_id = new.event_id
+      and user_id = new.user_id
+      and status = 'going'
+  ) then
+    raise exception 'A going RSVP is required before submitting activity hours';
+  end if;
+
+  return new;
+end;
+$$;
+
+-- Photo evidence remains immutable once a submission has been approved.
+-- Only active admin/exec reviewers may assign or change awarded hours.
+create or replace function public.enforce_portal_hour_submission_review_rules()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if tg_op = 'UPDATE'
+    and old.status = 'approved'
+    and (
+      new.start_photo_url is distinct from old.start_photo_url
+      or new.end_photo_url is distinct from old.end_photo_url
+    ) then
+    raise exception 'Photo URLs cannot be changed after approval';
+  end if;
+
+  if not public.is_portal_admin()
+    and (
+      (tg_op = 'INSERT' and new.hours_awarded is not null)
+      or (tg_op = 'UPDATE' and new.hours_awarded is distinct from old.hours_awarded)
+    ) then
+    raise exception 'Only admin or exec reviewers may set hours_awarded';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists validate_portal_hour_submission on public.portal_hour_submissions;
+create trigger validate_portal_hour_submission
+  before insert on public.portal_hour_submissions
+  for each row execute function public.validate_portal_hour_submission();
+
+drop trigger if exists enforce_portal_hour_submission_review_rules on public.portal_hour_submissions;
+create trigger enforce_portal_hour_submission_review_rules
+  before insert or update on public.portal_hour_submissions
+  for each row execute function public.enforce_portal_hour_submission_review_rules();
+
+alter table public.portal_semesters enable row level security;
+alter table public.portal_hour_submissions enable row level security;
+
+drop policy if exists "Members can read semesters" on public.portal_semesters;
+create policy "Members can read semesters"
+  on public.portal_semesters
+  for select
+  to authenticated
+  using (public.is_active_portal_member());
+
+drop policy if exists "Admins can create semesters" on public.portal_semesters;
+create policy "Admins can create semesters"
+  on public.portal_semesters
+  for insert
+  to authenticated
+  with check (public.is_portal_admin());
+
+drop policy if exists "Admins can update semesters" on public.portal_semesters;
+create policy "Admins can update semesters"
+  on public.portal_semesters
+  for update
+  to authenticated
+  using (public.is_portal_admin())
+  with check (public.is_portal_admin());
+
+drop policy if exists "Admins can delete semesters" on public.portal_semesters;
+create policy "Admins can delete semesters"
+  on public.portal_semesters
+  for delete
+  to authenticated
+  using (public.is_portal_admin());
+
+drop policy if exists "Members can read own hour submissions" on public.portal_hour_submissions;
+create policy "Members can read own hour submissions"
+  on public.portal_hour_submissions
+  for select
+  to authenticated
+  using (user_id = auth.uid() or public.is_portal_admin());
+
+drop policy if exists "Members can submit own activity hours" on public.portal_hour_submissions;
+create policy "Members can submit own activity hours"
+  on public.portal_hour_submissions
+  for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and public.is_active_portal_member()
+    and status = 'pending'
+    and hours_awarded is null
+    and reviewed_by is null
+    and reviewed_at is null
+    and rejection_reason is null
+  );
+
+drop policy if exists "Admins can update hour submissions" on public.portal_hour_submissions;
+create policy "Admins can update hour submissions"
+  on public.portal_hour_submissions
+  for update
+  to authenticated
+  using (public.is_portal_admin())
+  with check (public.is_portal_admin());
+
+revoke all on function public.validate_portal_hour_submission() from public;
+revoke all on function public.enforce_portal_hour_submission_review_rules() from public;
 
 -- Bootstrap the first admin in the SQL Editor before sending the Auth invite.
 -- Replace the email, then run:

@@ -25,11 +25,11 @@ function validateProfile(body) {
   ) {
     return { error: "Enter a valid graduation year." };
   }
-  if (utdEmail && !/^[a-z0-9._%+-]+@utdallas\.edu$/i.test(utdEmail)) {
-    return { error: "Use a valid @utdallas.edu email or leave it blank." };
+  if (!/^[a-z0-9._%+-]+@utdallas\.edu$/i.test(utdEmail)) {
+    return { error: "Enter a valid @utdallas.edu email." };
   }
-  if (phoneDigits && phoneDigits.length !== 10) {
-    return { error: "Enter a 10-digit US phone number or leave it blank." };
+  if (phoneDigits.length !== 10) {
+    return { error: "Enter a 10-digit US phone number." };
   }
 
   return {
@@ -37,13 +37,11 @@ function validateProfile(body) {
       full_name: fullName,
       major,
       graduation_year: graduationYear,
-      utd_email: utdEmail || null,
-      phone: phoneDigits
-        ? `(${phoneDigits.slice(0, 3)}) ${phoneDigits.slice(
-            3,
-            6
-          )}-${phoneDigits.slice(6)}`
-        : null,
+      utd_email: utdEmail,
+      phone: `(${phoneDigits.slice(0, 3)}) ${phoneDigits.slice(
+        3,
+        6
+      )}-${phoneDigits.slice(6)}`,
     },
   };
 }

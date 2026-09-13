@@ -11,6 +11,7 @@ const EXPECTED_ERRORS = new Set([
   "You are not eligible to check in to this event.",
   "Check-in is not open for this event.",
   "Invalid check-in code.",
+  "Invalid QR code.",
 ]);
 
 export async function POST(request) {
@@ -45,20 +46,34 @@ export async function POST(request) {
   const eventId = typeof body.eventId === "string" ? body.eventId.trim() : "";
   const passcode =
     typeof body.passcode === "string" ? body.passcode.trim() : "";
+  const qrToken =
+    typeof body.qrToken === "string" ? body.qrToken.trim() : "";
 
-  if (!UUID_PATTERN.test(eventId) || !PASSCODE_PATTERN.test(passcode)) {
+  if (!UUID_PATTERN.test(eventId)) {
     return NextResponse.json(
-      { error: "Enter the six-digit check-in code." },
+      { error: "Invalid event." },
       { status: 400 }
     );
   }
 
   const supabase = await getPortalServerClient();
+  const usingPasscode = PASSCODE_PATTERN.test(passcode);
+  const usingQr = qrToken.length >= 32;
+
+  if (!usingPasscode && !usingQr) {
+    return NextResponse.json(
+      { error: "Enter a six-digit passcode or scan a valid QR code." },
+      { status: 400 }
+    );
+  }
+
   const { data, error } = await supabase
-    .rpc("check_in_to_portal_event", {
-      requested_event_id: eventId,
-      requested_passcode: passcode,
-    })
+    .rpc(
+      usingQr ? "check_in_to_portal_event_by_qr" : "check_in_to_portal_event",
+      usingQr
+        ? { requested_event_id: eventId, requested_qr_token: qrToken }
+        : { requested_event_id: eventId, requested_passcode: passcode }
+    )
     .single();
 
   if (error || !data) {

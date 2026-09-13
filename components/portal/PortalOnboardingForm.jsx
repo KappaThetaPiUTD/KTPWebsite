@@ -125,7 +125,7 @@ export default function PortalOnboardingForm({ email, initialProfile }) {
             className="mb-2 block text-sm font-semibold text-gray-900"
             htmlFor="onboarding-utd-email"
           >
-            UTD email (optional)
+            UTD email
           </label>
           <input
             id="onboarding-utd-email"
@@ -133,6 +133,7 @@ export default function PortalOnboardingForm({ email, initialProfile }) {
             placeholder="netid@utdallas.edu"
             value={utdEmail}
             onChange={(event) => setUtdEmail(event.target.value)}
+            required
             disabled={submitting}
             className="w-full rounded-lg border border-gray-300 px-4 py-3 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
@@ -142,7 +143,7 @@ export default function PortalOnboardingForm({ email, initialProfile }) {
             className="mb-2 block text-sm font-semibold text-gray-900"
             htmlFor="onboarding-phone"
           >
-            Phone number (optional)
+            Phone number
           </label>
           <input
             id="onboarding-phone"
@@ -150,6 +151,7 @@ export default function PortalOnboardingForm({ email, initialProfile }) {
             autoComplete="tel"
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
+            required
             disabled={submitting}
             className="w-full rounded-lg border border-gray-300 px-4 py-3 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />

@@ -6,9 +6,7 @@ import EventCalendar from "../../../../components/portal/events/EventCalendar";
 export default function EventsPage() {
   const [events, setEvents] = useState([]);
   const [rsvps, setRsvps] = useState({});
-  const [attendance, setAttendance] = useState({});
-  const [checkInCodes, setCheckInCodes] = useState({});
-  const [checkInFeedback, setCheckInFeedback] = useState({});
+  const [activeEventIds, setActiveEventIds] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [submittingEventId, setSubmittingEventId] = useState(null);
@@ -23,14 +21,10 @@ export default function EventsPage() {
         if (!response.ok) throw new Error(payload.error || "Unable to load events.");
         if (cancelled) return;
 
-        setEvents(payload.events);
+        setEvents(payload.events || []);
+        setActiveEventIds(payload.activeEventIds || []);
         setRsvps(
-          Object.fromEntries(payload.rsvps.map((rsvp) => [rsvp.event_id, rsvp.status]))
-        );
-        setAttendance(
-          Object.fromEntries(
-            payload.attendance.map((record) => [record.event_id, record])
-          )
+          Object.fromEntries((payload.rsvps || []).map((rsvp) => [rsvp.event_id, rsvp.status]))
         );
       } catch (loadError) {
         if (!cancelled) setError(loadError.message);
@@ -40,8 +34,13 @@ export default function EventsPage() {
     }
 
     loadEvents();
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") loadEvents();
+    };
+    document.addEventListener("visibilitychange", refreshWhenVisible);
     return () => {
       cancelled = true;
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
     };
   }, []);
 
@@ -64,63 +63,6 @@ export default function EventsPage() {
     }
   };
 
-  const handleCheckIn = async (eventId) => {
-    const passcode = (checkInCodes[eventId] || "").trim();
-
-    if (!/^\d{6}$/.test(passcode)) {
-      setCheckInFeedback((current) => ({
-        ...current,
-        [eventId]: { type: "error", message: "Enter the six-digit check-in code." },
-      }));
-      return;
-    }
-
-    setSubmittingEventId(eventId);
-    setCheckInFeedback((current) => {
-      const next = { ...current };
-      delete next[eventId];
-      return next;
-    });
-
-    try {
-      const response = await fetch("/api/portal/events/check-in", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId, passcode }),
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload.error || "Unable to complete check-in.");
-      }
-
-      setAttendance((current) => ({
-        ...current,
-        [eventId]: {
-          event_id: eventId,
-          checked_in_at: payload.attendance.checkedInAt,
-          status: payload.attendance.status,
-        },
-      }));
-      setCheckInCodes((current) => ({ ...current, [eventId]: "" }));
-      setCheckInFeedback((current) => ({
-        ...current,
-        [eventId]: {
-          type: "success",
-          message: payload.alreadyCheckedIn
-            ? "You are already checked in."
-            : "You are checked in.",
-        },
-      }));
-    } catch (checkInError) {
-      setCheckInFeedback((current) => ({
-        ...current,
-        [eventId]: { type: "error", message: checkInError.message },
-      }));
-    } finally {
-      setSubmittingEventId(null);
-    }
-  };
-
   const formatDate = (value) =>
     new Intl.DateTimeFormat("en-US", {
       timeZone: "America/Chicago",
@@ -135,6 +77,8 @@ export default function EventsPage() {
       hour: "numeric",
       minute: "2-digit",
     }).format(new Date(value));
+  const activeEventIdSet = new Set(activeEventIds);
+  const cardEvents = events.filter((event) => activeEventIdSet.has(event.id));
 
   return (
     <div>
@@ -163,15 +107,9 @@ export default function EventsPage() {
 
         {/* Event cards */}
         <div className="max-h-[650px] space-y-5 overflow-y-auto pr-2">
-          {events.map((event) => {
+          {cardEvents.map((event) => {
             const rsvp = rsvps[event.id];
-            const attendanceRecord = attendance[event.id];
-            const feedback = checkInFeedback[event.id];
             const isSubmitting = submittingEventId === event.id;
-            const rsvpClosed = Boolean(
-              event.rsvp_deadline && new Date() > new Date(event.rsvp_deadline)
-            );
-            const hasStats = typeof event.goingCount === "number";
 
             return (
               <article
@@ -225,21 +163,11 @@ export default function EventsPage() {
                       Will you be attending?
                     </p>
 
-                    {/* RSVP counts (admins only; other members get zeros from the API) */}
-                    {hasStats && (
-                      <div className="mt-2 flex flex-wrap gap-x-3 text-xs text-gray-500">
-                        <span>{event.goingCount} going</span>
-                        <span>{event.maybeCount} maybe</span>
-                        <span>{event.notGoingCount} not going</span>
-                        <span>{event.checkedInCount} checked in</span>
-                      </div>
-                    )}
-
                     <div className="mt-3 flex flex-wrap gap-3">
                       <button
                         type="button"
                         onClick={() => handleRsvp(event.id, "going")}
-                        disabled={isSubmitting || rsvpClosed}
+                        disabled={isSubmitting}
                         className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
                           rsvp === "going"
                             ? "bg-primary text-white"
@@ -252,7 +180,7 @@ export default function EventsPage() {
                       <button
                         type="button"
                         onClick={() => handleRsvp(event.id, "not_going")}
-                        disabled={isSubmitting || rsvpClosed}
+                        disabled={isSubmitting}
                         className={`rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
                           rsvp === "not_going"
                             ? "bg-primary text-white"
@@ -263,63 +191,16 @@ export default function EventsPage() {
                       </button>
                     </div>
 
-                    <div className="mt-6 border-t border-gray-100 pt-6">
-                      <p className="text-sm font-semibold text-gray-800">Check-in</p>
-
-                      {attendanceRecord ? (
-                        <p className="mt-3 text-sm font-medium text-green-700" role="status">
-                          {feedback?.type === "success"
-                            ? feedback.message
-                            : "You are already checked in."}
-                        </p>
-                      ) : event.is_check_in_open ? (
-                        <div className="mt-3 flex flex-wrap items-start gap-3">
-                          <label className="sr-only" htmlFor={`check-in-code-${event.id}`}>
-                            Six-digit check-in code for {event.title}
-                          </label>
-                          <input
-                            id={`check-in-code-${event.id}`}
-                            type="text"
-                            inputMode="numeric"
-                            autoComplete="one-time-code"
-                            maxLength={6}
-                            value={checkInCodes[event.id] || ""}
-                            onChange={(inputEvent) =>
-                              setCheckInCodes((current) => ({
-                                ...current,
-                                [event.id]: inputEvent.target.value.replace(/\D/g, ""),
-                              }))
-                            }
-                            disabled={isSubmitting}
-                            placeholder="6-digit code"
-                            className="w-32 rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => handleCheckIn(event.id)}
-                            disabled={isSubmitting}
-                            className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {isSubmitting ? "Checking in…" : "Check in"}
-                          </button>
-                        </div>
-                      ) : (
-                        <p className="mt-3 text-sm text-gray-600" role="status">
-                          Check-in is not open yet.
-                        </p>
-                      )}
-
-                      {feedback?.type === "error" && !attendanceRecord && (
-                        <p className="mt-3 text-sm text-red-700" role="alert">
-                          {feedback.message}
-                        </p>
-                      )}
-                    </div>
                   </div>
                 </div>
               </article>
             );
           })}
+          {cardEvents.length === 0 && (
+            <p className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+              No events in the next two weeks. View the calendar for later events.
+            </p>
+          )}
         </div>
       </div>
       )}
