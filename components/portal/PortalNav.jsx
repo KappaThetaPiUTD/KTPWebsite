@@ -10,7 +10,6 @@ const memberNavItems = [
   { label: "Profile", href: "/portal/dashboard/profile" },
   { label: "Events", href: "/portal/dashboard/events" },
   { label: "Activity Hours", href: "/portal/dashboard/activity-hours" },
-  { label: "Attendance", href: "/portal/dashboard/attendance" },
 ];
 
 const adminNavItems = [
@@ -18,7 +17,7 @@ const adminNavItems = [
   { label: "Members", href: "/portal/dashboard/admin/members" },
   { label: "Event Management", href: "/portal/dashboard/admin/events" },
   { label: "Activity Hours", href: "/portal/dashboard/admin/activity-hours" },
-  { label: "Semesters", href: "/portal/dashboard/admin/semesters" },
+    { label: "Attendance", href: "/portal/dashboard/admin/attendance" },
 ];
 
 export default function PortalNav({ displayName, email, isAdmin }) {
