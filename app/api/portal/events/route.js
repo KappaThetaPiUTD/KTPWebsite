@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { loadPortalMemberContext } from "../../../../lib/portal/member";
 import { getPortalServerClient } from "../../../../lib/portal/server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+const NO_STORE_HEADERS = { "Cache-Control": "no-store, max-age=0" };
+
 export async function GET() {
   const context = await loadPortalMemberContext();
 
@@ -38,7 +43,7 @@ export async function GET() {
   const { data: events, error: eventsError } = await supabase
     .from("portal_events")
     .select(
-      "id, title, description, location, start_time, end_time, event_type, capacity, rsvp_deadline, is_check_in_open"
+      "id, title, description, location, start_time, end_time, event_type, capacity, rsvp_deadline, recurrence_series_id, is_check_in_open"
     )
     .order("start_time", { ascending: true });
 
@@ -154,9 +159,27 @@ export async function GET() {
     }),
   }));
 
-  return NextResponse.json({
-    events: eventsWithStats,
-    rsvps: rsvps ?? [],
-    attendance: attendance ?? [],
-  });
+  // The calendar deliberately receives every event. Keep the cards' eligibility
+  // decision on the server so it agrees with RSVP enforcement and does not
+  // depend on a member's device clock or local timezone.
+  const now = Date.now();
+  const activeEventIds = eventsWithStats
+    .filter((event) => {
+      const startTime = new Date(event.start_time).getTime();
+      const endTime = new Date(event.end_time).getTime();
+      const deadline = new Date(event.rsvp_deadline || event.start_time).getTime();
+
+      return startTime > now && endTime > now && deadline > now;
+    })
+    .map((event) => event.id);
+
+  return NextResponse.json(
+    {
+      events: eventsWithStats,
+      activeEventIds,
+      rsvps: rsvps ?? [],
+      attendance: attendance ?? [],
+    },
+    { headers: NO_STORE_HEADERS }
+  );
 }

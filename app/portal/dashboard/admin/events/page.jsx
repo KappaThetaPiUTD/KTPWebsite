@@ -33,6 +33,7 @@ export default function AdminEventsPage() {
   const [editLocation, setEditLocation] = useState("");
   const [editError, setEditError] = useState("");
   const [deletingEventId, setDeletingEventId] = useState("");
+  const [deleteDialogEvent, setDeleteDialogEvent] = useState(null);
   const [createEventError, setCreateEventError] = useState("");
   const [cardWindowStart] = useState(() => new Date());
 
@@ -199,26 +200,35 @@ export default function AdminEventsPage() {
     }
   }
 
-  async function deleteEvent(event) {
-    if (!window.confirm(`Delete “${event.title}”? This permanently removes the event and its RSVP and attendance records.`)) {
-      return;
-    }
-
+  async function deleteEvent(event, scope = "occurrence") {
     setDeletingEventId(event.id);
     setEventsError(null);
     try {
       const response = await fetch("/api/portal/admin/events", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventId: event.id }),
+        body: JSON.stringify({ eventId: event.id, scope }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to delete event.");
-      setEvents((current) => current.filter((currentEvent) => currentEvent.id !== event.id));
+      const deletedIds = new Set(data.deletedEventIds || [data.deletedEventId]);
+      setEvents((current) => current.filter((currentEvent) => !deletedIds.has(currentEvent.id)));
+      setDeleteDialogEvent(null);
     } catch (error) {
       setEventsError(error.message || "Unable to delete event.");
     } finally {
       setDeletingEventId("");
+    }
+  }
+
+  function requestDelete(event) {
+    if (event.recurrence_series_id) {
+      setDeleteDialogEvent(event);
+      return;
+    }
+
+    if (window.confirm(`Delete “${event.title}”? This permanently removes the event and its RSVP and attendance records.`)) {
+      deleteEvent(event);
     }
   }
 
@@ -807,7 +817,7 @@ export default function AdminEventsPage() {
 
                       <button
                         type="button"
-                        onClick={() => deleteEvent(event)}
+                        onClick={() => requestDelete(event)}
                         disabled={deletingEventId === event.id}
                         className="rounded-lg border border-red-300 px-3 py-2.5 text-xs font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                       >
@@ -830,6 +840,53 @@ export default function AdminEventsPage() {
           </div>
         )}
       </div>
+
+      {deleteDialogEvent && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-recurring-event-title"
+        >
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+            <h2 id="delete-recurring-event-title" className="text-xl font-bold text-gray-950">
+              Delete recurring event
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-gray-700">
+              This is a recurring event. Would you like to delete only this occurrence or all events in this series?
+            </p>
+            <p className="mt-2 text-sm text-gray-600">
+              RSVP and attendance records for the deleted event or events will also be removed.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteDialogEvent(null)}
+                disabled={Boolean(deletingEventId)}
+                className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-800 hover:border-primary hover:text-primary disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteEvent(deleteDialogEvent, "occurrence")}
+                disabled={Boolean(deletingEventId)}
+                className="rounded-lg border border-red-300 px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+              >
+                {deletingEventId ? "Deleting…" : "Delete this event only"}
+              </button>
+              <button
+                type="button"
+                onClick={() => deleteEvent(deleteDialogEvent, "series")}
+                disabled={Boolean(deletingEventId)}
+                className="rounded-lg bg-red-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+              >
+                {deletingEventId ? "Deleting…" : "Delete all events in series"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {editingEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="edit-event-title">

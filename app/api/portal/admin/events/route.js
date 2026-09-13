@@ -4,6 +4,7 @@ import { getPortalServerClient } from "../../../../../lib/portal/server";
 
 const EVENT_TYPES = ["chapter", "professional", "fundraiser", "social", "workshop", "other"];
 const RECURRENCE_TYPES = ["none", "weekly", "monthly"];
+const DELETE_SCOPES = ["occurrence", "series"];
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -165,6 +166,8 @@ export async function POST(request) {
 
   const supabase = await getPortalServerClient();
   const duration = parsedEnd.getTime() - parsedStart.getTime();
+  const recurrenceSeriesId =
+    recurrence === "none" ? null : crypto.randomUUID();
   const { data, error: insertError } = await supabase
     .from("portal_events")
     .insert(occurrenceStarts.map((occurrenceStart) => ({
@@ -175,13 +178,14 @@ export async function POST(request) {
       end_time: new Date(occurrenceStart.getTime() + duration).toISOString(),
       event_type: eventType,
       capacity,
+      recurrence_series_id: recurrenceSeriesId,
       check_in_passcode_enabled: checkInPasscodeEnabled,
       check_in_passcode: checkInPasscodeEnabled ? checkInPasscode : null,
       is_check_in_open: checkInOpen,
       created_by: context.user.id,
     })))
     .select(
-      "id, title, location, start_time, end_time, event_type, capacity, is_check_in_open, created_at"
+      "id, title, location, start_time, end_time, event_type, capacity, recurrence_series_id, is_check_in_open, created_at"
     )
 
     ;
@@ -228,17 +232,40 @@ export async function DELETE(request) {
   }
 
   const eventId = typeof body.eventId === "string" ? body.eventId.trim() : "";
+  const scope = typeof body.scope === "string" ? body.scope : "occurrence";
   if (!UUID_PATTERN.test(eventId)) {
     return NextResponse.json({ error: "Invalid event." }, { status: 400 });
   }
+  if (!DELETE_SCOPES.includes(scope)) {
+    return NextResponse.json({ error: "Invalid deletion scope." }, { status: 400 });
+  }
 
   const supabase = await getPortalServerClient();
-  const { data, error: deleteError } = await supabase
+  const { data: event, error: eventError } = await supabase
     .from("portal_events")
-    .delete()
+    .select("id, recurrence_series_id")
     .eq("id", eventId)
-    .select("id")
     .maybeSingle();
+
+  if (eventError) {
+    console.error("Portal event lookup failed:", eventError);
+    return NextResponse.json({ error: "Unable to delete event." }, { status: 500 });
+  }
+  if (!event) {
+    return NextResponse.json({ error: "Event not found." }, { status: 404 });
+  }
+  if (scope === "series" && !event.recurrence_series_id) {
+    return NextResponse.json(
+      { error: "This event is not part of a recurring series." },
+      { status: 400 }
+    );
+  }
+
+  let deleteQuery = supabase.from("portal_events").delete();
+  deleteQuery = scope === "series"
+    ? deleteQuery.eq("recurrence_series_id", event.recurrence_series_id)
+    : deleteQuery.eq("id", eventId);
+  const { data: deletedEvents, error: deleteError } = await deleteQuery.select("id");
 
   if (deleteError) {
     if (deleteError.code === "23503") {
@@ -250,9 +277,12 @@ export async function DELETE(request) {
     console.error("Portal event deletion failed:", deleteError);
     return NextResponse.json({ error: "Unable to delete event." }, { status: 500 });
   }
-  if (!data) {
+  if (!deletedEvents?.length) {
     return NextResponse.json({ error: "Event not found." }, { status: 404 });
   }
 
-  return NextResponse.json({ deletedEventId: data.id });
+  return NextResponse.json({
+    deletedEventId: eventId,
+    deletedEventIds: deletedEvents.map((deletedEvent) => deletedEvent.id),
+  });
 }

@@ -44,6 +44,8 @@ create table if not exists public.portal_strikes (
 
 create table if not exists public.portal_events (
   id uuid primary key default gen_random_uuid(),
+  -- Occurrences created together share this value. Standalone events leave it null.
+  recurrence_series_id uuid,
   title text not null check (char_length(title) between 2 and 200),
   description text not null check (char_length(description) between 5 and 5000),
   location text check (location is null or char_length(location) between 2 and 200),
@@ -67,6 +69,10 @@ create table if not exists public.portal_events (
   created_at timestamptz not null default now(),
   check (end_time > start_time)
 );
+
+create index if not exists portal_events_recurrence_series_id_idx
+  on public.portal_events (recurrence_series_id)
+  where recurrence_series_id is not null;
 
 create table if not exists public.portal_rsvps (
   id uuid primary key default gen_random_uuid(),
@@ -374,7 +380,7 @@ begin
   if not public.can_rsvp_to_portal_event(current_event.target_roles) then
     raise exception 'You are not eligible to RSVP to this event.' using errcode = '42501';
   end if;
-  if now() > coalesce(current_event.rsvp_deadline, current_event.start_time) then
+  if now() >= coalesce(current_event.rsvp_deadline, current_event.start_time) then
     raise exception 'RSVP deadline has passed.' using errcode = '22023';
   end if;
 
@@ -756,7 +762,12 @@ alter table public.portal_events
   add column if not exists check_in_passcode char(6),
   add column if not exists qr_code_secret text not null
     default encode(gen_random_bytes(32), 'base64'),
-  add column if not exists is_check_in_open boolean not null default false;
+  add column if not exists is_check_in_open boolean not null default false,
+  add column if not exists recurrence_series_id uuid;
+
+create index if not exists portal_events_recurrence_series_id_idx
+  on public.portal_events (recurrence_series_id)
+  where recurrence_series_id is not null;
 
 -- `ADD COLUMN IF NOT EXISTS` does not add the inline constraint when
 -- `event_type` already exists with a narrower enum, so make sure deployed
