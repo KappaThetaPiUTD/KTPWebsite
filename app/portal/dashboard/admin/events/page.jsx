@@ -1,7 +1,7 @@
 "use client";
 
 import { QRCodeSVG } from "qrcode.react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function AdminEventsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -37,45 +37,39 @@ export default function AdminEventsPage() {
   const [createEventError, setCreateEventError] = useState("");
   const [cardWindowStart] = useState(() => new Date());
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadEvents = useCallback(async ({ showLoading = false } = {}) => {
+    try {
+      if (showLoading) setEventsLoading(true);
+      setEventsError(null);
 
-    async function loadEvents() {
-      try {
-        setEventsLoading(true);
-        setEventsError(null);
+      const response = await fetch("/api/portal/events", {
+        cache: "no-store",
+      });
 
-        const response = await fetch("/api/portal/events", {
-          cache: "no-store",
-        });
+      const payload = await response.json();
 
-        const payload = await response.json();
-
-        if (!response.ok) {
-          throw new Error(payload.error || "Unable to load events.");
-        }
-
-        if (!cancelled) {
-          setEvents(payload.events || []);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setEventsError(error.message);
-          setEvents([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setEventsLoading(false);
-        }
+      if (!response.ok) {
+        throw new Error(payload.error || "Unable to load events.");
       }
+
+      setEvents(payload.events || []);
+    } catch (error) {
+      setEventsError(error.message);
+      if (showLoading) setEvents([]);
+    } finally {
+      if (showLoading) setEventsLoading(false);
     }
-
-    loadEvents();
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useEffect(() => {
+    loadEvents({ showLoading: true });
+
+    // Check-ins can be completed on a member's device while this screen is
+    // open. Refresh the aggregate card counts without interrupting the admin.
+    const refreshInterval = setInterval(() => loadEvents(), 5000);
+
+    return () => clearInterval(refreshInterval);
+  }, [loadEvents]);
 
   async function loadAttendance(eventId) {
     setAttendanceLoading(true);

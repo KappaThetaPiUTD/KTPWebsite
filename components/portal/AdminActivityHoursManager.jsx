@@ -35,7 +35,7 @@ export default function AdminActivityHoursManager() {
     if (!user) { setError("Sign in required."); setLoading(false); return; }
     const [semesterResult, memberResult, profileResult, submissionResult] = await Promise.all([
       supabase.from("portal_semesters").select("id, name, end_date, required_hours").eq("is_active", true).limit(1),
-      supabase.from("portal_members").select("id, user_id, email, status"),
+      supabase.from("portal_members").select("id, user_id, email, status, role"),
       supabase.from("portal_profiles").select("user_id, full_name"),
       supabase.from("portal_hour_submissions").select("id, event_id, user_id, semester_id, start_photo_url, end_photo_url, status, hours_awarded, reviewed_by, reviewed_at, rejection_reason, submitted_at, portal_events(title) ").order("submitted_at", { ascending: false }),
     ]);
