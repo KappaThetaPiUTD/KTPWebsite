@@ -23,9 +23,18 @@ export default function AdminEventsPage() {
   const [eventCheckInPasscode, setEventCheckInPasscode] = useState("");
   const [eventStart, setEventStart] = useState("");
   const [eventEnd, setEventEnd] = useState("");
+  const [eventRecurrence, setEventRecurrence] = useState("none");
+  const [eventRecurrenceEnd, setEventRecurrenceEnd] = useState("");
   const [creatingEvent, setCreatingEvent] = useState(false);
+  const [editingEventId, setEditingEventId] = useState("");
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editLocation, setEditLocation] = useState("");
+  const [editError, setEditError] = useState("");
   const [deletingEventId, setDeletingEventId] = useState("");
   const [createEventError, setCreateEventError] = useState("");
+  const [cardWindowStart] = useState(() => new Date());
 
   useEffect(() => {
     let cancelled = false;
@@ -213,6 +222,42 @@ export default function AdminEventsPage() {
     }
   }
 
+  function openEditEvent(event) {
+    setEditingEvent(event);
+    setEditTitle(event.title || "");
+    setEditDescription(event.description || "");
+    setEditLocation(event.location || "");
+    setEditError("");
+  }
+
+  async function editEvent(event) {
+    event.preventDefault();
+    if (!editingEvent) return;
+    const title = editTitle.trim();
+    const description = editDescription.trim();
+    const location = editLocation.trim();
+
+    setEditingEventId(editingEvent.id);
+    setEditError("");
+    try {
+      const response = await fetch("/api/portal/admin/events", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId: editingEvent.id, title, description, location }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to update event.");
+      setEvents((current) => current.map((currentEvent) =>
+        currentEvent.id === editingEvent.id ? { ...currentEvent, ...data.event } : currentEvent
+      ));
+      setEditingEvent(null);
+    } catch (error) {
+      setEditError(error.message || "Unable to update event.");
+    } finally {
+      setEditingEventId("");
+    }
+  }
+
   const formatDate = (value) =>
     new Intl.DateTimeFormat("en-US", {
       timeZone: "America/Chicago",
@@ -227,6 +272,8 @@ export default function AdminEventsPage() {
       hour: "numeric",
       minute: "2-digit",
     }).format(new Date(value));
+  const cardWindowEnd = new Date(cardWindowStart.getTime() + 14 * 24 * 60 * 60 * 1000);
+  const cardEvents = events.filter((event) => new Date(event.start_time) < cardWindowEnd);
 
   const closeCreateForm = () => {
     if (creatingEvent) return;
@@ -291,6 +338,8 @@ export default function AdminEventsPage() {
           endTime: eventEnd,
           eventType,
           capacity,
+          recurrence: eventRecurrence,
+          recurrenceEnd: eventRecurrenceEnd,
           checkInOpen: eventCheckInOpen,
           checkInPasscodeEnabled: eventCheckInPasscodeEnabled,
           checkInPasscode,
@@ -304,12 +353,12 @@ export default function AdminEventsPage() {
       }
 
       setEvents((current) => [
-        {
-          ...result.event,
+        ...(result.events || [result.event]).map((createdEvent) => ({
+          ...createdEvent,
           goingCount: 0,
           notGoingCount: 0,
           checkedInCount: 0,
-        },
+        })),
         ...current,
       ]);
 
@@ -324,6 +373,8 @@ export default function AdminEventsPage() {
       setEventCheckInPasscode("");
       setEventStart("");
       setEventEnd("");
+      setEventRecurrence("none");
+      setEventRecurrenceEnd("");
     } catch (error) {
       setCreateEventError(
         error.message || "Unable to create event right now."
@@ -423,6 +474,21 @@ export default function AdminEventsPage() {
                   className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary"
                 />
               </div>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label htmlFor="event-recurrence" className="text-sm font-semibold text-gray-800">Repeat</label>
+                <select id="event-recurrence" value={eventRecurrence} onChange={(event) => setEventRecurrence(event.target.value)} disabled={creatingEvent} className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary">
+                  <option value="none">Does not repeat</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                </select>
+              </div>
+              {eventRecurrence !== "none" && <div>
+                <label htmlFor="event-recurrence-end" className="text-sm font-semibold text-gray-800">Repeat through</label>
+                <input id="event-recurrence-end" type="date" value={eventRecurrenceEnd} onChange={(event) => setEventRecurrenceEnd(event.target.value)} disabled={creatingEvent} className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary" />
+              </div>}
             </div>
 
             <div>
@@ -612,15 +678,15 @@ export default function AdminEventsPage() {
           </div>
         )}
 
-        {!eventsLoading && !eventsError && events.length === 0 && (
+        {!eventsLoading && !eventsError && cardEvents.length === 0 && (
           <p className="mt-4 text-sm text-gray-600">
-            No upcoming events found.
+            No events in the next two weeks.
           </p>
         )}
 
-        {!eventsLoading && !eventsError && events.length > 0 && (
+        {!eventsLoading && !eventsError && cardEvents.length > 0 && (
           <div className="mt-4 grid gap-6 md:grid-cols-2">
-            {events.map((event) => (
+            {cardEvents.map((event) => (
               <article
                 key={event.id}
                 className="min-h-[390px] rounded-2xl border border-gray-200 bg-white p-7 shadow-sm"
@@ -747,6 +813,15 @@ export default function AdminEventsPage() {
                       >
                         {deletingEventId === event.id ? "Deleting…" : "Delete Event"}
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => openEditEvent(event)}
+                        disabled={editingEventId === event.id}
+                        className="rounded-lg border border-gray-300 px-3 py-2.5 text-xs font-semibold text-gray-800 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {editingEventId === event.id ? "Saving…" : "Edit Event"}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -755,6 +830,39 @@ export default function AdminEventsPage() {
           </div>
         )}
       </div>
+
+      {editingEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="edit-event-title">
+          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">Event management</p>
+                <h2 id="edit-event-title" className="mt-1 text-xl font-bold text-gray-950">Edit event</h2>
+              </div>
+              <button type="button" onClick={() => setEditingEvent(null)} disabled={Boolean(editingEventId)} aria-label="Close edit event" className="text-xl font-semibold text-gray-400 hover:text-gray-950 disabled:opacity-50">×</button>
+            </div>
+            <form className="mt-6 space-y-5" onSubmit={editEvent}>
+              <div>
+                <label htmlFor="edit-event-title-input" className="text-sm font-semibold text-gray-800">Event name</label>
+                <input id="edit-event-title-input" value={editTitle} onChange={(event) => setEditTitle(event.target.value)} disabled={Boolean(editingEventId)} className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary" />
+              </div>
+              <div>
+                <label htmlFor="edit-event-location" className="text-sm font-semibold text-gray-800">Location</label>
+                <input id="edit-event-location" value={editLocation} onChange={(event) => setEditLocation(event.target.value)} disabled={Boolean(editingEventId)} className="mt-2 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary" />
+              </div>
+              <div>
+                <label htmlFor="edit-event-description" className="text-sm font-semibold text-gray-800">Description</label>
+                <textarea id="edit-event-description" rows={5} value={editDescription} onChange={(event) => setEditDescription(event.target.value)} disabled={Boolean(editingEventId)} className="mt-2 w-full resize-none rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-primary" />
+              </div>
+              {editError && <p className="text-sm font-medium text-red-700" role="alert">{editError}</p>}
+              <div className="flex justify-end gap-3">
+                <button type="button" onClick={() => setEditingEvent(null)} disabled={Boolean(editingEventId)} className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-800 hover:border-primary hover:text-primary disabled:opacity-50">Cancel</button>
+                <button type="submit" disabled={Boolean(editingEventId)} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60">{editingEventId ? "Saving…" : "Save changes"}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
