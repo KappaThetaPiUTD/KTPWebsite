@@ -12,6 +12,7 @@ export default function EventsPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [submittingEventId, setSubmittingEventId] = useState(null);
+  const [cardWindowStart] = useState(() => new Date());
 
   useEffect(() => {
     let cancelled = false;
@@ -135,6 +136,8 @@ export default function EventsPage() {
       hour: "numeric",
       minute: "2-digit",
     }).format(new Date(value));
+  const cardWindowEnd = new Date(cardWindowStart.getTime() + 14 * 24 * 60 * 60 * 1000);
+  const cardEvents = events.filter((event) => new Date(event.start_time) < cardWindowEnd);
 
   return (
     <div>
@@ -163,7 +166,7 @@ export default function EventsPage() {
 
         {/* Event cards */}
         <div className="max-h-[650px] space-y-5 overflow-y-auto pr-2">
-          {events.map((event) => {
+          {cardEvents.map((event) => {
             const rsvp = rsvps[event.id];
             const attendanceRecord = attendance[event.id];
             const feedback = checkInFeedback[event.id];
@@ -320,6 +323,11 @@ export default function EventsPage() {
               </article>
             );
           })}
+          {cardEvents.length === 0 && (
+            <p className="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600">
+              No events in the next two weeks. View the calendar for later events.
+            </p>
+          )}
         </div>
       </div>
       )}

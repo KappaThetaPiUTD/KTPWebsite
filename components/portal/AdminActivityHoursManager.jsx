@@ -26,6 +26,7 @@ export default function AdminActivityHoursManager() {
   const [memberFilter, setMemberFilter] = useState("");
   const [summarySort, setSummarySort] = useState("lowest");
   const [photo, setPhoto] = useState(null);
+  const [now, setNow] = useState(0);
 
   const load = useCallback(async () => {
     const supabase = getPortalBrowserClient();
@@ -49,13 +50,14 @@ export default function AdminActivityHoursManager() {
     setLoading(false);
   }, []);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { setNow(Date.now()); }, [semester]);
 
   const pending = submissions.filter((submission) => submission.status === "pending");
   const history = submissions.filter((submission) => submission.status !== "pending").filter((submission) => (!eventFilter || submission.event_id === eventFilter) && (!memberFilter || submission.user_id === memberFilter));
   const events = [...new Map(submissions.map((submission) => [submission.event_id, submission.portal_events?.title || "Event unavailable"])).entries()];
   const activeApproved = submissions.filter((submission) => submission.semester_id === semester?.id && submission.status === "approved");
   const summary = members.filter((member) => member.status === "active" && member.user_id && member.role === "brother").map((member) => ({ ...member, total: activeApproved.filter((submission) => submission.user_id === member.user_id).reduce((sum, submission) => sum + Number(submission.hours_awarded || 0), 0) })).sort((a, b) => summarySort === "highest" ? b.total - a.total : a.total - b.total);
-  const ended = semester && new Date(`${semester.end_date}T23:59:59`).getTime() < Date.now();
+  const ended = Boolean(semester && new Date(`${semester.end_date}T23:59:59`).getTime() < now);
 
   async function review(submission, status) {
     const amount = Number(hoursById[submission.id]);

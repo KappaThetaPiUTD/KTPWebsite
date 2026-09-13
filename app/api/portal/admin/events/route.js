@@ -3,6 +3,21 @@ import { loadPortalMemberContext } from "../../../../../lib/portal/member";
 import { getPortalServerClient } from "../../../../../lib/portal/server";
 
 const EVENT_TYPES = ["chapter", "professional", "fundraiser", "social", "workshop", "other"];
+const RECURRENCE_TYPES = ["none", "weekly", "monthly"];
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function nextMonthlyOccurrence(value) {
+  const next = new Date(value);
+  const day = next.getUTCDate();
+  next.setUTCDate(1);
+  next.setUTCMonth(next.getUTCMonth() + 1);
+  const lastDay = new Date(
+    Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)
+  ).getUTCDate();
+  next.setUTCDate(Math.min(day, lastDay));
+  return next;
+}
 
 async function requireAdmin() {
   const context = await loadPortalMemberContext();
@@ -60,6 +75,10 @@ export async function POST(request) {
     typeof body.checkInPasscode === "string"
     ? body.checkInPasscode.trim()
     : "";
+  const checkInPasscodeEnabled = body.checkInPasscodeEnabled === true;
+  const checkInOpen = body.checkInOpen === true;
+  const recurrence = typeof body.recurrence === "string" ? body.recurrence : "none";
+  const recurrenceEnd = typeof body.recurrenceEnd === "string" ? body.recurrenceEnd : "";
   const eventType =
     typeof body.eventType === "string" && body.eventType.trim()
       ? body.eventType.trim()
@@ -67,6 +86,9 @@ export async function POST(request) {
 
   if (!EVENT_TYPES.includes(eventType)) {
     return NextResponse.json({ error: "Invalid event type." }, { status: 400 });
+  }
+  if (!RECURRENCE_TYPES.includes(recurrence)) {
+    return NextResponse.json({ error: "Invalid recurrence setting." }, { status: 400 });
   }
   if (
     capacity !== null &&
@@ -78,7 +100,7 @@ export async function POST(request) {
     );
   }
 
-  if (!/^\d{6}$/.test(checkInPasscode)) {
+  if (checkInPasscodeEnabled && !/^\d{6}$/.test(checkInPasscode)) {
     return NextResponse.json(
       { error: "Check-in passcode must be exactly 6 digits." },
       { status: 400 }
@@ -123,25 +145,46 @@ export async function POST(request) {
     );
   }
 
+  const occurrenceStarts = [parsedStart];
+  if (recurrence !== "none") {
+    const parsedRecurrenceEnd = new Date(`${recurrenceEnd}T23:59:59`);
+    if (!recurrenceEnd || Number.isNaN(parsedRecurrenceEnd.getTime()) || parsedRecurrenceEnd < parsedStart) {
+      return NextResponse.json({ error: "Choose a recurrence end date after the first event." }, { status: 400 });
+    }
+    let nextStart = new Date(parsedStart);
+    while (true) {
+      if (recurrence === "weekly") nextStart.setUTCDate(nextStart.getUTCDate() + 7);
+      else nextStart = nextMonthlyOccurrence(nextStart);
+      if (nextStart > parsedRecurrenceEnd) break;
+      occurrenceStarts.push(new Date(nextStart));
+      if (occurrenceStarts.length > 104) {
+        return NextResponse.json({ error: "A recurring event may have at most 104 occurrences." }, { status: 400 });
+      }
+    }
+  }
+
   const supabase = await getPortalServerClient();
+  const duration = parsedEnd.getTime() - parsedStart.getTime();
   const { data, error: insertError } = await supabase
     .from("portal_events")
-    .insert({
+    .insert(occurrenceStarts.map((occurrenceStart) => ({
       title,
       description,
       location,
-      start_time: parsedStart.toISOString(),
-      end_time: parsedEnd.toISOString(),
+      start_time: occurrenceStart.toISOString(),
+      end_time: new Date(occurrenceStart.getTime() + duration).toISOString(),
       event_type: eventType,
       capacity,
-      check_in_passcode: checkInPasscode,
+      check_in_passcode_enabled: checkInPasscodeEnabled,
+      check_in_passcode: checkInPasscodeEnabled ? checkInPasscode : null,
+      is_check_in_open: checkInOpen,
       created_by: context.user.id,
-    })
+    })))
     .select(
-      "id, title, location, start_time, end_time, event_type, capacity, check_in_passcode, created_at"
+      "id, title, location, start_time, end_time, event_type, capacity, is_check_in_open, created_at"
     )
 
-    .single();
+    ;
 
   if (insertError) {
     console.error("Portal event insert failed:", insertError);
@@ -151,5 +194,65 @@ export async function POST(request) {
     );
   }
 
-  return NextResponse.json({ event: data }, { status: 201 });
+  return NextResponse.json({ event: data?.[0], events: data || [] }, { status: 201 });
+}
+
+export async function PATCH(request) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+  let body;
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid request body." }, { status: 400 }); }
+  const eventId = typeof body.eventId === "string" ? body.eventId.trim() : "";
+  const title = typeof body.title === "string" ? body.title.trim() : "";
+  const description = typeof body.description === "string" ? body.description.trim() : "";
+  const location = typeof body.location === "string" ? body.location.trim() : "";
+  if (!UUID_PATTERN.test(eventId)) return NextResponse.json({ error: "Invalid event." }, { status: 400 });
+  if (title.length < 2 || title.length > 200 || description.length < 5 || description.length > 5000 || location.length < 2 || location.length > 200) {
+    return NextResponse.json({ error: "Use a valid title, description, and location." }, { status: 400 });
+  }
+  const supabase = await getPortalServerClient();
+  const { data, error: updateError } = await supabase.from("portal_events").update({ title, description, location }).eq("id", eventId).select("id, title, description, location, start_time, end_time, event_type, capacity, is_check_in_open").single();
+  if (updateError || !data) return NextResponse.json({ error: "Unable to update event." }, { status: 500 });
+  return NextResponse.json({ event: data });
+}
+
+export async function DELETE(request) {
+  const { error } = await requireAdmin();
+  if (error) return error;
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  const eventId = typeof body.eventId === "string" ? body.eventId.trim() : "";
+  if (!UUID_PATTERN.test(eventId)) {
+    return NextResponse.json({ error: "Invalid event." }, { status: 400 });
+  }
+
+  const supabase = await getPortalServerClient();
+  const { data, error: deleteError } = await supabase
+    .from("portal_events")
+    .delete()
+    .eq("id", eventId)
+    .select("id")
+    .maybeSingle();
+
+  if (deleteError) {
+    if (deleteError.code === "23503") {
+      return NextResponse.json(
+        { error: "This event has activity-hour submissions and cannot be deleted." },
+        { status: 409 }
+      );
+    }
+    console.error("Portal event deletion failed:", deleteError);
+    return NextResponse.json({ error: "Unable to delete event." }, { status: 500 });
+  }
+  if (!data) {
+    return NextResponse.json({ error: "Event not found." }, { status: 404 });
+  }
+
+  return NextResponse.json({ deletedEventId: data.id });
 }
