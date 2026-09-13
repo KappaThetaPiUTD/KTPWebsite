@@ -14,7 +14,6 @@ const memberNavItems = [
 ];
 
 const adminNavItems = [
-  { label: "Strikes", href: "/portal/dashboard/admin/strikes" },
   { label: "Members", href: "/portal/dashboard/admin/members" },
   { label: "Events", href: "/portal/dashboard/admin/events" },
   { label: "Activity Hours", href: "/portal/dashboard/admin/activity-hours" },
