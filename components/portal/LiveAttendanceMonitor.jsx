@@ -505,7 +505,7 @@ export default function LiveAttendanceMonitor({
             </h2>
 
             <p className="mt-1 text-sm text-gray-600">
-              Change a member's attendance status directly from this list.
+              Change a member&apos;s attendance status directly from this list.
             </p>
           </div>
 
