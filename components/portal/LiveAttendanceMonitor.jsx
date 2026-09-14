@@ -13,6 +13,24 @@ function formatTime(value) {
   }).format(new Date(value));
 }
 
+function getStatusClass(status) {
+  switch (status) {
+    case "late":
+      return "bg-amber-100 text-amber-800";
+
+    case "absent":
+    case "unexcused":
+      return "bg-red-100 text-red-800";
+
+    case "excused":
+      return "bg-blue-100 text-blue-800";
+
+    case "present":
+    default:
+      return "bg-green-100 text-green-800";
+  }
+}
+
 export default function LiveAttendanceMonitor({
   events,
   initialEventId,
@@ -29,6 +47,8 @@ export default function LiveAttendanceMonitor({
   const [showProjection, setShowProjection] =
     useState(false);
   const [qrPayload, setQrPayload] = useState("");
+  const [updatingAttendanceId, setUpdatingAttendanceId] =
+    useState("");
 
   const selectedEvent = events.find(
     (event) => event.id === eventId
@@ -71,6 +91,7 @@ export default function LiveAttendanceMonitor({
 
         if (!cancelled) {
           setRecords(data.attendance || []);
+          setError("");
         }
       } catch (loadError) {
         if (!cancelled) {
@@ -190,6 +211,63 @@ export default function LiveAttendanceMonitor({
       );
     } finally {
       setUpdatingWindow(false);
+    }
+  };
+
+  const updateAttendanceStatus = async (
+    attendanceId,
+    status
+  ) => {
+    const reason = window.prompt(
+      "Why are you changing this attendance status? (5–500 characters)"
+    );
+
+    if (reason === null) {
+      return;
+    }
+
+    setUpdatingAttendanceId(attendanceId);
+    setError("");
+
+    try {
+      const response = await fetch(
+        "/api/portal/admin/attendance",
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            attendanceId,
+            status,
+            reason,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Unable to update attendance."
+        );
+      }
+
+      setRecords((current) =>
+        current.map((record) =>
+          record.id === attendanceId
+            ? data.attendance
+            : record
+        )
+      );
+    } catch (updateError) {
+      setError(
+        updateError.message ||
+          "Unable to update attendance."
+      );
+    } finally {
+      setUpdatingAttendanceId("");
     }
   };
 
@@ -427,9 +505,15 @@ export default function LiveAttendanceMonitor({
 
       <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="text-xl font-bold text-gray-950">
-            Live check-ins
-          </h2>
+          <div>
+            <h2 className="text-xl font-bold text-gray-950">
+              Live check-ins
+            </h2>
+
+            <p className="mt-1 text-sm text-gray-600">
+              Change a member's attendance status directly from this list.
+            </p>
+          </div>
 
           <p className="text-sm text-gray-600">
             {records.length} total
@@ -451,7 +535,7 @@ export default function LiveAttendanceMonitor({
               .map((record) => (
                 <div
                   key={record.id}
-                  className="flex items-center justify-between gap-4 py-4"
+                  className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
                     <p className="font-semibold text-gray-950">
@@ -466,15 +550,53 @@ export default function LiveAttendanceMonitor({
                     </p>
                   </div>
 
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
-                      record.status === "late"
-                        ? "bg-amber-100 text-amber-800"
-                        : "bg-green-100 text-green-800"
-                    }`}
-                  >
-                    {record.status}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${getStatusClass(
+                        record.status
+                      )}`}
+                    >
+                      {record.status}
+                    </span>
+
+                    <select
+                      value={record.status}
+                      disabled={
+                        updatingAttendanceId ===
+                        record.id
+                      }
+                      onChange={(event) =>
+                        updateAttendanceStatus(
+                          record.id,
+                          event.target.value
+                        )
+                      }
+                      className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-800 outline-none focus:border-primary disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label={`Change attendance status for ${
+                        record.full_name || "member"
+                      }`}
+                    >
+                      <option value="present">
+                        Present
+                      </option>
+
+                      <option value="absent">
+                        Absent
+                      </option>
+
+                      <option value="late">
+                        Late
+                      </option>
+
+                      <option value="excused">
+                        Excused
+                      </option>
+
+                      <option value="unexcused">
+                        Unexcused
+                      </option>
+                    </select>
+                  </div>
                 </div>
               ))}
           </div>
