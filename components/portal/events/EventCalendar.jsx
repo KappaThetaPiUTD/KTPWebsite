@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { format, parse, startOfWeek, getDay } from "date-fns";
+import { endOfDay, format, parse, startOfWeek, getDay } from "date-fns";
 import { enUS } from "date-fns/locale";
 
 const locales = {
@@ -30,6 +30,10 @@ export default function EventCalendar({ events, rsvps }) {
     const start = new Date(event.start_time);
     const end = new Date(event.end_time);
 
+    // The portal calendar is a date-based RSVP view. Keep an event card in
+    // its start-date cell even if its recorded end time passes midnight.
+    const calendarEnd = end > endOfDay(start) ? endOfDay(start) : end;
+
     return {
       id: event.id,
       title:
@@ -39,7 +43,7 @@ export default function EventCalendar({ events, rsvps }) {
           ? `⚑ ${event.title}`
           : event.title,
       start,
-      end,
+      end: calendarEnd,
       isGoing,
       isMaybe,
     };

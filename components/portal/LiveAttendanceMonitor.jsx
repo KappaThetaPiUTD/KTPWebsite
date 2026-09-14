@@ -109,14 +109,8 @@ export default function LiveAttendanceMonitor({
 
     loadRecords();
 
-    const refreshInterval = setInterval(
-      loadRecords,
-      5000
-    );
-
     return () => {
       cancelled = true;
-      clearInterval(refreshInterval);
     };
   }, [eventId]);
 
