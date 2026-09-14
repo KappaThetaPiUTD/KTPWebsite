@@ -8,6 +8,7 @@ export default function EventsPage() {
   const [rsvps, setRsvps] = useState({});
   const [activeEventIds, setActiveEventIds] = useState([]);
   const [error, setError] = useState("");
+  const [rsvpFeedback, setRsvpFeedback] = useState({});
   const [loading, setLoading] = useState(true);
   const [submittingEventId, setSubmittingEventId] = useState(null);
 
@@ -47,6 +48,11 @@ export default function EventsPage() {
   const handleRsvp = async (eventId, status) => {
     setSubmittingEventId(eventId);
     setError("");
+    setRsvpFeedback((current) => {
+      const next = { ...current };
+      delete next[eventId];
+      return next;
+    });
     try {
       const response = await fetch("/api/portal/events/rsvp", {
         method: "POST",
@@ -56,8 +62,22 @@ export default function EventsPage() {
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "Unable to save RSVP.");
       setRsvps((current) => ({ ...current, [eventId]: payload.rsvp.status }));
+      setRsvpFeedback((current) => ({
+        ...current,
+        [eventId]: {
+          message: `You're marked as ${payload.rsvp.status === "going" ? "Going" : "Not Going"}.`,
+          type: "success",
+        },
+      }));
     } catch (rsvpError) {
       setError(rsvpError.message);
+      setRsvpFeedback((current) => ({
+        ...current,
+        [eventId]: {
+          message: rsvpError.message || "Unable to save RSVP.",
+          type: "error",
+        },
+      }));
     } finally {
       setSubmittingEventId(null);
     }
@@ -110,6 +130,7 @@ export default function EventsPage() {
           {cardEvents.map((event) => {
             const rsvp = rsvps[event.id];
             const isSubmitting = submittingEventId === event.id;
+            const feedback = rsvpFeedback[event.id];
 
             return (
               <article
@@ -190,6 +211,17 @@ export default function EventsPage() {
                         Not Going
                       </button>
                     </div>
+
+                    {(isSubmitting || feedback) && (
+                      <p
+                        className={`mt-3 text-sm font-medium ${
+                          feedback?.type === "error" ? "text-red-700" : "text-green-700"
+                        }`}
+                        role={feedback?.type === "error" ? "alert" : "status"}
+                      >
+                        {isSubmitting ? "Saving…" : feedback.message}
+                      </p>
+                    )}
 
                   </div>
                 </div>

@@ -34,6 +34,7 @@ export default function PhotoUpload({
   const [previewUrl, setPreviewUrl] = useState(null);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export default function PhotoUpload({
     const fileError = getFileError(nextFile);
 
     setError(fileError || "");
+    setSuccess("");
     setProgress(0);
     setFile(fileError ? null : nextFile);
 
@@ -63,6 +65,7 @@ export default function PhotoUpload({
     }
 
     setError("");
+    setSuccess("");
     setProgress(0);
     setIsUploading(true);
 
@@ -118,6 +121,7 @@ export default function PhotoUpload({
 
       setProgress(100);
       onUploadComplete(result.secure_url);
+      setSuccess("Photo uploaded successfully.");
     } catch (uploadError) {
       setError(uploadError.message || "Unable to upload the photo.");
     } finally {
@@ -163,6 +167,7 @@ export default function PhotoUpload({
       )}
 
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {success && <p role="status" className="text-sm font-medium text-green-700">{success}</p>}
 
       <button
         type="button"
