@@ -81,9 +81,35 @@ export default function EventsSection() {
 
   if (!events || events.length === 0) return null;
 
-  const handleRSVP = (e) => {
-    if (!e.rsvp_url) return;
+  const handleRSVP = async (e) => {
     trackEvent('event_rsvp', { event_title: e.title });
+
+    if (!e.rsvp_url) {
+      // Event has no external RSVP URL; try the new backend RSVP
+      const res = await fetch('/api/portal/events/rsvp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          eventId: e.id,
+          status: 'going',
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || 'Failed to submit RSVP.');
+        return;
+      }
+
+      alert(`RSVP submitted successfully for "${e.title}"!`);
+      trackEvent('rsvp_success', { event_title: e.title });
+      return;
+    }
+
+    // Event has an external RSVP URL; open it in a new tab
     window.open(e.rsvp_url, '_blank', 'noopener,noreferrer');
   };
 

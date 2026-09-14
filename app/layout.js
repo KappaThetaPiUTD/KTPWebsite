@@ -81,35 +81,36 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <style>
-        {`
-          @media print {
-            #simplify-jobs-container {
-              display: none;
+      <head>
+        <style>
+          {`
+            @media print {
+              #simplify-jobs-container {
+                display: none;
+              }
             }
-          }
-          " Client: "
-          ::-webkit-scrollbar {
-              width: 4px; 
-              height: 6px;
+            ::-webkit-scrollbar {
+                width: 4px;
+                height: 6px;
+              }
+
+            ::-webkit-scrollbar-thumb {
+                background-color: #363636;
+                border-radius: 3px;
             }
 
-          ::-webkit-scrollbar-thumb {
-              background-color: #363636;
-              border-radius: 3px;
-          }
+            ::-webkit-scrollbar-track {
+                background-color: #0F0F0F;
+            }
 
-          ::-webkit-scrollbar-track {
-              background-color: #0F0F0F;
-          }
-
-          ::-webkit-scrollbar-button {
-              display: none;
-          }
-        `}
-      </style>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="theme-color" content="#00542C" />
+            ::-webkit-scrollbar-button {
+                display: none;
+            }
+          `}
+        </style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#00542C" />
+      </head>
       <body className={inter.className} style={{ overflowX: "hidden" }}>
         <script
           type="application/ld+json"
