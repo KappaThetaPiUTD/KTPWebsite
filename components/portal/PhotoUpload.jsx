@@ -27,6 +27,7 @@ export default function PhotoUpload({
   onUploadComplete,
   label = "Upload photo",
   disabled = false,
+  uploadEndpoint = "/api/activity-hours/upload-signature",
 }) {
   const inputId = useId();
   const previewUrlRef = useRef(null);
@@ -70,14 +71,11 @@ export default function PhotoUpload({
     setIsUploading(true);
 
     try {
-      const signatureResponse = await fetch(
-        "/api/activity-hours/upload-signature",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ eventId }),
-        }
-      );
+      const signatureResponse = await fetch(uploadEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventId }),
+      });
       const signedParams = await signatureResponse.json();
 
       if (!signatureResponse.ok) {

@@ -1008,3 +1008,293 @@ revoke all on function public.enforce_portal_hour_submission_review_rules() from
 --
 -- insert into public.portal_members (email, role, status)
 -- values ('officer@example.com', 'admin', 'active');
+-- Study Hours: separate photo-backed submissions and weekly requirements.
+--
+-- Pledges need 3 Study Hours per week.
+-- Brothers only need Study Hours if an admin assigns them.
+-- Assigned brothers need 2 Study Hours per week by default.
+-- Study Hours are separate from Activity Hours.
+-- A Study Hours submission does NOT require an RSVP.
+
+create table if not exists public.portal_study_hour_submissions (
+  id uuid primary key default gen_random_uuid(),
+
+  event_id uuid not null references public.portal_events(id),
+
+  user_id uuid not null references auth.users(id),
+
+  semester_id uuid not null references public.portal_semesters(id),
+
+  start_photo_url text not null,
+
+  end_photo_url text,
+
+  status text not null default 'pending'
+    check (status in ('pending', 'approved', 'rejected')),
+
+  hours_awarded numeric,
+
+  reviewed_by uuid references public.portal_members(id),
+
+  reviewed_at timestamptz,
+
+  rejection_reason text,
+
+  submitted_at timestamptz default now(),
+
+  updated_at timestamptz default now(),
+
+  unique (event_id, user_id)
+);
+
+
+-- A Study Hours submission is valid only after the event has ended.
+-- RSVP is intentionally NOT required for Study Hours.
+
+create or replace function public.validate_portal_study_hour_submission()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  submission_event_end_time timestamptz;
+begin
+
+  select end_time
+  into submission_event_end_time
+  from public.portal_events
+  where id = new.event_id;
+
+  if submission_event_end_time is null then
+    raise exception 'Event % does not exist', new.event_id;
+  end if;
+
+  if submission_event_end_time > now() then
+    raise exception
+      'Study Hours cannot be submitted until the event has ended';
+  end if;
+
+  return new;
+end;
+$$;
+
+
+-- Photo evidence remains immutable once a Study Hours submission
+-- has been approved. Only admin/exec reviewers may assign hours.
+
+create or replace function public.enforce_portal_study_hour_submission_review_rules()
+returns trigger
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+
+  if tg_op = 'UPDATE'
+    and old.status = 'approved'
+    and (
+      new.start_photo_url is distinct from old.start_photo_url
+      or new.end_photo_url is distinct from old.end_photo_url
+    ) then
+    raise exception 'Photo URLs cannot be changed after approval';
+  end if;
+
+  if not public.is_portal_admin()
+    and (
+      (tg_op = 'INSERT' and new.hours_awarded is not null)
+      or
+      (tg_op = 'UPDATE'
+        and new.hours_awarded is distinct from old.hours_awarded)
+    ) then
+    raise exception
+      'Only admin or exec reviewers may set hours_awarded';
+  end if;
+
+  return new;
+end;
+$$;
+
+
+drop trigger if exists validate_portal_study_hour_submission
+  on public.portal_study_hour_submissions;
+
+create trigger validate_portal_study_hour_submission
+  before insert on public.portal_study_hour_submissions
+  for each row
+  execute function public.validate_portal_study_hour_submission();
+
+
+drop trigger if exists enforce_portal_study_hour_submission_review_rules
+  on public.portal_study_hour_submissions;
+
+create trigger enforce_portal_study_hour_submission_review_rules
+  before insert or update on public.portal_study_hour_submissions
+  for each row
+  execute function public.enforce_portal_study_hour_submission_review_rules();
+
+
+-- Weekly Study Hours requirements.
+--
+-- Only pledges have a role-based automatic requirement.
+-- Brothers are handled individually through
+-- portal_study_hour_assignments.
+
+create table if not exists public.portal_study_hour_requirements (
+  id uuid primary key default gen_random_uuid(),
+
+  role text not null
+    check (role in ('brother', 'pledge')),
+
+  hours_per_week numeric not null
+    check (hours_per_week > 0),
+
+  created_at timestamptz not null default now(),
+
+  updated_at timestamptz not null default now(),
+
+  unique (role)
+);
+
+
+-- Pledges automatically require 3 hours per week.
+--
+-- Do NOT insert a brother requirement here.
+-- Brother requirements are assigned individually by admins.
+
+insert into public.portal_study_hour_requirements (
+  role,
+  hours_per_week
+)
+values (
+  'pledge',
+  3
+)
+on conflict (role) do update
+set
+  hours_per_week = excluded.hours_per_week,
+  updated_at = now();
+
+
+-- Members can read the weekly requirements so the dashboard
+-- can display the correct requirement for pledges.
+
+alter table public.portal_study_hour_requirements
+  enable row level security;
+
+drop policy if exists "Authenticated users can read study hour requirements"
+  on public.portal_study_hour_requirements;
+
+create policy "Authenticated users can read study hour requirements"
+  on public.portal_study_hour_requirements
+  for select
+  to authenticated
+  using (true);
+
+
+-- Study Hours submission security.
+
+alter table public.portal_study_hour_submissions
+  enable row level security;
+
+drop policy if exists "Members can read own study hour submissions"
+  on public.portal_study_hour_submissions;
+
+create policy "Members can read own study hour submissions"
+  on public.portal_study_hour_submissions
+  for select
+  to authenticated
+  using (
+    user_id = auth.uid()
+    or public.is_portal_admin()
+  );
+
+
+drop policy if exists "Members can submit own study hours"
+  on public.portal_study_hour_submissions;
+
+create policy "Members can submit own study hours"
+  on public.portal_study_hour_submissions
+  for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and public.is_active_portal_member()
+    and status = 'pending'
+    and hours_awarded is null
+    and reviewed_by is null
+    and reviewed_at is null
+    and rejection_reason is null
+  );
+
+
+drop policy if exists "Admins can update study hour submissions"
+  on public.portal_study_hour_submissions;
+
+create policy "Admins can update study hour submissions"
+  on public.portal_study_hour_submissions
+  for update
+  to authenticated
+  using (public.is_portal_admin())
+  with check (public.is_portal_admin());
+
+
+-- Prevent direct execution of the validation/review functions.
+
+revoke all on function public.validate_portal_study_hour_submission()
+  from public;
+
+revoke all on function public.enforce_portal_study_hour_submission_review_rules()
+  from public;
+
+
+-- Brother-specific Study Hours assignments.
+--
+-- An admin can assign a brother to have a 2-hour weekly requirement.
+-- Brothers who are not assigned have NO Study Hours requirement.
+--
+-- Do not delete portal_members rows with a NULL user_id.
+-- Those members are simply excluded from the assignment selector.
+
+create table if not exists public.portal_study_hour_assignments (
+  id uuid primary key default gen_random_uuid(),
+
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  hours_per_week numeric not null default 2
+    check (hours_per_week > 0),
+
+  assigned_by uuid references public.portal_members(id),
+
+  assigned_at timestamptz default now(),
+
+  unique (user_id)
+);
+
+
+alter table public.portal_study_hour_assignments
+  enable row level security;
+
+
+drop policy if exists "Members can read own study hour assignment"
+  on public.portal_study_hour_assignments;
+
+create policy "Members can read own study hour assignment"
+  on public.portal_study_hour_assignments
+  for select
+  to authenticated
+  using (
+    user_id = auth.uid()
+    or public.is_portal_admin()
+  );
+
+
+drop policy if exists "Admins can manage study hour assignments"
+  on public.portal_study_hour_assignments;
+
+create policy "Admins can manage study hour assignments"
+  on public.portal_study_hour_assignments
+  for all
+  to authenticated
+  using (public.is_portal_admin())
+  with check (public.is_portal_admin());

@@ -518,6 +518,7 @@ export default function AdminEventsPage() {
                 <option value="fundraiser">Fundraiser</option>
                 <option value="social">Social</option>
                 <option value="workshop">Workshop</option>
+                <option value="study_hours">Study Hours</option>
                 <option value="other">Other</option>
               </select>
             </div>
