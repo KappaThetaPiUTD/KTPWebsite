@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { loadPortalMemberContext } from "../../../../../lib/portal/member";
 import { getPortalServerClient } from "../../../../../lib/portal/server";
 
-const EVENT_TYPES = ["chapter", "professional", "fundraiser", "social", "workshop", "other"];
+const EVENT_TYPES = ["chapter", "professional", "fundraiser", "social", "workshop", "study_hours", "other"];
 const RECURRENCE_TYPES = ["none", "weekly", "monthly"];
 const DELETE_SCOPES = ["occurrence", "series"];
 const UUID_PATTERN =

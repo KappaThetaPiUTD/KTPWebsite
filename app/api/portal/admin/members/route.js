@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { loadPortalMemberContext } from "../../../../../lib/portal/member";
-import { getPortalServerClient } from "../../../../../lib/portal/server";
+import {
+  getPortalServerClient,
+  getPortalServiceRoleClient,
+} from "../../../../../lib/portal/server";
 
 const VALID_ROLES = ["admin", "exec", "director", "brother", "pledge"];
 const VALID_STATUSES = ["active", "inactive"];
@@ -61,6 +64,14 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid role." }, { status: 400 });
   }
 
+  const invitationClient = getPortalServiceRoleClient();
+  if (!invitationClient) {
+    return NextResponse.json(
+      { error: "Member invitations are not configured." },
+      { status: 503 }
+    );
+  }
+
   const supabase = await getPortalServerClient();
   const { data, error: insertError } = await supabase
     .from("portal_members")
@@ -79,7 +90,27 @@ export async function POST(request) {
     return NextResponse.json({ error: "Unable to add member." }, { status: 500 });
   }
 
-  return NextResponse.json({ member: data }, { status: 201 });
+  const invitationUrl = new URL("/portal/auth/confirm", request.url);
+  invitationUrl.searchParams.set("next", "/portal/reset-password");
+  const { error: invitationError } =
+    await invitationClient.auth.admin.inviteUserByEmail(email, {
+      redirectTo: invitationUrl.toString(),
+    });
+
+  if (invitationError) {
+    console.error("Portal member invitation failed:", invitationError);
+    return NextResponse.json(
+      {
+        member: data,
+        inviteSent: false,
+        warning:
+          "The member was added, but the invitation could not be sent. Configure SMTP or try again later.",
+      },
+      { status: 201 }
+    );
+  }
+
+  return NextResponse.json({ member: data, inviteSent: true }, { status: 201 });
 }
 
 export async function PATCH(request) {
