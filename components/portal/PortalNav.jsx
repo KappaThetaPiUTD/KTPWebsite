@@ -27,7 +27,7 @@ export default function PortalNav({ displayName, email, isAdmin }) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
-  
+
   const handleSignOut = async () => {
     setSigningOut(true);
     setError("");
