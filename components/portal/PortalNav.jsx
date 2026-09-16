@@ -11,12 +11,14 @@ const memberNavItems = [
   { label: "Events", href: "/portal/dashboard/events" },
   { label: "Attendance", href: "/portal/dashboard/attendance" },
   { label: "Activity Hours", href: "/portal/dashboard/activity-hours" },
+  { label: "Study Hours", href: "/portal/dashboard/study-hours" },
 ];
 
 const adminNavItems = [
   { label: "Members", href: "/portal/dashboard/admin/members" },
   { label: "Events", href: "/portal/dashboard/admin/events" },
   { label: "Activity Hours", href: "/portal/dashboard/admin/activity-hours" },
+  { label: "Study Hours", href: "/portal/dashboard/admin/study-hours" },
   { label: "Attendance", href: "/portal/dashboard/admin/attendance" },
 ];
 

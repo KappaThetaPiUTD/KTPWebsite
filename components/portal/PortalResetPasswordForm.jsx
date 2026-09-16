@@ -73,7 +73,7 @@ export default function PortalResetPasswordForm({ configured }) {
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
       <h1 className="text-2xl font-bold text-primary">Choose a new password</h1>
       <p className="mt-2 text-sm leading-6 text-gray-700">
-        Open this page from the secure link in your password reset email.
+        Open this page from the secure link in your invitation or password reset email.
       </p>
 
       {!configured && (
