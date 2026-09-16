@@ -6,6 +6,7 @@ import { useState } from "react";
 import { getPortalBrowserClient } from "../../lib/portal/client";
 
 const memberNavItems = [
+const memberNavItems = [
   { label: "Overview", href: "/portal/dashboard" },
   { label: "Profile", href: "/portal/dashboard/profile" },
   { label: "Events", href: "/portal/dashboard/events" },
@@ -27,6 +28,7 @@ export default function PortalNav({ displayName, email, isAdmin }) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
+  
   
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -68,7 +70,59 @@ export default function PortalNav({ displayName, email, isAdmin }) {
               pathname === item.href ||
               (item.href !== "/portal/dashboard" &&
                 pathname.startsWith(`${item.href}/`));
+      <nav className="mt-5" aria-label="Portal navigation">
+        <div className="flex gap-2 overflow-x-auto md:flex-col">
+          {memberNavItems.map((item) => {
+            const active =
+              pathname === item.href ||
+              (item.href !== "/portal/dashboard" &&
+                pathname.startsWith(`${item.href}/`));
 
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={`whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition ${
+                  active
+                    ? "bg-primary text-white"
+                    : "text-gray-700 hover:bg-primary/10 hover:text-primary"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+
+        {isAdmin && (
+          <div className="mt-6 border-t border-primary/20 pt-5">
+            <p className="px-1 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+              Admin
+            </p>
+            <div className="mt-2 flex gap-2 overflow-x-auto rounded-xl bg-primary/5 p-2 md:flex-col">
+              {adminNavItems.map((item) => {
+                const active =
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className={`whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
+                      active
+                        ? "bg-primary text-white shadow-sm"
+                        : "text-primary hover:bg-white"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
             return (
               <Link
                 key={item.href}
