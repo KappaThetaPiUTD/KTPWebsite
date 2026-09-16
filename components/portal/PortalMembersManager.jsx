@@ -20,6 +20,7 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
   const [query, setQuery] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [rowError, setRowError] = useState("");
+  const [notice, setNotice] = useState(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newEmail, setNewEmail] = useState("");
@@ -190,6 +191,17 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
 
       setMemberList((previousMembers) => [result.member, ...previousMembers]);
       setShowAddModal(false);
+      setNotice(
+        result.inviteSent
+          ? {
+              type: "success",
+              message: "Member added and invitation sent. They can set their password from the email.",
+            }
+          : {
+              type: "warning",
+              message: result.warning || "Member added, but the invitation was not sent.",
+            }
+      );
       router.refresh();
     } catch {
       setAddError("Unable to add member right now.");
@@ -246,6 +258,11 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
         {rowError && (
           <p className="mt-4 text-sm font-medium text-red-700" role="alert">
             {rowError}
+          </p>
+        )}
+        {notice && (
+          <p className={`mt-4 rounded-lg border px-4 py-3 text-sm font-medium ${notice.type === "success" ? "border-green-200 bg-green-50 text-green-800" : "border-amber-200 bg-amber-50 text-amber-900"}`} role="status">
+            {notice.message}
           </p>
         )}
 
@@ -443,8 +460,8 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
               Add member
             </h2>
             <p className="mt-2 text-sm leading-6 text-gray-600">
-              The member must complete onboarding after signing in for the first
-              time.
+              An invitation email will let the member set a password, then
+              complete onboarding on their first sign-in.
             </p>
 
             <label

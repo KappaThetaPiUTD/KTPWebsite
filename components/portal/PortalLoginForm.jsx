@@ -69,7 +69,7 @@ export default function PortalLoginForm({
     }
 
     setResetting(true);
-    const callbackUrl = new URL("/portal/auth/callback", window.location.origin);
+    const callbackUrl = new URL("/portal/auth/confirm", window.location.origin);
     callbackUrl.searchParams.set("next", "/portal/reset-password");
 
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(
