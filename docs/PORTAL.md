@@ -25,7 +25,7 @@ authorization and direct browser admin writes.
 5. In Auth settings:
    - Disable open user signups.
    - Add
-     `https://ktp-website.vercel.app/portal/auth/callback`
+     `https://ktp-website.vercel.app/portal/auth/confirm`
      as an allowed redirect URL.
 6. Bootstrap the first admin in SQL:
 

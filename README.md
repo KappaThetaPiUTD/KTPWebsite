@@ -130,7 +130,7 @@ NEXT_PUBLIC_PORTAL_SUPABASE_ANON_KEY=
 
 Resume the **KTP Portal** Supabase project before adding these values in Vercel.
 Run `supabase/portal-schema.sql`, then in Supabase Auth settings add
-`https://ktp-website.vercel.app/portal/auth/callback` as an allowed redirect
+`https://ktp-website.vercel.app/portal/auth/confirm` as an allowed redirect
 URL and disable open user signups. Provision member accounts through Supabase
 invites after adding each lower-case email to `portal_members`.
 
