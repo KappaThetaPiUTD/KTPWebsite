@@ -15,6 +15,15 @@ function formatDateTime(dateString) {
   });
 }
 
+function getMemberDisplayName(member) {
+  return (
+    member?.profile?.full_name ||
+    member?.email ||
+    member?.profile?.utd_email ||
+    "Unknown member"
+  );
+}
+
 function getStatusClasses(status) {
   switch (status) {
     case "approved":
@@ -72,6 +81,11 @@ export default function AdminStudyHoursManager() {
 
   const [statusFilter, setStatusFilter] = useState("all");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [brotherSearch, setBrotherSearch] = useState("");
+
+  const [progressSearch, setProgressSearch] = useState("");
+  const [progressRoleFilter, setProgressRoleFilter] =
+    useState("all");
 
   const [selectedSubmission, setSelectedSubmission] =
     useState(null);
@@ -104,7 +118,7 @@ export default function AdminStudyHoursManager() {
       const { data: memberData, error: memberError } =
         await supabase
           .from("portal_members")
-          .select("id, user_id, role, status")
+          .select("id, user_id, email, role, status")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -174,7 +188,7 @@ export default function AdminStudyHoursManager() {
         supabase
           .from("portal_members")
           .select(
-            "id, user_id, role, status"
+            "id, user_id, email, role, status"
           )
           .in("role", ["brother", "pledge"]),
 
@@ -236,7 +250,7 @@ export default function AdminStudyHoursManager() {
        * MEMBER PROFILES
        * ----------------------------------------------------------
        *
-       * portal_members does not contain names.
+       * portal_members contains the email fallback.
        * Get names/emails from portal_profiles.
        *
        * Filter out null user IDs because portal_members
@@ -772,12 +786,35 @@ export default function AdminStudyHoursManager() {
       };
     })
     .filter(Boolean)
-    .sort((a, b) => {
-      const nameA =
-        a.profile?.full_name || "";
+    .filter((member) => {
+      if (
+        progressRoleFilter !== "all" &&
+        member.role !== progressRoleFilter
+      ) {
+        return false;
+      }
 
-      const nameB =
-        b.profile?.full_name || "";
+      const search =
+        progressSearch.trim().toLowerCase();
+
+      if (!search) {
+        return true;
+      }
+
+      const name =
+        getMemberDisplayName(member).toLowerCase();
+
+      const email =
+        (member.email || "").toLowerCase();
+
+      return (
+        name.includes(search) ||
+        email.includes(search)
+      );
+    })
+    .sort((a, b) => {
+      const nameA = getMemberDisplayName(a);
+      const nameB = getMemberDisplayName(b);
 
       return nameA.localeCompare(nameB);
     });
@@ -795,19 +832,24 @@ export default function AdminStudyHoursManager() {
         member.status === "active" &&
         member.user_id
     )
-    .sort((a, b) => {
-      const nameA =
-        a.profile?.full_name ||
-        a.profile?.utd_email ||
-        "";
+    .filter((member) => {
+      const search = brotherSearch.trim().toLowerCase();
 
-      const nameB =
-        b.profile?.full_name ||
-        b.profile?.utd_email ||
-        "";
+      if (!search) return true;
 
-      return nameA.localeCompare(nameB);
-    });
+      const name = getMemberDisplayName(member).toLowerCase();
+      const email = (member.email || "").toLowerCase();
+
+      return (
+        name.includes(search) ||
+        email.includes(search)
+      );
+    })
+    .sort((a, b) =>
+      getMemberDisplayName(a).localeCompare(
+        getMemberDisplayName(b)
+      )
+    );
 
   if (loading) {
     return (
@@ -921,10 +963,25 @@ export default function AdminStudyHoursManager() {
             </div>
           </div>
 
+          <div className="mb-5">
+            <input
+              type="text"
+              value={brotherSearch}
+              onChange={(event) =>
+                setBrotherSearch(
+                  event.target.value
+                )
+              }
+              placeholder="Search brothers by name or email..."
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-primary"
+            />
+          </div>
+
           {selectableBrothers.length === 0 ? (
             <p className="text-sm text-gray-600">
-              No active brothers with linked accounts
-              found.
+              {brotherSearch.trim()
+                ? "No brothers match your search."
+                : "No active brothers with linked accounts found."}
             </p>
           ) : (
             <div className="space-y-3">
@@ -951,21 +1008,14 @@ export default function AdminStudyHoursManager() {
                     >
                       <div>
                         <p className="font-medium text-gray-950">
-                          {brother.profile
-                            ?.full_name ||
-                            brother.profile
-                              ?.utd_email ||
-                            "Unknown member"}
+                          {getMemberDisplayName(
+                            brother
+                          )}
                         </p>
 
-                        {brother.profile
-                          ?.utd_email && (
+                        {brother.email && (
                           <p className="mt-1 text-xs text-gray-500">
-                            {
-                              brother
-                                .profile
-                                .utd_email
-                            }
+                            {brother.email}
                           </p>
                         )}
 
@@ -1016,21 +1066,51 @@ export default function AdminStudyHoursManager() {
 
       <section>
         <div className="mb-5">
-          <h2 className="text-2xl font-bold text-gray-950">
-            Weekly Progress
-          </h2>
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-950">
+                Weekly Progress
+              </h2>
 
-          <p className="mt-2 text-sm text-gray-600">
-            Current Study Hours progress for Monday
-            through Sunday.
-          </p>
+              <p className="mt-2 text-sm text-gray-600">
+                Current Study Hours progress for Monday
+                through Sunday.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <input
+                type="text"
+                value={progressSearch}
+                onChange={(event) =>
+                  setProgressSearch(event.target.value)
+                }
+                placeholder="Search members by name or email..."
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-900 outline-none focus:border-primary sm:w-72"
+              />
+
+              <select
+                value={progressRoleFilter}
+                onChange={(event) =>
+                  setProgressRoleFilter(event.target.value)
+                }
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-700"
+              >
+                <option value="all">All roles</option>
+                <option value="brother">Brothers</option>
+                <option value="pledge">Pledges</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {memberProgress.length === 0 ? (
           <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <p className="text-sm text-gray-600">
-              No members are currently required to
-              complete Study Hours.
+              {progressSearch.trim() ||
+              progressRoleFilter !== "all"
+                ? "No members match the selected search or role filter."
+                : "No members are currently required to complete Study Hours."}
             </p>
           </div>
         ) : (
@@ -1067,21 +1147,14 @@ export default function AdminStudyHoursManager() {
                       <tr key={member.id}>
                         <td className="px-5 py-4">
                           <p className="font-medium text-gray-950">
-                            {member.profile
-                              ?.full_name ||
-                              member.profile
-                                ?.utd_email ||
-                              "Unknown member"}
+                            {getMemberDisplayName(
+                              member
+                            )}
                           </p>
 
-                          {member.profile
-                            ?.utd_email && (
+                          {member.email && (
                             <p className="mt-1 text-xs text-gray-500">
-                              {
-                                member
-                                  .profile
-                                  .utd_email
-                              }
+                              {member.email}
                             </p>
                           )}
                         </td>
@@ -1193,27 +1266,6 @@ export default function AdminStudyHoursManager() {
               </option>
             </select>
 
-            <select
-              value={roleFilter}
-              onChange={(event) =>
-                setRoleFilter(
-                  event.target.value
-                )
-              }
-              className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
-            >
-              <option value="all">
-                All roles
-              </option>
-
-              <option value="brother">
-                Brothers
-              </option>
-
-              <option value="pledge">
-                Pledges
-              </option>
-            </select>
           </div>
         </div>
 
@@ -1246,11 +1298,9 @@ export default function AdminStudyHoursManager() {
                       <div>
                         <div className="flex flex-wrap items-center gap-3">
                           <h3 className="text-lg font-semibold text-gray-950">
-                            {profile
-                              ?.full_name ||
-                              profile
-                                ?.utd_email ||
-                              "Unknown member"}
+                            {getMemberDisplayName(
+                              member
+                            )}
                           </h3>
 
                           <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold capitalize text-gray-700">
@@ -1404,13 +1454,9 @@ export default function AdminStudyHoursManager() {
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-600">
-                  {selectedSubmission
-                    .member?.profile
-                    ?.full_name ||
-                    selectedSubmission
-                      .member?.profile
-                      ?.utd_email ||
-                    "Unknown member"}
+                  {getMemberDisplayName(
+                    selectedSubmission.member
+                  )}
                 </p>
               </div>
 
