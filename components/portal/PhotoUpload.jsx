@@ -27,10 +27,7 @@ export default function PhotoUpload({
   onUploadComplete,
   label = "Upload photo",
   disabled = false,
-<<<<<<< HEAD
   uploadEndpoint = "/api/activity-hours/upload-signature",
-=======
->>>>>>> 8a2ebb7e69f58a1747ebf1f077f5461c6bc6a40a
 }) {
   const inputId = useId();
   const previewUrlRef = useRef(null);
