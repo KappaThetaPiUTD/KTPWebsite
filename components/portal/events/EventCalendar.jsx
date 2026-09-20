@@ -18,7 +18,7 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-export default function EventCalendar({ events, rsvps }) {
+export default function EventCalendar({ events, rsvps, onSelectEvent }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState("month");
 
@@ -46,6 +46,7 @@ export default function EventCalendar({ events, rsvps }) {
       end: calendarEnd,
       isGoing,
       isMaybe,
+      event,
     };
   });
 
@@ -72,6 +73,7 @@ export default function EventCalendar({ events, rsvps }) {
           onView={(view) => setCurrentView(view)}
           date={currentDate}
           onNavigate={(date) => setCurrentDate(date)}
+          onSelectEvent={(calendarEvent) => onSelectEvent?.(calendarEvent.event)}
           popup
           eventPropGetter={(event) => ({
             className:

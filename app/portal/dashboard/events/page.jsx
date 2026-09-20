@@ -11,6 +11,7 @@ export default function EventsPage() {
   const [rsvpFeedback, setRsvpFeedback] = useState({});
   const [loading, setLoading] = useState(true);
   const [submittingEventId, setSubmittingEventId] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -123,7 +124,11 @@ export default function EventsPage() {
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(320px,2fr)]">
         {/* Calendar */}
-        <EventCalendar events={events} rsvps={rsvps} />
+        <EventCalendar
+          events={events}
+          rsvps={rsvps}
+          onSelectEvent={setSelectedEvent}
+        />
 
         {/* Event cards */}
         <div className="max-h-[650px] space-y-5 overflow-y-auto pr-2">
@@ -235,6 +240,48 @@ export default function EventsPage() {
           )}
         </div>
       </div>
+      )}
+
+      {selectedEvent && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/50 p-4"
+          onMouseDown={() => setSelectedEvent(null)}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="event-details-title"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
+                  Event details
+                </p>
+                <h2 id="event-details-title" className="mt-2 text-2xl font-bold text-gray-950">
+                  {selectedEvent.title}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedEvent(null)}
+                className="rounded-lg px-3 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-gray-950"
+                aria-label="Close event details"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-3 text-sm text-gray-700">
+              <p><span className="font-semibold text-gray-950">Date:</span> {formatDate(selectedEvent.start_time)}</p>
+              <p><span className="font-semibold text-gray-950">Time:</span> {formatTime(selectedEvent.start_time)} – {formatTime(selectedEvent.end_time)}</p>
+              <p><span className="font-semibold text-gray-950">Location:</span> {selectedEvent.location || "TBD"}</p>
+              <p className="whitespace-pre-wrap leading-6">{selectedEvent.description}</p>
+            </div>
+          </section>
+        </div>
       )}
     </div>
   );
