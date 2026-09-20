@@ -39,6 +39,92 @@ async function requireAdmin() {
   return { context };
 }
 
+function getPasswordSetupRedirectUrl(request) {
+  const redirectUrl = new URL("/portal/auth/confirm", request.url);
+  redirectUrl.searchParams.set("next", "/portal/reset-password");
+  return redirectUrl.toString();
+}
+
+async function resendMemberAccessEmail({ memberId, email, request }) {
+  if (!UUID_PATTERN.test(memberId) && !EMAIL_PATTERN.test(email)) {
+    return NextResponse.json({ error: "Enter a valid member email." }, { status: 400 });
+  }
+
+  const invitationClient = getPortalServiceRoleClient();
+  if (!invitationClient) {
+    return NextResponse.json(
+      { error: "Member invitations are not configured." },
+      { status: 503 }
+    );
+  }
+
+  const supabase = await getPortalServerClient();
+  let memberQuery = supabase
+    .from("portal_members")
+    .select("id, email, status, user_id");
+  memberQuery = UUID_PATTERN.test(memberId)
+    ? memberQuery.eq("id", memberId)
+    : memberQuery.eq("email", email);
+  const { data: member, error: memberError } = await memberQuery.maybeSingle();
+
+  if (memberError) {
+    console.error("Portal member lookup failed:", memberError);
+    return NextResponse.json({ error: "Unable to find member." }, { status: 500 });
+  }
+  if (!member) {
+    return NextResponse.json({ error: "Member not found." }, { status: 404 });
+  }
+  if (member.status !== "active") {
+    return NextResponse.json(
+      { error: "Reactivate this member before sending account access emails." },
+      { status: 400 }
+    );
+  }
+
+  const redirectTo = getPasswordSetupRedirectUrl(request);
+  let acceptedInvite = false;
+
+  if (member.user_id) {
+    const { data: userData, error: userError } =
+      await invitationClient.auth.admin.getUserById(member.user_id);
+
+    if (userError || !userData.user) {
+      console.error("Portal Auth user lookup failed:", userError);
+      return NextResponse.json(
+        { error: "Unable to verify the member's invitation status." },
+        { status: 500 }
+      );
+    }
+
+    acceptedInvite = Boolean(
+      userData.user.email_confirmed_at || userData.user.confirmed_at
+    );
+  }
+
+  const { error: emailError } = acceptedInvite
+    ? await invitationClient.auth.resetPasswordForEmail(member.email, { redirectTo })
+    : await invitationClient.auth.admin.inviteUserByEmail(member.email, {
+        redirectTo,
+      });
+
+  if (emailError) {
+    console.error("Portal member access email failed:", emailError);
+    return NextResponse.json(
+      {
+        error: acceptedInvite
+          ? "Unable to send password reset email. Try again later."
+          : "Unable to resend invitation. Try again later.",
+      },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({
+    emailSent: true,
+    emailType: acceptedInvite ? "password_reset" : "invitation",
+  });
+}
+
 export async function POST(request) {
   const { context, error } = await requireAdmin();
   if (error) return error;
@@ -48,6 +134,13 @@ export async function POST(request) {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  if (body.action === "resend_access") {
+    const memberId = typeof body.memberId === "string" ? body.memberId.trim() : "";
+    const email =
+      typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    return resendMemberAccessEmail({ memberId, email, request });
   }
 
   const email =
@@ -90,11 +183,9 @@ export async function POST(request) {
     return NextResponse.json({ error: "Unable to add member." }, { status: 500 });
   }
 
-  const invitationUrl = new URL("/portal/auth/confirm", request.url);
-  invitationUrl.searchParams.set("next", "/portal/reset-password");
   const { error: invitationError } =
     await invitationClient.auth.admin.inviteUserByEmail(email, {
-      redirectTo: invitationUrl.toString(),
+      redirectTo: getPasswordSetupRedirectUrl(request),
     });
 
   if (invitationError) {

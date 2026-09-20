@@ -13,6 +13,7 @@ export default function AdminEventsPage() {
   const [eventDescription, setEventDescription] = useState("");
   const [eventLocation, setEventLocation] = useState("");
   const [eventType, setEventType] = useState("chapter");
+  const [eventTargetRoles, setEventTargetRoles] = useState(["brother", "pledge"]);
   const [eventCapacity, setEventCapacity] = useState("");
   const [eventCheckInOpen, setEventCheckInOpen] = useState(false);
   const [eventCheckInPasscodeEnabled, setEventCheckInPasscodeEnabled] =
@@ -255,6 +256,7 @@ export default function AdminEventsPage() {
           startTime: eventStart,
           endTime: eventEnd,
           eventType,
+          targetRoles: eventTargetRoles,
           capacity,
           recurrence: eventRecurrence,
           recurrenceEnd: eventRecurrenceEnd,
@@ -290,6 +292,7 @@ export default function AdminEventsPage() {
       setEventDescription("");
       setEventLocation("");
       setEventType("chapter");
+      setEventTargetRoles(["brother", "pledge"]);
       setEventCapacity("");
       setEventCheckInOpen(false);
       setEventCheckInPasscodeEnabled(false);
@@ -522,6 +525,43 @@ export default function AdminEventsPage() {
                 <option value="other">Other</option>
               </select>
             </div>
+
+            <fieldset>
+              <legend className="text-sm font-semibold text-gray-800">
+                Event audience
+              </legend>
+
+              <p className="mt-1 text-xs text-gray-500">
+                Select every group that should be able to view and RSVP to this event.
+              </p>
+
+              <div className="mt-3 flex flex-wrap gap-3">
+                {[
+                  ["brother", "Brothers"],
+                  ["pledge", "Pledges"],
+                ].map(([role, label]) => (
+                  <label
+                    key={role}
+                    className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-800"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={eventTargetRoles.includes(role)}
+                      onChange={(event) =>
+                        setEventTargetRoles((current) =>
+                          event.target.checked
+                            ? [...current, role]
+                            : current.filter((currentRole) => currentRole !== role)
+                        )
+                      }
+                      disabled={creatingEvent}
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
             <div className="grid gap-5 sm:grid-cols-2">
               <div>
