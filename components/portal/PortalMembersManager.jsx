@@ -5,6 +5,18 @@ import { useRouter } from "next/navigation";
 
 const ROLES = ["admin", "exec", "director", "brother", "pledge"];
 
+const ROLE_COLOR_CLASSES = {
+  exec: "border-teal-700 bg-teal-200 text-teal-950 focus:border-teal-800 focus:ring-teal-300",
+  brother: "border-green-700 bg-green-200 text-green-950 focus:border-green-800 focus:ring-green-300",
+  pledge: "border-gray-400 bg-gray-200 text-gray-700 focus:border-gray-500 focus:ring-gray-300",
+};
+
+const ROLE_BACKGROUND_STYLES = {
+  exec: { backgroundColor: "#99f6e4" },
+  brother: { backgroundColor: "#bbf7d0" },
+  pledge: { backgroundColor: "#e5e7eb" },
+};
+
 function formatCentralDate(value) {
   return new Date(value).toLocaleString("en-US", {
     timeZone: "America/Chicago",
@@ -356,7 +368,11 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
                       onChange={(event) =>
                         handleRoleChange(member, event.target.value)
                       }
-                      className="rounded-lg border border-gray-300 px-3 py-1.5 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                      style={ROLE_BACKGROUND_STYLES[member.role]}
+                      className={`rounded-lg border px-3 py-1.5 font-semibold outline-none focus:ring-2 disabled:opacity-50 ${
+                        ROLE_COLOR_CLASSES[member.role] ||
+                        "border-gray-300 bg-white text-black focus:border-primary focus:ring-primary/20"
+                      }`}
                     >
                       {ROLES.map((role) => (
                         <option key={role} value={role}>
