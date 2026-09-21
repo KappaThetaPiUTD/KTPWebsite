@@ -131,7 +131,7 @@ export default function EventsPage() {
         />
 
         {/* Event cards */}
-        <div className="max-h-[650px] space-y-5 overflow-y-auto pr-2">
+        <div className="space-y-5 lg:max-h-[650px] lg:overflow-y-auto lg:pr-2">
           {cardEvents.map((event) => {
             const rsvp = rsvps[event.id];
             const isSubmitting = submittingEventId === event.id;

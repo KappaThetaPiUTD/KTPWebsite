@@ -774,7 +774,7 @@ export default function AdminEventsPage() {
                       </span>
                     </div>
 
-                    <div className="mt-8 grid grid-cols-3 gap-3">
+                    <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div className="rounded-xl bg-gray-50 p-4 text-center">
                         <p className="flex min-h-[48px] items-center justify-center text-xs font-semibold uppercase tracking-wide text-gray-500">
                           Going
@@ -876,12 +876,12 @@ export default function AdminEventsPage() {
 
       {deleteDialogEvent && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 sm:items-center"
           role="dialog"
           aria-modal="true"
           aria-labelledby="delete-recurring-event-title"
         >
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+          <div className="my-auto max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-xl sm:p-6">
             <h2
               id="delete-recurring-event-title"
               className="text-xl font-bold text-gray-950"

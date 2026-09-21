@@ -62,7 +62,7 @@ export default function EventCalendar({ events, rsvps, onSelectEvent }) {
         </p>
       </div>
 
-      <div className="h-[570px]">
+      <div className="h-[430px] sm:h-[570px]">
         <Calendar
           localizer={localizer}
           events={calendarEvents}

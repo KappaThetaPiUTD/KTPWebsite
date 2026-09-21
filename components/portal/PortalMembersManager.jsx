@@ -341,7 +341,7 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
         )}
 
         <div className="mt-5 overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
+          <table className="min-w-[760px] text-left text-sm">
             <thead className="bg-primary text-white">
               <tr>
                 <th className="px-4 py-3">Email</th>
@@ -459,14 +459,14 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
 
       {selectedMember && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-4"
+          className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/55 p-4 sm:items-center"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeStrikeModal();
           }}
         >
           <div
-            className="w-full max-w-lg rounded-2xl bg-white p-6 text-black shadow-2xl"
+            className="my-auto max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 text-black shadow-2xl sm:p-6"
             role="dialog"
             aria-modal="true"
             aria-labelledby="strike-dialog-title"
