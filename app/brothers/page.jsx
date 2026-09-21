@@ -14,7 +14,7 @@ const activeMembers = [
   {
     name: "Mekha Mathew",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783395863/Brother%20Page/Spring%202026/Mekha_Mathew.jpg",
-    linkedin: "https://www.linkedin.com/in/mekha-mathew",
+    linkedin: "https://www.linkedin.com/in/mekha-mathew-7402b4275/",
   },
   {
     name: "Ruthvik Penmatsa",
