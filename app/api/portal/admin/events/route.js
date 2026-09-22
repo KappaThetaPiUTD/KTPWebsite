@@ -3,7 +3,6 @@ import { loadPortalMemberContext } from "../../../../../lib/portal/member";
 import { getPortalServerClient } from "../../../../../lib/portal/server";
 
 const EVENT_TYPES = ["chapter", "professional", "fundraiser", "social", "workshop", "study_hours", "other"];
-const TARGET_ROLES = ["brother", "pledge"];
 const RECURRENCE_TYPES = ["none", "weekly", "monthly"];
 const DELETE_SCOPES = ["occurrence", "series"];
 const UUID_PATTERN =
@@ -85,15 +84,9 @@ export async function POST(request) {
     typeof body.eventType === "string" && body.eventType.trim()
       ? body.eventType.trim()
       : "chapter";
-  const targetRoles = Array.isArray(body.targetRoles)
-    ? [...new Set(body.targetRoles.filter((role) => typeof role === "string"))]
-    : null;
 
   if (!EVENT_TYPES.includes(eventType)) {
     return NextResponse.json({ error: "Invalid event type." }, { status: 400 });
-  }
-  if (targetRoles && (!targetRoles.length || targetRoles.some((role) => !TARGET_ROLES.includes(role)))) {
-    return NextResponse.json({ error: "Choose at least one valid event audience." }, { status: 400 });
   }
   if (!RECURRENCE_TYPES.includes(recurrence)) {
     return NextResponse.json({ error: "Invalid recurrence setting." }, { status: 400 });
@@ -184,7 +177,6 @@ export async function POST(request) {
       start_time: occurrenceStart.toISOString(),
       end_time: new Date(occurrenceStart.getTime() + duration).toISOString(),
       event_type: eventType,
-      target_roles: targetRoles,
       capacity,
       recurrence_series_id: recurrenceSeriesId,
       check_in_passcode_enabled: checkInPasscodeEnabled,
@@ -193,7 +185,7 @@ export async function POST(request) {
       created_by: context.user.id,
     })))
     .select(
-      "id, title, description, location, start_time, end_time, event_type, target_roles, capacity, recurrence_series_id, is_check_in_open, created_at"
+      "id, title, location, start_time, end_time, event_type, capacity, recurrence_series_id, is_check_in_open, created_at"
     )
 
     ;

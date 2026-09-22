@@ -40,13 +40,7 @@ values ('officer@example.com', 'admin', 'active');
 ```text
 NEXT_PUBLIC_PORTAL_SUPABASE_URL=
 NEXT_PUBLIC_PORTAL_SUPABASE_ANON_KEY=
-PORTAL_SUPABASE_SECRET_KEY=
 ```
-
-`PORTAL_SUPABASE_SECRET_KEY` is server-only and is required for admin-created
-invitations, resending expired invitations, and admin-triggered password reset
-emails. Use the Portal project's Supabase secret key; never expose it through a
-`NEXT_PUBLIC_` variable.
 
 9. Redeploy after adding the variables.
 

@@ -24,10 +24,10 @@ const Navbar = () => {
     { id: 5, text: "RECRUITMENT", path: "/recruitment" },
     { id: 6, text: "BLOG", path: "/blog" },
     { id: 7, text: "GALLERY", path: "/gallery" },
+    { id: 8, text: "CONTACT", path: "/contact-us" },
     ...(portalConfigured
       ? [{ id: 9, text: "PORTAL", path: "/portal" }]
       : []),
-    { id: 8, text: "CONTACT", path: "/contact-us" },
   ];
 
   return (

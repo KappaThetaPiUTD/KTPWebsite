@@ -5,18 +5,6 @@ import { useRouter } from "next/navigation";
 
 const ROLES = ["admin", "exec", "director", "brother", "pledge"];
 
-const ROLE_COLOR_CLASSES = {
-  exec: "border-teal-700 bg-teal-200 text-teal-950 focus:border-teal-800 focus:ring-teal-300",
-  brother: "border-green-700 bg-green-200 text-green-950 focus:border-green-800 focus:ring-green-300",
-  pledge: "border-gray-400 bg-gray-200 text-gray-700 focus:border-gray-500 focus:ring-gray-300",
-};
-
-const ROLE_BACKGROUND_STYLES = {
-  exec: { backgroundColor: "#99f6e4" },
-  brother: { backgroundColor: "#bbf7d0" },
-  pledge: { backgroundColor: "#e5e7eb" },
-};
-
 function formatCentralDate(value) {
   return new Date(value).toLocaleString("en-US", {
     timeZone: "America/Chicago",
@@ -33,9 +21,6 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
   const [busyId, setBusyId] = useState(null);
   const [rowError, setRowError] = useState("");
   const [notice, setNotice] = useState(null);
-  const [accessEmail, setAccessEmail] = useState("");
-  const [sendingAccessEmail, setSendingAccessEmail] = useState(false);
-  const [showResendModal, setShowResendModal] = useState(false);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newEmail, setNewEmail] = useState("");
@@ -104,58 +89,6 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
   const handleStatusToggle = (member) => {
     const status = member.status === "active" ? "inactive" : "active";
     patchMember(member.id, { status });
-  };
-
-  const resendAccessEmail = async () => {
-    const email = accessEmail.trim().toLowerCase();
-    if (!email) {
-      setRowError("Enter a whitelisted member email.");
-      return;
-    }
-
-    setSendingAccessEmail(true);
-    setRowError("");
-    setNotice(null);
-
-    try {
-      const response = await fetch("/api/portal/admin/members", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "resend_access", email }),
-      });
-      const result = await response.json();
-
-      if (!response.ok) {
-        setRowError(result.error || "Unable to send account access email.");
-        return;
-      }
-
-      setNotice({
-        type: "success",
-        message:
-          result.emailType === "password_reset"
-            ? "This member has already accepted their invitation, so a password reset email was sent instead."
-            : "A fresh invitation email was sent.",
-      });
-      setAccessEmail("");
-      setShowResendModal(false);
-    } catch {
-      setRowError("Unable to send account access email right now.");
-    } finally {
-      setSendingAccessEmail(false);
-    }
-  };
-
-  const openResendModal = () => {
-    setAccessEmail("");
-    setRowError("");
-    setShowResendModal(true);
-  };
-
-  const closeResendModal = () => {
-    if (sendingAccessEmail) return;
-    setShowResendModal(false);
-    setAccessEmail("");
   };
 
   const openStrikeModal = (member) => {
@@ -319,13 +252,6 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
             >
               Add member
             </button>
-            <button
-              type="button"
-              onClick={openResendModal}
-              className="h-fit rounded-lg border border-primary px-4 py-2.5 font-semibold text-primary hover:bg-primary hover:text-white"
-            >
-              Resend invitation
-            </button>
           </div>
         </div>
 
@@ -341,7 +267,7 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
         )}
 
         <div className="mt-5 overflow-x-auto">
-          <table className="min-w-[760px] text-left text-sm">
+          <table className="min-w-full text-left text-sm">
             <thead className="bg-primary text-white">
               <tr>
                 <th className="px-4 py-3">Email</th>
@@ -368,11 +294,7 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
                       onChange={(event) =>
                         handleRoleChange(member, event.target.value)
                       }
-                      style={ROLE_BACKGROUND_STYLES[member.role]}
-                      className={`rounded-lg border px-3 py-1.5 font-semibold outline-none focus:ring-2 disabled:opacity-50 ${
-                        ROLE_COLOR_CLASSES[member.role] ||
-                        "border-gray-300 bg-white text-black focus:border-primary focus:ring-primary/20"
-                      }`}
+                      className="rounded-lg border border-gray-300 px-3 py-1.5 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
                     >
                       {ROLES.map((role) => (
                         <option key={role} value={role}>
@@ -403,16 +325,14 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        disabled={busyId === member.id}
-                        onClick={() => handleStatusToggle(member)}
-                        className="rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-800 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {member.status === "active" ? "Deactivate" : "Reactivate"}
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      disabled={busyId === member.id}
+                      onClick={() => handleStatusToggle(member)}
+                      className="rounded-lg border border-gray-300 px-4 py-2 font-semibold text-gray-800 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {member.status === "active" ? "Deactivate" : "Reactivate"}
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -459,14 +379,14 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
 
       {selectedMember && (
         <div
-          className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/55 p-4 sm:items-center"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-4"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeStrikeModal();
           }}
         >
           <div
-            className="my-auto max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 text-black shadow-2xl sm:p-6"
+            className="w-full max-w-lg rounded-2xl bg-white p-6 text-black shadow-2xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="strike-dialog-title"
@@ -601,68 +521,6 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
                 className="rounded-lg bg-primary px-4 py-2.5 font-semibold text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-gray-400"
               >
                 {adding ? "Adding..." : "Add member"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showResendModal && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-4"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) closeResendModal();
-          }}
-        >
-          <div
-            className="w-full max-w-lg rounded-2xl bg-white p-6 text-black shadow-2xl"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="resend-invitation-dialog-title"
-          >
-            <h2 id="resend-invitation-dialog-title" className="text-2xl font-bold text-gray-950">
-              Resend invitation
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-gray-600">
-              Enter an existing whitelisted email. Members who have already accepted their invitation receive a password reset email instead.
-            </p>
-            <label
-              className="mb-2 mt-5 block text-sm font-semibold text-gray-900"
-              htmlFor="access-email"
-            >
-              Member email
-            </label>
-            <input
-              id="access-email"
-              type="email"
-              value={accessEmail}
-              onChange={(event) => setAccessEmail(event.target.value)}
-              disabled={sendingAccessEmail}
-              placeholder="member@example.com"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100"
-            />
-            {rowError && (
-              <p className="mt-3 text-sm font-medium text-red-700" role="alert">
-                {rowError}
-              </p>
-            )}
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={closeResendModal}
-                disabled={sendingAccessEmail}
-                className="rounded-lg border border-gray-300 px-4 py-2.5 font-semibold text-gray-800 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={resendAccessEmail}
-                disabled={sendingAccessEmail}
-                className="rounded-lg bg-primary px-4 py-2.5 font-semibold text-white hover:bg-primary/90 disabled:cursor-not-allowed disabled:bg-gray-400"
-              >
-                {sendingAccessEmail ? "Sending..." : "Resend invitation"}
               </button>
             </div>
           </div>
