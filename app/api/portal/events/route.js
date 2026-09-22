@@ -43,7 +43,7 @@ export async function GET() {
   const { data: events, error: eventsError } = await supabase
     .from("portal_events")
     .select(
-      "id, title, description, location, start_time, end_time, event_type, capacity, rsvp_deadline, recurrence_series_id, is_check_in_open"
+      "id, title, description, location, start_time, end_time, event_type, target_roles, capacity, rsvp_deadline, recurrence_series_id, is_check_in_open"
     )
     .order("start_time", { ascending: true });
 
@@ -55,6 +55,15 @@ export async function GET() {
       { status: 500 }
     );
   }
+
+  // Server-side clients bypass RLS, so enforce role visibility here too.
+  // A null audience means the event is visible to every portal member.
+  const visibleEvents = (events ?? []).filter(
+    (event) =>
+      context.isAdmin ||
+      !event.target_roles ||
+      event.target_roles.includes(context.member.role)
+  );
 
   const { data: rsvps, error: rsvpsError } = await supabase
     .from("portal_rsvps")
@@ -117,7 +126,7 @@ export async function GET() {
       );
     }
 
-    for (const event of events ?? []) {
+    for (const event of visibleEvents) {
       eventStats[event.id] = {
         goingCount: 0,
         maybeCount: 0,
@@ -149,7 +158,7 @@ export async function GET() {
     }
   }
 
-  const eventsWithStats = (events ?? []).map((event) => ({
+  const eventsWithStats = visibleEvents.map((event) => ({
     ...event,
     ...(eventStats[event.id] || {
       goingCount: 0,
