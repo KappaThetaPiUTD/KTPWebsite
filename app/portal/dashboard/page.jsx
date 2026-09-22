@@ -20,7 +20,7 @@ export default async function PortalDashboardPage() {
         ready for the separate KTP Portal Supabase project.
       </p>
 
-      <div className="mt-8 grid max-w-xl grid-cols-1 gap-5 sm:grid-cols-2">
+      <div className="mt-8 grid max-w-xl grid-cols-2 gap-5">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <p className="text-sm font-semibold text-gray-600">
             Account

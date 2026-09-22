@@ -18,7 +18,7 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-export default function EventCalendar({ events, rsvps, onSelectEvent }) {
+export default function EventCalendar({ events, rsvps }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState("month");
 
@@ -46,7 +46,6 @@ export default function EventCalendar({ events, rsvps, onSelectEvent }) {
       end: calendarEnd,
       isGoing,
       isMaybe,
-      event,
     };
   });
 
@@ -62,7 +61,7 @@ export default function EventCalendar({ events, rsvps, onSelectEvent }) {
         </p>
       </div>
 
-      <div className="h-[430px] sm:h-[570px]">
+      <div className="h-[570px]">
         <Calendar
           localizer={localizer}
           events={calendarEvents}
@@ -73,7 +72,6 @@ export default function EventCalendar({ events, rsvps, onSelectEvent }) {
           onView={(view) => setCurrentView(view)}
           date={currentDate}
           onNavigate={(date) => setCurrentDate(date)}
-          onSelectEvent={(calendarEvent) => onSelectEvent?.(calendarEvent.event)}
           popup
           eventPropGetter={(event) => ({
             className:
