@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getPortalBrowserClient } from "../../lib/portal/client";
 
 const memberNavItems = [
@@ -27,6 +27,22 @@ export default function PortalNav({ displayName, email, isAdmin }) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
   const [error, setError] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [mobileOpen]);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -54,15 +70,86 @@ export default function PortalNav({ displayName, email, isAdmin }) {
   return (
     <aside className="border-b border-gray-200 bg-white p-4 md:min-h-[calc(100vh-6rem)] md:border-b-0 md:border-r md:p-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-          Member Portal
-        </p>
-        <p className="mt-2 truncate font-bold text-gray-950">{displayName}</p>
-        <p className="truncate text-xs text-gray-600">{email}</p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              Member Portal
+            </p>
+            <p className="mt-2 truncate font-bold text-gray-950">{displayName}</p>
+            <p className="truncate text-xs text-gray-600">{email}</p>
+          </div>
+          <button
+            type="button"
+            aria-expanded={mobileOpen}
+            aria-controls="portal-mobile-navigation"
+            className="shrink-0 rounded-lg border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-800 hover:border-primary hover:text-primary md:hidden"
+            onClick={() => setMobileOpen((isOpen) => !isOpen)}
+          >
+            {mobileOpen ? "Close menu" : "Menu"}
+          </button>
+        </div>
       </div>
 
       <nav className="mt-5" aria-label="Portal navigation">
-        <div className="flex gap-2 overflow-x-auto md:flex-col">
+        <div
+          id="portal-mobile-navigation"
+          className={`${mobileOpen ? "block" : "hidden"} rounded-xl border border-gray-200 bg-gray-50 p-2 md:hidden`}
+        >
+          <div className="space-y-1">
+            {memberNavItems.map((item) => {
+              const active =
+                pathname === item.href ||
+                (item.href !== "/portal/dashboard" &&
+                  pathname.startsWith(`${item.href}/`));
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`block rounded-lg px-3 py-3 text-sm font-semibold transition ${
+                    active
+                      ? "bg-primary text-white"
+                      : "text-gray-700 hover:bg-primary/10 hover:text-primary"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {isAdmin && (
+            <div className="mt-3 border-t border-primary/20 pt-3">
+              <p className="px-3 text-xs font-bold uppercase tracking-[0.18em] text-primary">
+                Admin
+              </p>
+              <div className="mt-1 space-y-1">
+                {adminNavItems.map((item) => {
+                  const active =
+                    pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={active ? "page" : undefined}
+                      className={`block rounded-lg px-3 py-3 text-sm font-semibold transition ${
+                        active
+                          ? "bg-primary text-white shadow-sm"
+                          : "text-primary hover:bg-white"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="hidden gap-2 md:flex md:flex-col">
           {memberNavItems.map((item) => {
             const active =
               pathname === item.href ||
@@ -87,7 +174,7 @@ export default function PortalNav({ displayName, email, isAdmin }) {
         </div>
 
         {isAdmin && (
-          <div className="mt-6 border-t border-primary/20 pt-5">
+          <div className="mt-6 hidden border-t border-primary/20 pt-5 md:block">
             <p className="px-1 text-xs font-bold uppercase tracking-[0.18em] text-primary">
               Admin
             </p>
