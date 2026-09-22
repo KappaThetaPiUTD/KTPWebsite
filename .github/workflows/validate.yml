@@ -5,6 +5,11 @@ on:
   push:
     branches:
       - main
+      # Run on stage pushes too: stage is a protected branch and feeds
+      # stage -> main PRs. Without this, commits squash-merged onto stage
+      # never produced the required "validate" check for the stage->main PR
+      # (see docs/DEPLOYMENT.md, "Stage branch and stage -> main merges").
+      - stage
 
 permissions:
   contents: read
