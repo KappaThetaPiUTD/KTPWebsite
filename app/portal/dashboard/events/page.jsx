@@ -99,7 +99,12 @@ export default function EventsPage() {
       minute: "2-digit",
     }).format(new Date(value));
   const activeEventIdSet = new Set(activeEventIds);
-  const cardEvents = events.filter((event) => activeEventIdSet.has(event.id));
+  const now = Date.now();
+  const twoWeeksFromNow = now + 14 * 24 * 60 * 60 * 1000;
+  const cardEvents = events.filter((event) => {
+    const startTime = new Date(event.start_time).getTime();
+    return activeEventIdSet.has(event.id) && startTime >= now && startTime <= twoWeeksFromNow;
+  });
 
   return (
     <div>
@@ -132,6 +137,7 @@ export default function EventsPage() {
 
         {/* Event cards */}
         <div className="space-y-5 lg:max-h-[650px] lg:overflow-y-auto lg:pr-2">
+          <h2 className="text-xl font-bold text-gray-950">Events in the next 2 weeks</h2>
           {cardEvents.map((event) => {
             const rsvp = rsvps[event.id];
             const isSubmitting = submittingEventId === event.id;
