@@ -58,8 +58,16 @@ export default function LiveAttendanceMonitor({
   const [qrPayload, setQrPayload] = useState("");
   const [updatingAttendanceId, setUpdatingAttendanceId] =
     useState("");
+  const [now, setNow] = useState(() => Date.now());
 
-  const now = Date.now();
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
+    }, 60000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
   const sortedEvents = [...events].sort((a, b) => {
     const aStart = new Date(a.start_time).getTime();
     const bStart = new Date(b.start_time).getTime();
