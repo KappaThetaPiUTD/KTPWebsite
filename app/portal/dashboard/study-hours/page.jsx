@@ -562,66 +562,68 @@ export default function StudyHoursPage() {
               SUBMIT STUDY HOURS
               ===================================================== */}
 
-          <section>
-            <div className="mb-5">
-              <h2 className="text-2xl font-bold text-gray-950">
-                Submit Study Hours
-              </h2>
+          {studyHoursRequired && (
+            <section>
+              <div className="mb-5">
+                <h2 className="text-2xl font-bold text-gray-950">
+                  Submit Study Hours
+                </h2>
 
-              <p className="mt-2 text-sm text-gray-600">
-                Completed Study Hours events will appear
-                here after they end. An RSVP is not required.
-              </p>
-            </div>
-
-            {eligibleEvents.length === 0 ? (
-              <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-                <p className="text-sm text-gray-600">
-                  You do not have any eligible Study Hours
-                  events to submit right now.
+                <p className="mt-2 text-sm text-gray-600">
+                  Completed Study Hours events will appear
+                  here after they end. An RSVP is not required.
                 </p>
               </div>
-            ) : (
-              <div className="grid gap-5 md:grid-cols-2">
-                {eligibleEvents.map((event) => (
-                  <article
-                    key={event.id}
-                    className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-950">
-                          {event.title}
-                        </h3>
 
-                        <p className="mt-1 text-sm text-gray-500">
-                          {formatDateTime(event.start_time)}
-                        </p>
+              {eligibleEvents.length === 0 ? (
+                <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+                  <p className="text-sm text-gray-600">
+                    You do not have any eligible Study Hours
+                    events to submit right now.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-5 md:grid-cols-2">
+                  {eligibleEvents.map((event) => (
+                    <article
+                      key={event.id}
+                      className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-950">
+                            {event.title}
+                          </h3>
+
+                          <p className="mt-1 text-sm text-gray-500">
+                            {formatDateTime(event.start_time)}
+                          </p>
+                        </div>
+
+                        <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                          {event.event_type || "Study Hours"}
+                        </span>
                       </div>
 
-                      <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                        {event.event_type || "Study Hours"}
-                      </span>
-                    </div>
+                      {event.location && (
+                        <p className="mt-4 text-sm text-gray-600">
+                          {event.location}
+                        </p>
+                      )}
 
-                    {event.location && (
-                      <p className="mt-4 text-sm text-gray-600">
-                        {event.location}
-                      </p>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => openSubmission(event)}
-                      className="mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
-                    >
-                      Submit Study Hours
-                    </button>
-                  </article>
-                ))}
-              </div>
-            )}
-          </section>
+                      <button
+                        type="button"
+                        onClick={() => openSubmission(event)}
+                        className="mt-5 w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+                      >
+                        Submit Study Hours
+                      </button>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* =====================================================
               SUBMISSION HISTORY
