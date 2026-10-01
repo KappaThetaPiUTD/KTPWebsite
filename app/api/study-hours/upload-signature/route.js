@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { loadPortalMemberContext } from "../../../../lib/portal/member";
+import { getPortalServerClient } from "../../../../lib/portal/server";
 import cloudinary from "../../../../utils/cloudinary";
 
 export const runtime = "nodejs";
@@ -37,6 +38,56 @@ export async function POST(request) {
       { status: 403 }
     );
   }
+
+  // Study Hours submission eligibility:
+  // - All active pledges are eligible.
+  // - Brothers are eligible only if an admin assigned them Study Hours.
+  // - Admins, execs, directors, and unassigned brothers are not eligible.
+
+  const member = context.member;
+
+  let studyHoursEligible = false;
+
+  if (member?.role === "pledge") {
+    studyHoursEligible = true;
+  } else if (member?.role === "brother") {
+    const supabase = await getPortalServerClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Portal configuration is unavailable." },
+        { status: 503 }
+      );
+    }
+
+    const { data: assignment, error: assignmentError } = await supabase
+      .from("portal_study_hour_assignments")
+      .select("id")
+      .eq("user_id", context.user.id)
+      .maybeSingle();
+
+    if (assignmentError) {
+      console.error(
+        "Unable to verify Study Hours assignment:",
+        assignmentError
+      );
+
+      return NextResponse.json(
+        { error: "Unable to verify Study Hours eligibility." },
+        { status: 503 }
+      );
+    }
+
+    studyHoursEligible = Boolean(assignment);
+  }
+
+  if (!studyHoursEligible) {
+    return NextResponse.json(
+      { error: "You are not eligible to submit Study Hours." },
+      { status: 403 }
+    );
+  }
+
 
   let body;
 
