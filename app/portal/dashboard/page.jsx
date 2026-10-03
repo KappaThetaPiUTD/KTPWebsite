@@ -1,8 +1,25 @@
 import { getPortalMemberContext } from "../../../lib/portal/member";
+import { getPortalServerClient } from "../../../lib/portal/server";
+
+// Members only see their own strike count; RLS limits the rows to their own.
+async function loadOwnStrikeCount(userId) {
+  if (!userId) return null;
+
+  const supabase = await getPortalServerClient();
+  if (!supabase) return null;
+
+  const { count, error } = await supabase
+    .from("portal_strikes")
+    .select("id", { count: "exact", head: true })
+    .eq("member_user_id", userId);
+
+  return error ? null : count ?? 0;
+}
 
 export default async function PortalDashboardPage() {
   const context = await getPortalMemberContext();
   const user = context.user;
+  const strikeCount = await loadOwnStrikeCount(user?.id);
 
   return (
     <div>
@@ -20,7 +37,7 @@ export default async function PortalDashboardPage() {
         ready for the separate KTP Portal Supabase project.
       </p>
 
-      <div className="mt-8 grid max-w-xl grid-cols-1 gap-5 sm:grid-cols-2">
+      <div className="mt-8 grid max-w-4xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <p className="text-sm font-semibold text-gray-600">
             Account
@@ -52,6 +69,26 @@ export default async function PortalDashboardPage() {
           <p className="mt-2 text-xs leading-5 text-gray-600">
             Official roles are controlled by chapter leadership and database
             policy, not editable profile fields.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <p className="text-sm font-semibold text-gray-600">
+            Strikes
+          </p>
+
+          <p
+            className={`mt-2 text-xl font-bold ${
+              strikeCount > 0 ? "text-red-600" : "text-gray-950"
+            }`}
+          >
+            {strikeCount === null ? "Unavailable" : strikeCount}
+          </p>
+
+          <p className="mt-2 text-xs leading-5 text-gray-600">
+            {strikeCount === null
+              ? "Your strike count could not be loaded right now."
+              : "Questions about a strike can be directed to chapter leadership."}
           </p>
         </div>
       </div>
