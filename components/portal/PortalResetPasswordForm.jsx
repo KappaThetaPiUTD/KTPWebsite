@@ -1,9 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { FaCheck, FaEye, FaEyeSlash, FaTimes } from "react-icons/fa";
 import { getPortalBrowserClient } from "../../lib/portal/client";
+
+const SPECIAL_CHAR_REGEX = /[!@#$%^&*()\-_=+[\]{}|;:',.<>?/"\\`~]/;
+
+const PASSWORD_REQUIREMENTS_BASE = [
+  {
+    id: "minLength",
+    label: "At least 8 characters",
+    test: (p) => p.length >= 8,
+  },
+  {
+    id: "maxLength",
+    label: "Maximum 64 characters",
+    test: (p) => p.length <= 64,
+  },
+  {
+    id: "upper",
+    label: "At least one uppercase letter (A–Z)",
+    test: (p) => /[A-Z]/.test(p),
+  },
+  {
+    id: "lower",
+    label: "At least one lowercase letter (a–z)",
+    test: (p) => /[a-z]/.test(p),
+  },
+  {
+    id: "number",
+    label: "At least one number (0–9)",
+    test: (p) => /\d/.test(p),
+  },
+  {
+    id: "special",
+    label: "At least one special character (e.g. ! @ # $ % ^ & *)",
+    test: (p) => SPECIAL_CHAR_REGEX.test(p),
+  },
+];
+
+function getPasswordStrength(p) {
+  if (!p.length) return { level: 0, label: "Weak" };
+  let score = 0;
+  if (p.length >= 8) score++;
+  if (/[A-Z]/.test(p)) score++;
+  if (/[a-z]/.test(p)) score++;
+  if (/\d/.test(p)) score++;
+  if (SPECIAL_CHAR_REGEX.test(p)) score++;
+  const level = score <= 1 ? 1 : score <= 2 ? 2 : score <= 3 ? 3 : 4;
+  const labels = ["Weak", "Weak", "Fair", "Good", "Strong"];
+  return { level, label: labels[level] };
+}
+
+function getPasswordRequirements(userEmail) {
+  return [
+    ...PASSWORD_REQUIREMENTS_BASE,
+    {
+      id: "notMatch",
+      label: "Must not match username or email",
+      test: (p) =>
+        p.length > 0 && p.toLowerCase() !== (userEmail || "").toLowerCase(),
+    },
+  ];
+}
 
 export default function PortalResetPasswordForm({ configured }) {
   const router = useRouter();
@@ -12,13 +73,29 @@ export default function PortalResetPasswordForm({ configured }) {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    const supabase = getPortalBrowserClient();
+    if (!supabase) return;
+
+    supabase.auth.getUser().then(({ data }) => {
+      setUserEmail(data?.user?.email ?? "");
+    });
+  }, []);
+
+  const requirements = getPasswordRequirements(userEmail);
+  const { level, label } = getPasswordStrength(password);
+  const strengthColors = ["bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500"];
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
 
-    if (password.length < 8) {
-      setError("Use at least 8 characters for your new password.");
+    if (!requirements.every((requirement) => requirement.test(password))) {
+      setError("Please meet all password requirements below.");
       return;
     }
 
@@ -82,6 +159,7 @@ export default function PortalResetPasswordForm({ configured }) {
           role="status"
         >
           The KTP Portal Supabase project is not connected in this environment.
+          You can still preview the password requirements below.
         </p>
       )}
 
@@ -93,17 +171,70 @@ export default function PortalResetPasswordForm({ configured }) {
           >
             New password
           </label>
-          <input
-            id="new-password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            disabled={!configured || submitting}
-            minLength={8}
-            required
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100"
-          />
+          <div className="relative">
+            <input
+              id="new-password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              disabled={submitting}
+              maxLength={64}
+              required
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100"
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 flex items-center pr-3"
+              onClick={() => setShowPassword((current) => !current)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <FaEyeSlash className="h-4 w-4 text-gray-600 hover:text-gray-800" />
+              ) : (
+                <FaEye className="h-4 w-4 text-gray-600 hover:text-gray-800" />
+              )}
+            </button>
+          </div>
+
+          {password.length > 0 && (
+            <div className="mt-2">
+              <div className="mb-1 flex items-center gap-2">
+                <div className="flex h-1.5 flex-1 gap-0.5 overflow-hidden rounded-full bg-gray-200">
+                  {[0, 1, 2, 3].map((index) => (
+                    <div
+                      key={index}
+                      className={`flex-1 transition-colors ${
+                        index < level ? strengthColors[level - 1] : "bg-gray-200"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <span className="text-xs font-medium capitalize text-black">
+                  {label}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-3 space-y-1.5">
+            <p className="mb-1.5 text-xs font-medium text-black">
+              Password requirements:
+            </p>
+            {requirements.map((requirement) => {
+              const met = requirement.test(password);
+              return (
+                <div key={requirement.id} className="flex items-center gap-2 text-sm">
+                  {met ? (
+                    <FaCheck className="h-4 w-4 shrink-0 text-green-600" aria-hidden />
+                  ) : (
+                    <FaTimes className="h-4 w-4 shrink-0 text-red-500" aria-hidden />
+                  )}
+                  <span className="text-black">{requirement.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div>
@@ -113,17 +244,48 @@ export default function PortalResetPasswordForm({ configured }) {
           >
             Confirm new password
           </label>
-          <input
-            id="confirm-password"
-            type="password"
-            autoComplete="new-password"
-            value={confirmation}
-            onChange={(event) => setConfirmation(event.target.value)}
-            disabled={!configured || submitting}
-            minLength={8}
-            required
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100"
-          />
+          <div className="relative">
+            <input
+              id="confirm-password"
+              type={showConfirmation ? "text" : "password"}
+              autoComplete="new-password"
+              value={confirmation}
+              onChange={(event) => setConfirmation(event.target.value)}
+              disabled={submitting}
+              maxLength={64}
+              required
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:bg-gray-100"
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 flex items-center pr-3"
+              onClick={() => setShowConfirmation((current) => !current)}
+              aria-label={
+                showConfirmation ? "Hide confirmation" : "Show confirmation"
+              }
+            >
+              {showConfirmation ? (
+                <FaEyeSlash className="h-4 w-4 text-gray-600 hover:text-gray-800" />
+              ) : (
+                <FaEye className="h-4 w-4 text-gray-600 hover:text-gray-800" />
+              )}
+            </button>
+          </div>
+          {confirmation.length > 0 && (
+            <div className="mt-1.5 flex items-center gap-2 text-sm">
+              {password === confirmation ? (
+                <>
+                  <FaCheck className="h-4 w-4 shrink-0 text-green-600" />
+                  <span className="text-gray-700">Passwords match</span>
+                </>
+              ) : (
+                <>
+                  <FaTimes className="h-4 w-4 shrink-0 text-red-500" />
+                  <span className="text-black">Passwords do not match</span>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         {error && (
