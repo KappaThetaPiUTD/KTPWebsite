@@ -172,7 +172,7 @@ export default function PortalLoginForm({
                   autoComplete="current-password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  disabled={submitting}
+                  disabled={!configured || submitting}
                   required
                   className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 text-black outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-gray-100"
                 />
