@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getEligibleStudyEvents, getApprovedStudyHours } from "../../../../lib/portal/studyHours.mjs";
 import PhotoUpload from "../../../../components/portal/PhotoUpload";
 import { getPortalBrowserClient } from "../../../../lib/portal/client";
 
@@ -224,12 +225,6 @@ export default function StudyHoursPage() {
        * can be submitted.
        */
 
-      const submittedEventIds = new Set(
-        (submissionData || []).map(
-          (submission) => submission.event_id
-        )
-      );
-
       const now = new Date();
 
       const {
@@ -250,44 +245,9 @@ export default function StudyHoursPage() {
 
       if (eventError) throw eventError;
 
-      const events = (eventData || [])
-        .filter((event) => new Date(event.end_time) <= now)
-        .filter((event) => !submittedEventIds.has(event.id))
-        .filter((event) => {
-          if (!semesterData) return true;
-
-          const eventDate = new Date(event.start_time);
-
-          const semesterStart = new Date(
-            `${semesterData.start_date}T00:00:00`
-          );
-
-          const semesterEnd = new Date(
-            `${semesterData.end_date}T23:59:59`
-          );
-
-          return (
-            eventDate >= semesterStart &&
-            eventDate <= semesterEnd
-          );
-        })
-        .filter((event) => {
-          /*
-           * Only Study Hours events should appear here.
-           *
-           * This checks the event_type without requiring
-           * an RSVP.
-           */
-          const eventType = String(
-            event.event_type || ""
-          ).toLowerCase();
-
-          return (
-            eventType === "study hours" ||
-            eventType === "study_hours" ||
-            eventType === "studyhours"
-          );
-        });
+      const events = getEligibleStudyEvents(
+        eventData || [], submissionData || [], semesterData, now
+      );
 
       setEligibleEvents(events);
     } catch (loadError) {
@@ -390,35 +350,7 @@ export default function StudyHoursPage() {
   const startOfWeek = getStartOfCurrentWeek();
   const endOfWeek = getEndOfCurrentWeek();
 
-  const approvedHours = submissions.reduce(
-    (total, submission) => {
-      if (submission.status !== "approved") {
-        return total;
-      }
-
-      const eventStartTime =
-        submission.portal_events?.start_time;
-
-      if (!eventStartTime) {
-        return total;
-      }
-
-      const eventDate = new Date(eventStartTime);
-
-      if (
-        eventDate < startOfWeek ||
-        eventDate > endOfWeek
-      ) {
-        return total;
-      }
-
-      return (
-        total +
-        Number(submission.hours_awarded || 0)
-      );
-    },
-    0
-  );
+  const approvedHours = getApprovedStudyHours(submissions, startOfWeek, endOfWeek);
 
   const requiredHours = weeklyRequirement;
 
@@ -571,7 +503,9 @@ export default function StudyHoursPage() {
 
                 <p className="mt-2 text-sm text-gray-600">
                   Completed Study Hours events will appear
-                  here after they end. An RSVP is not required.
+                  here after they end. Submit once per event; you can split
+                  your weekly hours across different days, such as 2 hours
+                  on Tuesday and 1 hour on Thursday. An RSVP is not required.
                 </p>
               </div>
 

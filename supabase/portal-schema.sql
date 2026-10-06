@@ -53,7 +53,7 @@ create table if not exists public.portal_events (
   end_time timestamptz not null,
   -- scheduling & visibility: event_type drives filters; target_roles null = all members
   event_type text not null default 'chapter'
-    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'other')),
+    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'study_hours', 'other')),
   target_roles text[],
   -- rsvp rules: capacity null = unlimited; rsvp_deadline null = open until event start
   capacity integer check (capacity is null or capacity > 0),
@@ -752,7 +752,7 @@ $$;
 
 alter table public.portal_events
   add column if not exists event_type text not null default 'chapter'
-    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'other')),
+    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'study_hours', 'other')),
   add column if not exists target_roles text[],
   add column if not exists capacity integer check (capacity is null or capacity > 0),
   add column if not exists rsvp_deadline timestamptz,
@@ -787,7 +787,7 @@ begin
 
   alter table public.portal_events
     add constraint portal_events_event_type_check
-    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'other'));
+    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'study_hours', 'other'));
 end;
 $$;
 
