@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { getPortalBrowserClient } from "../../lib/portal/client";
 
 function getLoginErrorMessage(error) {
@@ -24,6 +25,7 @@ export default function PortalLoginForm({
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -163,16 +165,30 @@ export default function PortalLoginForm({
                   {resetting ? "Sending..." : "Forgot password?"}
                 </button>
               </div>
-              <input
-                id="portal-password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                disabled={!configured || submitting}
-                required
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 text-black outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-gray-100"
-              />
+              <div className="relative">
+                <input
+                  id="portal-password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  disabled={!configured || submitting}
+                  required
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 text-black outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-gray-100"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 flex items-center pr-3"
+                  onClick={() => setShowPassword((current) => !current)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <FaEyeSlash className="h-4 w-4 text-gray-600 hover:text-gray-800" />
+                  ) : (
+                    <FaEye className="h-4 w-4 text-gray-600 hover:text-gray-800" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && (

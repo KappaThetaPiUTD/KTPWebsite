@@ -29,20 +29,30 @@ npm run lint
 npm run build
 ```
 
-## Why there is no permanent stage branch
+## Stage branch and stage -> main merges
 
-Vercel already creates an isolated preview deployment for every pull request.
-A permanent `stage` branch would require merging each change twice, can drift
-away from `main`, and creates additional conflict and rollback paths.
+A protected `stage` branch exists. All portal work lands there first (as PRs
+into `stage`, since stage itself rejects direct pushes), and then stage is
+merged to `main` through a `stage -> main` pull request.
 
-Add a permanent staging branch only if KTP later has all three of these:
+The `validate` workflow runs on every pull request and on every push to `main`
+or `stage`, so a `stage -> main` PR always has the required `validate` check.
 
-1. A separate staging domain.
-2. Separate staging databases and third-party credentials.
-3. Scheduled release batches that must be tested together before production.
+### Avoiding `stage -> main` conflicts
 
-Until then, pull request previews plus protected `main` provide the safer and
-simpler workflow.
+A `stage -> main` PR conflicts when the same portal files were changed on both
+branches since they diverged. The merge pattern in that case is the PR 211 /
+PR 222 playbook:
+
+1. Get the required check green on the `stage -> main` PR by closing and
+   reopening it if `validate` shows as expected but never runs.
+2. On a branch from `main`, check out the conflicted files from `stage`:
+   `git checkout stage -- <conflicted paths>`.
+3. Open that as its own PR into `main` (e.g. "Align N portal files with stage
+   to unblock PR #NNN"), with the same squash-merge flow as any other PR.
+4. After it merges, the `stage -> main` PR becomes conflict-free.
+
+Before opening the pull request:
 
 The project pins Node.js `24.x` in `package.json`. Vercel announced that Node 20
 deployments created on or after October 1, 2026 will fail, so do not remove the
