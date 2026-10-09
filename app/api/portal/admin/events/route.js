@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { loadPortalMemberContext } from "../../../../../lib/portal/member";
 import { getPortalServerClient } from "../../../../../lib/portal/server";
+import {
+  addCentralDays,
+  addCentralMonths,
+  parseCentralDateEnd,
+  parseCentralDateTime,
+} from "../../../../../lib/portal/time";
 
 const EVENT_TYPES = ["chapter", "professional", "fundraiser", "social", "workshop", "study_hours", "other"];
 const TARGET_ROLES = ["brother", "pledge"];
@@ -8,18 +14,6 @@ const RECURRENCE_TYPES = ["none", "weekly", "monthly"];
 const DELETE_SCOPES = ["occurrence", "series"];
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-function nextMonthlyOccurrence(value) {
-  const next = new Date(value);
-  const day = next.getUTCDate();
-  next.setUTCDate(1);
-  next.setUTCMonth(next.getUTCMonth() + 1);
-  const lastDay = new Date(
-    Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)
-  ).getUTCDate();
-  next.setUTCDate(Math.min(day, lastDay));
-  return next;
-}
 
 async function requireAdmin() {
   const context = await loadPortalMemberContext();
@@ -132,15 +126,17 @@ export async function POST(request) {
       { status: 400 }
     );
   }
-  const parsedStart = new Date(startTime);
-  const parsedEnd = new Date(endTime);
-  if (!startTime || Number.isNaN(parsedStart.getTime())) {
+  // datetime-local values have no timezone offset. Treat them as Central wall
+  // time here, regardless of the server or admin's local timezone.
+  const parsedStart = parseCentralDateTime(startTime);
+  const parsedEnd = parseCentralDateTime(endTime);
+  if (!parsedStart) {
     return NextResponse.json(
       { error: "Enter a valid start time." },
       { status: 400 }
     );
   }
-  if (!endTime || Number.isNaN(parsedEnd.getTime())) {
+  if (!parsedEnd) {
     return NextResponse.json(
       { error: "Enter a valid end time." },
       { status: 400 }
@@ -155,14 +151,18 @@ export async function POST(request) {
 
   const occurrenceStarts = [parsedStart];
   if (recurrence !== "none") {
-    const parsedRecurrenceEnd = new Date(`${recurrenceEnd}T23:59:59`);
-    if (!recurrenceEnd || Number.isNaN(parsedRecurrenceEnd.getTime()) || parsedRecurrenceEnd < parsedStart) {
+    const parsedRecurrenceEnd = parseCentralDateEnd(recurrenceEnd);
+    if (!parsedRecurrenceEnd || parsedRecurrenceEnd < parsedStart) {
       return NextResponse.json({ error: "Choose a recurrence end date after the first event." }, { status: 400 });
     }
     let nextStart = new Date(parsedStart);
     while (true) {
-      if (recurrence === "weekly") nextStart.setUTCDate(nextStart.getUTCDate() + 7);
-      else nextStart = nextMonthlyOccurrence(nextStart);
+      nextStart = recurrence === "weekly"
+        ? addCentralDays(nextStart, 7)
+        : addCentralMonths(nextStart, 1);
+      if (!nextStart) {
+        return NextResponse.json({ error: "A recurring event falls at a time that does not exist in Central Time due to the daylight-saving change." }, { status: 400 });
+      }
       if (nextStart > parsedRecurrenceEnd) break;
       occurrenceStarts.push(new Date(nextStart));
       if (occurrenceStarts.length > 104) {

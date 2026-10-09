@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 
 const ROLES = ["admin", "exec", "director", "brother", "pledge"];
@@ -30,6 +31,7 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
   const [memberList, setMemberList] = useState(members);
   const [strikeList, setStrikeList] = useState(recentStrikes);
   const [query, setQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [rowError, setRowError] = useState("");
   const [notice, setNotice] = useState(null);
@@ -57,13 +59,14 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
 
   const filteredMembers = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return memberList;
     return memberList.filter(
       (member) =>
-        member.email.toLowerCase().includes(normalized) ||
-        member.name.toLowerCase().includes(normalized)
+        (!roleFilter || member.role === roleFilter) &&
+        (!normalized ||
+          member.email.toLowerCase().includes(normalized) ||
+          member.name.toLowerCase().includes(normalized))
     );
-  }, [memberList, query]);
+  }, [memberList, query, roleFilter]);
 
   const patchMember = async (memberId, updates) => {
     setBusyId(memberId);
@@ -289,17 +292,17 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
       )}
 
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-4">
           <div>
             <h2 className="text-xl font-bold text-gray-950">Members</h2>
             <p className="mt-1 text-sm text-gray-600">
               Search by name or email, manage access, and record strikes for active members.
             </p>
           </div>
-          <div className="flex w-full gap-3 sm:w-auto sm:items-end">
-            <div className="w-full sm:max-w-sm">
+          <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(12rem,1fr)_10rem_auto_auto] xl:items-end">
+            <div className="min-w-0">
               <label
-                className="mb-2 block text-sm font-semibold text-gray-900"
+                className="mb-1 block text-sm font-semibold text-gray-900"
                 htmlFor="member-search"
               >
                 Search members
@@ -312,17 +315,38 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
                 className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
+            <div className="min-w-0">
+              <label
+                className="mb-2 block text-sm font-semibold text-gray-900"
+                htmlFor="member-role-filter"
+              >
+                Filter by role
+              </label>
+              <select
+                id="member-role-filter"
+                value={roleFilter}
+                onChange={(event) => setRoleFilter(event.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-black outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="">All roles</option>
+                {["exec", "admin", "pledge", "brother"].map((role) => (
+                  <option key={role} value={role}>
+                    {role[0].toUpperCase() + role.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
             <button
               type="button"
               onClick={openAddModal}
-              className="h-fit rounded-lg bg-primary px-4 py-2.5 font-semibold text-white hover:bg-primary/90"
+              className="min-h-11 rounded-lg bg-primary px-4 py-2.5 font-semibold leading-5 text-white hover:bg-primary/90"
             >
               Add member
             </button>
             <button
               type="button"
               onClick={openResendModal}
-              className="h-fit rounded-lg border border-primary px-4 py-2.5 font-semibold text-primary hover:bg-primary hover:text-white"
+              className="min-h-11 rounded-lg border border-primary px-4 py-2.5 font-semibold leading-5 text-primary hover:bg-primary hover:text-white"
             >
               Resend invitation
             </button>
@@ -341,7 +365,7 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
         )}
 
         <div className="mt-5 overflow-x-auto">
-          <table className="min-w-[760px] text-left text-sm">
+          <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="bg-primary text-white">
               <tr>
                 <th className="px-4 py-3">Email</th>
@@ -419,7 +443,7 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
               {filteredMembers.length === 0 && (
                 <tr>
                   <td colSpan={5} className="px-4 py-8 text-center text-gray-600">
-                    No members match that search.
+                    No members match the selected search and role.
                   </td>
                 </tr>
               )}
@@ -522,9 +546,9 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
         </div>
       )}
 
-      {showAddModal && (
+      {showAddModal && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-4"
+          className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/55 px-4 py-8"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeAddModal();
@@ -604,12 +628,13 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {showResendModal && (
+      {showResendModal && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/55 px-4"
+          className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/55 px-4 py-8"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) closeResendModal();
@@ -666,7 +691,8 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

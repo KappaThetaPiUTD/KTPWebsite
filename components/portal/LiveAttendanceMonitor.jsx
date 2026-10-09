@@ -13,6 +13,15 @@ function formatTime(value) {
   }).format(new Date(value));
 }
 
+function formatCentralDate(value) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
 function getStatusClass(status) {
   switch (status) {
     case "late":
@@ -49,6 +58,25 @@ export default function LiveAttendanceMonitor({
   const [qrPayload, setQrPayload] = useState("");
   const [updatingAttendanceId, setUpdatingAttendanceId] =
     useState("");
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
+    }, 60000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  const sortedEvents = [...events].sort((a, b) => {
+    const aStart = new Date(a.start_time).getTime();
+    const bStart = new Date(b.start_time).getTime();
+    const aUpcoming = aStart >= now;
+    const bUpcoming = bStart >= now;
+
+    if (aUpcoming !== bUpcoming) return aUpcoming ? -1 : 1;
+    return aUpcoming ? aStart - bStart : bStart - aStart;
+  });
 
   const selectedEvent = events.find(
     (event) => event.id === eventId
@@ -419,12 +447,12 @@ export default function LiveAttendanceMonitor({
                 Choose an event
               </option>
 
-              {events.map((event) => (
+              {sortedEvents.map((event) => (
                 <option
                   key={event.id}
                   value={event.id}
                 >
-                  {event.title}
+                  {event.title} — {formatCentralDate(event.start_time)}
                 </option>
               ))}
             </select>
