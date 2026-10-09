@@ -372,7 +372,7 @@ export default function AdminEventsPage() {
                   htmlFor="event-start"
                   className="text-sm font-semibold text-gray-800"
                 >
-                  Start time
+                Start time (Central Time)
                 </label>
 
                 <input
@@ -392,7 +392,7 @@ export default function AdminEventsPage() {
                   htmlFor="event-end"
                   className="text-sm font-semibold text-gray-800"
                 >
-                  End time
+                End time (Central Time)
                 </label>
 
                 <input

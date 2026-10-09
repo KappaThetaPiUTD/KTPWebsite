@@ -121,6 +121,9 @@ The server uses the authenticated admin ID as `issued_by`; the client cannot
 choose or forge it. RLS independently rejects non-admin inserts. Strike rows are
 append-only in the initial schema to preserve audit history.
 
+Members see only their own strike count on the portal Overview page
+(`/portal/dashboard`). Reasons and issuers are not shown to members.
+
 ## Attendance
 
 Admin/exec users can:

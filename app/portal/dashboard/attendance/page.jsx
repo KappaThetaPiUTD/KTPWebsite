@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import jsQR from "jsqr";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -107,10 +108,12 @@ function QrScanner({ onScan, onError, disabled }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const frameRef = useRef(null);
+  const timeoutRef = useRef(null);
   const [scanning, setScanning] = useState(false);
 
   const stopScanner = () => {
     if (frameRef.current) cancelAnimationFrame(frameRef.current);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
     frameRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
@@ -120,13 +123,18 @@ function QrScanner({ onScan, onError, disabled }) {
   useEffect(() => stopScanner, []);
 
   const startScanner = async () => {
-    if (!navigator.mediaDevices?.getUserMedia || !("BarcodeDetector" in window)) {
-      onError("QR scanning is not supported by this browser. Use the passcode instead.");
+    if (!navigator.mediaDevices?.getUserMedia) {
+      onError("Camera access is not available in this browser. Use the passcode instead.");
       return;
     }
 
     try {
-      const detector = new window.BarcodeDetector({ formats: ["qr_code"] });
+      const detector = "BarcodeDetector" in window
+        ? new window.BarcodeDetector({ formats: ["qr_code"] })
+        : null;
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      if (!detector && !context) throw new Error("Canvas QR decoding is unavailable.");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: { ideal: "environment" } },
         audio: false,
@@ -139,18 +147,30 @@ function QrScanner({ onScan, onError, disabled }) {
       const detect = async () => {
         if (!videoRef.current || !streamRef.current) return;
         try {
-          const codes = await detector.detect(videoRef.current);
-          if (codes[0]?.rawValue) {
+          let rawValue = "";
+          if (detector) {
+            const codes = await detector.detect(videoRef.current);
+            rawValue = codes[0]?.rawValue || "";
+          } else if (videoRef.current.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
+            canvas.width = videoRef.current.videoWidth;
+            canvas.height = videoRef.current.videoHeight;
+            context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const image = context.getImageData(0, 0, canvas.width, canvas.height);
+            rawValue = jsQR(image.data, image.width, image.height)?.data || "";
+          }
+          if (rawValue) {
             stopScanner();
-            onScan(codes[0].rawValue);
+            onScan(rawValue);
             return;
           }
         } catch {
           // A frame can be unavailable while the camera starts; continue scanning.
         }
-        frameRef.current = requestAnimationFrame(detect);
+        if (detector) frameRef.current = requestAnimationFrame(detect);
+        else timeoutRef.current = setTimeout(detect, 100);
       };
-      frameRef.current = requestAnimationFrame(detect);
+      if (detector) frameRef.current = requestAnimationFrame(detect);
+      else timeoutRef.current = setTimeout(detect, 100);
     } catch {
       stopScanner();
       onError("Camera access was unavailable. Check browser permissions or use the passcode.");
