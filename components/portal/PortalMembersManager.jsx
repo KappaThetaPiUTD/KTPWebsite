@@ -294,6 +294,10 @@ export default function PortalMembersManager({ members, recentStrikes, error }) 
       <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-col gap-4">
           <div>
+            <h2 className="text-xl font-bold text-gray-950">Members</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Search by name or email, manage access, and record strikes for active members.
+            </p>
           </div>
           <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(12rem,1fr)_10rem_auto_auto] xl:items-end">
             <div className="min-w-0">

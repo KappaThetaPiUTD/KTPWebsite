@@ -53,7 +53,7 @@ create table if not exists public.portal_events (
   end_time timestamptz not null,
   -- scheduling & visibility: event_type drives filters; target_roles null = all members
   event_type text not null default 'chapter'
-    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'other')),
+    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'study_hours', 'other')),
   target_roles text[],
   -- rsvp rules: capacity null = unlimited; rsvp_deadline null = open until event start
   capacity integer check (capacity is null or capacity > 0),
@@ -752,7 +752,7 @@ $$;
 
 alter table public.portal_events
   add column if not exists event_type text not null default 'chapter'
-    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'other')),
+    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'study_hours', 'other')),
   add column if not exists target_roles text[],
   add column if not exists capacity integer check (capacity is null or capacity > 0),
   add column if not exists rsvp_deadline timestamptz,
@@ -787,7 +787,7 @@ begin
 
   alter table public.portal_events
     add constraint portal_events_event_type_check
-    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'other'));
+    check (event_type in ('chapter', 'professional', 'fundraiser', 'social', 'workshop', 'study_hours', 'other'));
 end;
 $$;
 
@@ -1191,63 +1191,6 @@ create policy "Authenticated users can read study hour requirements"
   to authenticated
   using (true);
 
-
--- Study Hours submission security.
-
-alter table public.portal_study_hour_submissions
-  enable row level security;
-
-drop policy if exists "Members can read own study hour submissions"
-  on public.portal_study_hour_submissions;
-
-create policy "Members can read own study hour submissions"
-  on public.portal_study_hour_submissions
-  for select
-  to authenticated
-  using (
-    user_id = auth.uid()
-    or public.is_portal_admin()
-  );
-
-
-drop policy if exists "Members can submit own study hours"
-  on public.portal_study_hour_submissions;
-
-create policy "Members can submit own study hours"
-  on public.portal_study_hour_submissions
-  for insert
-  to authenticated
-  with check (
-    user_id = auth.uid()
-    and public.is_active_portal_member()
-    and status = 'pending'
-    and hours_awarded is null
-    and reviewed_by is null
-    and reviewed_at is null
-    and rejection_reason is null
-  );
-
-
-drop policy if exists "Admins can update study hour submissions"
-  on public.portal_study_hour_submissions;
-
-create policy "Admins can update study hour submissions"
-  on public.portal_study_hour_submissions
-  for update
-  to authenticated
-  using (public.is_portal_admin())
-  with check (public.is_portal_admin());
-
-
--- Prevent direct execution of the validation/review functions.
-
-revoke all on function public.validate_portal_study_hour_submission()
-  from public;
-
-revoke all on function public.enforce_portal_study_hour_submission_review_rules()
-  from public;
-
-
 -- Brother-specific Study Hours assignments.
 --
 -- An admin can assign a brother to have a 2-hour weekly requirement.
@@ -1298,3 +1241,97 @@ create policy "Admins can manage study hour assignments"
   to authenticated
   using (public.is_portal_admin())
   with check (public.is_portal_admin());
+
+-- Only active pledges and active brothers with a Study Hours
+-- assignment are allowed to submit Study Hours.
+create or replace function public.can_submit_portal_study_hours()
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  member_role text;
+begin
+  select role
+  into member_role
+  from public.portal_members
+  where user_id = auth.uid()
+    and status = 'active';
+
+  if member_role = 'pledge' then
+    return true;
+  end if;
+
+  if member_role = 'brother' then
+    return exists (
+      select 1
+      from public.portal_study_hour_assignments
+      where user_id = auth.uid()
+    );
+  end if;
+
+  return false;
+end;
+$$;
+
+revoke all on function public.can_submit_portal_study_hours()
+  from public;
+
+grant execute on function public.can_submit_portal_study_hours()
+  to authenticated;
+
+-- Study Hours submission security.
+
+alter table public.portal_study_hour_submissions
+  enable row level security;
+
+drop policy if exists "Members can read own study hour submissions"
+  on public.portal_study_hour_submissions;
+
+create policy "Members can read own study hour submissions"
+  on public.portal_study_hour_submissions
+  for select
+  to authenticated
+  using (
+    user_id = auth.uid()
+    or public.is_portal_admin()
+  );
+
+
+drop policy if exists "Members can submit own study hours"
+  on public.portal_study_hour_submissions;
+
+create policy "Members can submit own study hours"
+  on public.portal_study_hour_submissions
+  for insert
+  to authenticated
+  with check (
+    user_id = auth.uid()
+    and public.can_submit_portal_study_hours()
+    and status = 'pending'
+    and hours_awarded is null
+    and reviewed_by is null
+    and reviewed_at is null
+    and rejection_reason is null
+  );
+
+
+drop policy if exists "Admins can update study hour submissions"
+  on public.portal_study_hour_submissions;
+
+create policy "Admins can update study hour submissions"
+  on public.portal_study_hour_submissions
+  for update
+  to authenticated
+  using (public.is_portal_admin())
+  with check (public.is_portal_admin());
+
+
+-- Prevent direct execution of the validation/review functions.
+
+revoke all on function public.validate_portal_study_hour_submission()
+  from public;
+
+revoke all on function public.enforce_portal_study_hour_submission_review_rules()
+  from public;
