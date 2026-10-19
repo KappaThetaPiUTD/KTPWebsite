@@ -50,6 +50,23 @@ emails. Use the Portal project's Supabase secret key; never expose it through a
 
 9. Redeploy after adding the variables.
 
+## Activity Hours: remove the RSVP requirement
+
+Activity Hours submissions do not require an RSVP. For an existing database,
+run `supabase/remove-activity-hours-rsvp-requirement.sql` in the KTP Portal
+SQL Editor. The event must still have ended; photo evidence and admin review
+are still required. Deploy the updated Activity Hours page to show completed
+events without filtering by RSVP status.
+
+## Study Hours: remove the RSVP requirement
+
+Study Hours submissions do not require a Going RSVP. For an existing database
+that still enforces the old rule, run
+`supabase/remove-study-hours-rsvp-requirement.sql` in the KTP Portal SQL Editor.
+This updates the Study Hours validation trigger and insert policy. Brothers
+still need an admin assignment, events must have ended, and submissions go
+through review. The full setup schema already includes this behavior.
+
 ## Emergency security finding (July 2026)
 
 Supabase reported `rls_disabled_in_public` for the KTP Portal project. A

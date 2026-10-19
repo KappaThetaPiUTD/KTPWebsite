@@ -860,8 +860,8 @@ create table if not exists public.portal_hour_submissions (
   unique (event_id, user_id)
 );
 
--- An hours submission is valid only after the event has ended and the member
--- RSVP'd "going" (the attending status used by portal_rsvps).
+-- An activity hours submission is valid only after the event has ended.
+-- An RSVP is not required.
 create or replace function public.validate_portal_hour_submission()
 returns trigger
 language plpgsql
@@ -882,16 +882,6 @@ begin
 
   if submission_event_end_time > now() then
     raise exception 'Hours cannot be submitted until the event has ended';
-  end if;
-
-  if not exists (
-    select 1
-    from public.portal_rsvps
-    where event_id = new.event_id
-      and user_id = new.user_id
-      and status = 'going'
-  ) then
-    raise exception 'A going RSVP is required before submitting activity hours';
   end if;
 
   return new;
