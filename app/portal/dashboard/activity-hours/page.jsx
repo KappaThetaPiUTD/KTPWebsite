@@ -11,7 +11,6 @@ function friendlyError(error) {
   const message = String(error?.message || "").toLowerCase();
   if (error?.code === "23505") return "A submission already exists for this event. Each event can only be submitted once.";
   if (message.includes("until the event has ended")) return "This event has not ended yet, so activity hours cannot be submitted.";
-  if (message.includes("going rsvp")) return "A confirmed Going RSVP is required before you can submit hours for this event.";
   if (error?.code === "42501" || message.includes("row-level security")) return "You do not have permission to submit activity hours for this event.";
   return "Your submission could not be saved. Refresh the page and verify that the event is eligible before trying again.";
 }
@@ -49,19 +48,15 @@ export default function ActivityHoursPage() {
     setSemester(active);
     if (!active) { setSubmissions([]); setEligibleEvents([]); setLoading(false); return; }
 
-    const [submissionResult, rsvpResult] = await Promise.all([
+    const [submissionResult, eventResult] = await Promise.all([
       supabase.from("portal_hour_submissions").select("id, event_id, semester_id, status, hours_awarded, rejection_reason, submitted_at, portal_events(title)").eq("user_id", user.id).order("submitted_at", { ascending: false }),
-      supabase.from("portal_rsvps").select("event_id").eq("user_id", user.id).eq("status", "going"),
+      supabase.from("portal_events").select("id, title, end_time").lte("end_time", new Date().toISOString()).order("end_time", { ascending: false }),
     ]);
-    if (submissionResult.error || rsvpResult.error) { setLoadingError("Unable to load activity-hour records. Please try again later."); setLoading(false); return; }
+    if (submissionResult.error || eventResult.error) { setLoadingError("Unable to load activity-hour records. Please try again later."); setLoading(false); return; }
     const allSubmissions = submissionResult.data || [];
     setSubmissions(allSubmissions.filter((submission) => submission.semester_id === active.id));
     const submittedIds = new Set(allSubmissions.map((submission) => submission.event_id));
-    const goingIds = (rsvpResult.data || []).map((rsvp) => rsvp.event_id).filter((id) => !submittedIds.has(id));
-    if (!goingIds.length) { setEligibleEvents([]); setLoading(false); return; }
-    const { data: events, error: eventsError } = await supabase.from("portal_events").select("id, title, end_time").in("id", goingIds).lte("end_time", new Date().toISOString()).order("end_time", { ascending: false });
-    if (eventsError) setLoadingError("Unable to load eligible events. Please try again later.");
-    else setEligibleEvents(events || []);
+    setEligibleEvents((eventResult.data || []).filter((event) => !submittedIds.has(event.id)));
     setLoading(false);
   }, []);
 
@@ -104,7 +99,7 @@ export default function ActivityHoursPage() {
     </section>
     {semesterEnded && earned < required && <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-800">This semester has ended and you are {hours(required - earned)} hours below the {hours(required)}-hour requirement. Contact exec for guidance.</div>}
     <section className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-bold text-gray-950">Submit activity hours</h2><p className="mt-2 text-sm leading-6 text-gray-700">Only completed events with your confirmed Going RSVP are available below.</p>
+      <h2 className="text-xl font-bold text-gray-950">Submit activity hours</h2><p className="mt-2 text-sm leading-6 text-gray-700">Completed events are available below. An RSVP is not required.</p>
       {!eligibleEvents.length ? <p className="mt-5 rounded-lg bg-gray-50 px-4 py-3 text-sm text-gray-600">No eligible events right now.</p> : <><label className="mt-5 block text-sm font-semibold text-gray-800" htmlFor="eligible-event">Choose an event</label><select id="eligible-event" value={eventId} onChange={chooseEvent} className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 outline-none focus:border-primary"><option value="">Select an eligible event</option>{eligibleEvents.map((event) => <option key={event.id} value={event.id}>{event.title} — ended {date(event.end_time)}</option>)}</select></>}
       {selectedEvent && <div className="mt-6 space-y-6 border-t border-gray-100 pt-6"><PhotoUpload key={`${selectedEvent.id}-start`} eventId={selectedEvent.id} label="Start of event photo" onUploadComplete={setStartPhotoUrl} disabled={submitting} /><PhotoUpload key={`${selectedEvent.id}-end`} eventId={selectedEvent.id} label="End of event photo" onUploadComplete={setEndPhotoUrl} disabled={submitting} /><div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">You can only submit once for this event and cannot edit or resubmit after this — make sure both photos are correct.</div>{submitError && <p role="alert" className="text-sm text-red-600">{submitError}</p>}{success && <p role="status" className="text-sm text-green-700">{success}</p>}<button type="button" onClick={submit} disabled={submitting || !startPhotoUrl || !endPhotoUrl} className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60">{submitting ? "Submitting…" : "Submit for review"}</button></div>}
     </section>
