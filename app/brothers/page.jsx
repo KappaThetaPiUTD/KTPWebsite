@@ -104,8 +104,8 @@ const activeMembers = [
     linkedin: "https://www.linkedin.com/in/lalith-raju-keertipati/",
   },
   {
-    name: "Madhav Suri",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207296/Brother%20Page/Actives/madhav_suri.jpg",
+    name: "Navmi Srithaj",
+    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1771190844/Brother%20Page/Actives/IMG_5599_dcvebb.jpg",
     linkedin: "",
   },
   {
