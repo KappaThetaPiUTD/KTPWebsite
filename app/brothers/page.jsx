@@ -114,11 +114,6 @@ const activeMembers = [
     linkedin: "https://linkedin.com/in/nirmal-shah1",
   },
   {
-    name: "Onkar Bajwa",
-    src: "https://res.cloudinary.com/dha44tosd/image/upload/v1715885018/Brother%20Page/Actives/KTP_LOGO_aj24pt.png",
-    linkedin: "",
-  },
-  {
     name: "Prateek Banda",
     src: "https://res.cloudinary.com/dha44tosd/image/upload/v1783207292/Brother%20Page/Actives/prateek_banda.jpg",
     linkedin: "",
@@ -201,7 +196,6 @@ const deltaClassMembers = [
   "Abhinav Atluri",
   "Anvi Siddabhattuni",
   "Ariha Kothari",
-  "Arnav Jain",
   "Ayaan Khan",
   "Ayush Velhal",
   "Joel Philipose",
@@ -244,7 +238,6 @@ const zetaClassMembers = [
   "Kushagra Mathur",
   "Madhav Suri",
   "Nirmal Shah",
-  "Onkar Bajwa",
   "Pranav Cheedalla",
   "Sam Paudel",
   "Sanika Tripathi",
